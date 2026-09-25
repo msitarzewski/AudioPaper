@@ -9,6 +9,10 @@ public actor ArtworkCache {
     private var imagesDir: URL { root.appending(path: "images", directoryHint: .isDirectory) }
     private var indexDir: URL { root.appending(path: "index", directoryHint: .isDirectory) }
 
+    /// Remembered artist identities (see `MusicBrainz.rememberArtistIDs`); inside the index, so clearing
+    /// the cache forgets them along with the search results.
+    public var artistIDsFile: URL { indexDir.appending(path: "artist-ids.json") }
+
     public init(root: URL = ArtworkCache.defaultRoot, http: any HTTPClient = URLSessionHTTPClient()) {
         self.root = root
         self.http = http

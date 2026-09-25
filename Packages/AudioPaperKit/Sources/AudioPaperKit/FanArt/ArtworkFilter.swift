@@ -24,35 +24,34 @@ public protocol ArtworkFilter: Sendable {
     func evaluate(_ image: AnalyzedImage) async throws -> FilterVerdict
 }
 
-/// Rejects small or badly-proportioned images. Also usable before download via `accepts(width:height:)`.
+/// Rejects thumbnails and extreme shapes. Also usable before download via `accepts(width:height:)`.
+///
+/// One floor for every source: 1280×720, the size curated backgrounds (fanart.tv, TheAudioDB) publish at.
+/// Portrait images are welcome — Automatic framing shows them whole at full height with a blurred
+/// extension at the sides — so only extreme strips (narrower than 1:2 or wider than 2.6:1) are refused.
 public struct SizeFilter: ArtworkFilter {
     public let id = "size"
     public var minLongEdge: Int
     public var minShortEdge: Int
-    /// Width ÷ height bounds; wallpapers are landscape, so very tall art crops badly.
+    /// Width ÷ height bounds.
     public var aspectRange: ClosedRange<Double>
 
-    public init(minLongEdge: Int = 1400, minShortEdge: Int = 900, aspectRange: ClosedRange<Double> = 0.75...2.6) {
+    public init(minLongEdge: Int = 1280, minShortEdge: Int = 720, aspectRange: ClosedRange<Double> = 0.5...2.6) {
         self.minLongEdge = minLongEdge
         self.minShortEdge = minShortEdge
         self.aspectRange = aspectRange
     }
 
-    /// Floor for curated background collections, which publish at 1280×720.
-    public static let curatedMinimum = (longEdge: 1280, shortEdge: 720)
-
-    public func accepts(width: Int?, height: Int?, curated: Bool = false) -> Bool {
+    public func accepts(width: Int?, height: Int?) -> Bool {
         // Unknown sizes are allowed through to download; the real size is checked afterwards.
         guard let width, let height, width > 0, height > 0 else { return true }
-        let long = curated ? min(minLongEdge, Self.curatedMinimum.longEdge) : minLongEdge
-        let short = curated ? min(minShortEdge, Self.curatedMinimum.shortEdge) : minShortEdge
-        return max(width, height) >= long
-            && min(width, height) >= short
+        return max(width, height) >= minLongEdge
+            && min(width, height) >= minShortEdge
             && aspectRange.contains(Double(width) / Double(height))
     }
 
     public func evaluate(_ image: AnalyzedImage) async throws -> FilterVerdict {
-        accepts(width: image.pixelWidth, height: image.pixelHeight, curated: image.candidate.isCurated)
+        accepts(width: image.pixelWidth, height: image.pixelHeight)
             ? .accept()
             : .reject("size \(image.pixelWidth)×\(image.pixelHeight)")
     }

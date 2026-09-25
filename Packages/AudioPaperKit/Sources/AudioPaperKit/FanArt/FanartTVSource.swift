@@ -75,8 +75,7 @@ public struct FanartTVSource: FanArtSource {
                 kind: .fanArt,
                 providerID: "fanarttv",
                 attribution: Attribution(title: "\(artist) background", pageURL: page, sourceName: "fanart.tv"),
-                matchScore: score,
-                isCurated: true
+                matchScore: score
             )
         }
     }

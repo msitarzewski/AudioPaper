@@ -6,10 +6,44 @@ public enum MusicBrainz {
     static let limiter = RateLimiter(interval: .milliseconds(1100))
     static let artistIDs = ArtistIDMemo()
 
+    /// Remembers resolved artist IDs so repeat artists don't cost MusicBrainz lookups — in memory, and on disk
+    /// once the app calls `rememberArtistIDs(in:)`. Unresolved names expire after a week so newly catalogued
+    /// artists are found; resolved IDs are kept until the cache is cleared.
     actor ArtistIDMemo {
-        private var ids: [String: String?] = [:]
-        func get(_ key: String) -> String?? { ids[key] }
-        func set(_ key: String, _ id: String?) { ids[key] = .some(id) }
+        struct Entry: Codable {
+            var id: String?
+            var date: Date
+        }
+
+        static let unresolvedLifetime: TimeInterval = 7 * 24 * 3600
+        private var entries: [String: Entry] = [:]
+        private var file: URL?
+
+        func persist(at file: URL) {
+            self.file = file
+            if let data = try? Data(contentsOf: file),
+               let saved = try? JSONDecoder().decode([String: Entry].self, from: data) {
+                entries.merge(saved) { current, _ in current }
+            }
+        }
+
+        func get(_ key: String) -> String?? {
+            guard let entry = entries[key] else { return nil }
+            if entry.id == nil, entry.date.timeIntervalSinceNow < -Self.unresolvedLifetime { return nil }
+            return .some(entry.id)
+        }
+
+        func set(_ key: String, _ id: String?) {
+            entries[key] = Entry(id: id, date: .now)
+            guard let file else { return }
+            try? FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? JSONEncoder().encode(entries).write(to: file, options: .atomic)
+        }
+    }
+
+    /// Keeps resolved artist IDs on disk (the app passes a file inside its cache, so Clear Cache removes it).
+    public static func rememberArtistIDs(in file: URL) async {
+        await artistIDs.persist(at: file)
     }
 
     struct ArtistSearch: Decodable {
@@ -74,12 +108,12 @@ public enum MusicBrainz {
         return id
     }
 
-    /// The artist credited on confident recording matches, when they all agree on one artist.
+    /// The artist credited on confident recording matches, when they all agree on one artist. Any credit on
+    /// the recording counts, so a featured artist (j-hope on LE SSERAFIM's "SPAGHETTI") resolves too.
     static func resolve(_ response: RecordingSearch, artist: String) -> String? {
         let ids = response.recordings.compactMap { recording -> String? in
             guard (recording.score ?? 0) >= 90,
-                  let credit = recording.artistCredit?.first,
-                  Normalizer.key(credit.name) == Normalizer.key(artist)
+                  let credit = recording.artistCredit?.first(where: { Normalizer.key($0.name) == Normalizer.key(artist) })
             else { return nil }
             return credit.artist.id
         }

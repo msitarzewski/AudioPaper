@@ -275,14 +275,9 @@ struct AttributionRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            AsyncImage(url: attribution.creatorAvatarURL) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Image(systemName: artwork.candidate.kind == .albumCover ? "opticaldisc" : "paintpalette")
-                    .foregroundStyle(.secondary)
-            }
-            .frame(width: 28, height: 28)
-            .clipShape(.circle)
+            AvatarImage(url: attribution.creatorAvatarURL, placeholder: artwork.candidate.kind == .albumCover ? "opticaldisc" : "paintpalette")
+                .frame(width: 28, height: 28)
+                .clipShape(.circle)
 
             VStack(alignment: .leading, spacing: 1) {
                 if artwork.candidate.kind == .fanArt, let creator = attribution.creatorName {
@@ -308,6 +303,29 @@ struct AttributionRow: View {
                 }
                 .help("Open where this art was found")
             }
+        }
+    }
+}
+
+/// An artist's avatar, fetched through AudioPaper's cookie-free session. (`AsyncImage` uses the shared
+/// system session, which stores cookies.)
+private struct AvatarImage: View {
+    let url: URL?
+    let placeholder: String
+    @State private var image: NSImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(nsImage: image).resizable().aspectRatio(contentMode: .fill)
+            } else {
+                Image(systemName: placeholder).foregroundStyle(.secondary)
+            }
+        }
+        .task(id: url) {
+            image = nil
+            guard let url, let (data, _) = try? await URLSessionHTTPClient().data(for: URLRequest(url: url)) else { return }
+            image = NSImage(data: data)
         }
     }
 }

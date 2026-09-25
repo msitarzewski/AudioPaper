@@ -33,20 +33,22 @@ func fanArtCandidate(_ name: String, width: Int? = 1920, height: Int? = 1080) ->
 @Suite struct SizeFilterTests {
     let filter = SizeFilter()
 
-    @Test func acceptsDesktopSizes() {
+    @Test func acceptsDesktopSizesFrom720p() {
         #expect(filter.accepts(width: 1920, height: 1080))
         #expect(filter.accepts(width: 2560, height: 1600))
+        #expect(filter.accepts(width: 1280, height: 720))
     }
 
-    @Test func rejectsThumbnailsAndPhoneWallpapers() {
+    @Test func acceptsPortraitImagesForFitFraming() {
+        #expect(filter.accepts(width: 1080, height: 1920))
+        #expect(filter.accepts(width: 1080, height: 1350))
+    }
+
+    @Test func rejectsThumbnailsAndExtremeStrips() {
         #expect(!filter.accepts(width: 340, height: 270))
-        #expect(!filter.accepts(width: 1080, height: 2400))
-    }
-
-    @Test func curatedBackgroundsMayBe720p() {
-        #expect(!filter.accepts(width: 1280, height: 720))
-        #expect(filter.accepts(width: 1280, height: 720, curated: true))
-        #expect(!filter.accepts(width: 1000, height: 562, curated: true))
+        #expect(!filter.accepts(width: 1000, height: 562))
+        #expect(!filter.accepts(width: 1080, height: 2400), "narrower than 1:2")
+        #expect(!filter.accepts(width: 3000, height: 1000), "wider than 2.6:1")
     }
 
     @Test func unknownSizeIsDeferredToDownload() {
@@ -113,6 +115,47 @@ func fanArtCandidate(_ name: String, width: Int? = 1920, height: Int? = 1080) ->
         let short = await run(rejectedPrimary)
         #expect(short.accepted == ["z"])
         #expect(Set(short.rejected) == ["a", "b", "c", "d"])
+    }
+
+    /// A source that only knows art for particular artist names, like a real per-artist service.
+    struct ArtistKeyedFanArt: FanArtSource {
+        let id = "keyed"
+        let displayName = "Keyed"
+        let isConfigured = true
+        let art: [String: [ArtworkCandidate]]
+        func candidates(for track: Track, limit: Int) async throws -> [ArtworkCandidate] { art[track.artist] ?? [] }
+    }
+
+    func acceptedNames(_ pipeline: FanArtPipeline, _ track: Track) async -> [String] {
+        var names: [String] = []
+        for await event in pipeline.run(for: track) {
+            if case let .accepted(artwork) = event { names.append(artwork.candidate.imageURL.lastPathComponent) }
+        }
+        return names
+    }
+
+    @Test func collaborationFallsBackToEachCreditedArtist() async {
+        let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: StubHTTP { _ in Fixture.png(width: 1920, height: 1080) })
+        let source = ArtistKeyedFanArt(art: [
+            "LE SSERAFIM": [fanArtCandidate("ls1"), fanArtCandidate("ls2")],
+            "j-hope": [fanArtCandidate("jh1")],
+        ])
+        var pipeline = FanArtPipeline(sources: [source], filters: [], cache: cache)
+        pipeline.duplicateDistance = -1
+        let names = await acceptedNames(pipeline, .sample("SPAGHETTI", artist: "LE SSERAFIM & j-hope"))
+        // Images are checked concurrently, so they arrive in completion order; what matters is both artists.
+        #expect(Set(names) == ["ls1", "ls2", "jh1"])
+    }
+
+    @Test func fullCreditIsUsedWhenItFindsArt() async {
+        let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: StubHTTP { _ in Fixture.png(width: 1920, height: 1080) })
+        let source = ArtistKeyedFanArt(art: [
+            "Simon & Garfunkel": [fanArtCandidate("sg")],
+            "Simon": [fanArtCandidate("wrong-simon")],
+        ])
+        var pipeline = FanArtPipeline(sources: [source], filters: [], cache: cache)
+        pipeline.duplicateDistance = -1
+        #expect(await acceptedNames(pipeline, .sample("The Boxer", artist: "Simon & Garfunkel")) == ["sg"])
     }
 
     @Test func unconfiguredSourcesAreSkipped() async {

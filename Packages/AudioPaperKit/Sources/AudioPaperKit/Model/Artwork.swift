@@ -44,9 +44,6 @@ public struct ArtworkCandidate: Hashable, Sendable, Codable, Identifiable {
     public var attribution: Attribution
     /// Provider-reported confidence that this matches the request, 0...1.
     public var matchScore: Double
-    /// From a curated background collection (e.g. TheAudioDB fan art): made for wallpapers, so the
-    /// size floor is relaxed to 1280×720.
-    public var isCurated: Bool
 
     public init(
         imageURL: URL,
@@ -55,8 +52,7 @@ public struct ArtworkCandidate: Hashable, Sendable, Codable, Identifiable {
         kind: ArtworkKind,
         providerID: String,
         attribution: Attribution,
-        matchScore: Double = 1,
-        isCurated: Bool = false
+        matchScore: Double = 1
     ) {
         self.imageURL = imageURL
         self.width = width
@@ -65,7 +61,6 @@ public struct ArtworkCandidate: Hashable, Sendable, Codable, Identifiable {
         self.providerID = providerID
         self.attribution = attribution
         self.matchScore = matchScore
-        self.isCurated = isCurated
     }
 
 }

@@ -7,7 +7,7 @@ import Vision
 /// Order of work is cheapest first: reported size → download → decode → Vision filters → duplicate check.
 public struct FanArtPipeline: Sendable {
     /// Bump when sources, filters or thresholds change, so cached per-song results are searched again.
-    public static let version = 2
+    public static let version = 4
 
     public enum Event: Sendable {
         case accepted(Artwork)
@@ -57,13 +57,13 @@ public struct FanArtPipeline: Sendable {
         }
         let configured = sources.filter(\.isConfigured)
 
-        let primary = await gather(from: configured.filter { !$0.isFallback }, for: track)
+        let primary = await gatherCrediting(from: configured.filter { !$0.isFallback }, for: track)
         await process(primary, into: &accepted, continuation: continuation)
 
         // Metered fallbacks fill in only when too few images *passed* the filters (not merely were found).
         guard !Task.isCancelled, accepted.count < fallbackThreshold else { return }
         let seen = Set(primary.map(\.imageURL))
-        let fallback = await gather(from: configured.filter(\.isFallback), for: track).filter { !seen.contains($0.imageURL) }
+        let fallback = await gatherCrediting(from: configured.filter(\.isFallback), for: track).filter { !seen.contains($0.imageURL) }
         await process(fallback, into: &accepted, continuation: continuation)
     }
 
@@ -79,7 +79,7 @@ public struct FanArtPipeline: Sendable {
         continuation: AsyncStream<Event>.Continuation
     ) async {
         var queue = candidates.filter { candidate in
-            guard sizeFilter.accepts(width: candidate.width, height: candidate.height, curated: candidate.isCurated) else {
+            guard sizeFilter.accepts(width: candidate.width, height: candidate.height) else {
                 continuation.yield(.rejected(candidate, reason: "reported size \(candidate.width ?? 0)×\(candidate.height ?? 0)"))
                 return false
             }
@@ -128,6 +128,19 @@ public struct FanArtPipeline: Sendable {
     }
 
     /// Round-robins sources (each already ordered by relevance) so no single source dominates.
+    /// Searches under the full artist credit; if that finds nothing and the credit is a collaboration
+    /// ("LE SSERAFIM & j-hope"), searches each credited artist and interleaves their results.
+    private func gatherCrediting(from configured: [any FanArtSource], for track: Track) async -> [ArtworkCandidate] {
+        let full = await gather(from: configured, for: track)
+        let artists = track.creditedArtists
+        guard full.isEmpty, !artists.isEmpty else { return full }
+        var lists: [[ArtworkCandidate]] = []
+        for artist in artists {
+            lists.append(await gather(from: configured, for: track.crediting(artist)))
+        }
+        return Self.interleave(lists)
+    }
+
     private func gather(from configured: [any FanArtSource], for track: Track) async -> [ArtworkCandidate] {
         let limit = candidatesPerSource
         let lists = await withTaskGroup(of: (Int, [ArtworkCandidate]).self) { group in
@@ -146,6 +159,11 @@ public struct FanArtPipeline: Sendable {
             for await (index, list) in group { lists[index] = list }
             return lists
         }
+        return Self.interleave(lists)
+    }
+
+    /// Round-robin merge of ranked lists, dropping repeated images.
+    static func interleave(_ lists: [[ArtworkCandidate]]) -> [ArtworkCandidate] {
         var merged: [ArtworkCandidate] = []
         var seen = Set<URL>()
         for position in 0..<(lists.map(\.count).max() ?? 0) {

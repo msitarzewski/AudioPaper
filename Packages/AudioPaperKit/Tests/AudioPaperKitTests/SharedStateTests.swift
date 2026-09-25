@@ -47,3 +47,35 @@ import Testing
         #expect(SharedStore.read(from: nil) == .empty)
     }
 }
+
+@Suite struct PrivacyTests {
+    @Test func networkSessionStoresNoCookiesOrCache() {
+        let configuration = URLSessionHTTPClient.privateSession.configuration
+        #expect(configuration.httpCookieStorage == nil)
+        #expect(!configuration.httpShouldSetCookies)
+        #expect(configuration.urlCache == nil)
+    }
+
+    @Test func artistIDsSurviveARelaunchAndUnresolvedOnesExpire() async throws {
+        let file = Fixture.temporaryDirectory().appending(path: "artist-ids.json")
+        let first = MusicBrainz.ArtistIDMemo()
+        await first.persist(at: file)
+        await first.set("nine inch nails", "b7ffd2af")
+        await first.set("nobody", nil)
+
+        // A fresh memo (as after relaunch) reads them back from disk.
+        let relaunched = MusicBrainz.ArtistIDMemo()
+        await relaunched.persist(at: file)
+        #expect(await relaunched.get("nine inch nails") == .some("b7ffd2af"))
+        #expect(await relaunched.get("nobody") == .some(nil), "a recent 'not found' is remembered")
+
+        // An old 'not found' has expired, so the artist is looked up again.
+        var entries = try JSONDecoder().decode([String: MusicBrainz.ArtistIDMemo.Entry].self, from: Data(contentsOf: file))
+        entries["nobody"]?.date = Date(timeIntervalSinceNow: -8 * 24 * 3600)
+        try JSONEncoder().encode(entries).write(to: file)
+        let later = MusicBrainz.ArtistIDMemo()
+        await later.persist(at: file)
+        #expect(await later.get("nobody") == nil)
+        #expect(await later.get("nine inch nails") == .some("b7ffd2af"), "resolved IDs don't expire")
+    }
+}

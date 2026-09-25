@@ -15,7 +15,7 @@ Email **msitarzewski@gmail.com** with:
 - the version or commit you tested against
 - your name or handle, if you'd like credit (optional)
 
-Please do **not** open a public GitHub issue for security reports.
+Please do **not** open a public GitHub issue for security reports. Privacy concerns are welcome through the same channel; AudioPaper's data flows are documented in [PRIVACY.md](./PRIVACY.md) and [NETWORK.md](./NETWORK.md).
 
 ## Response time
 

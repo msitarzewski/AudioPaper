@@ -25,7 +25,20 @@ public struct URLSessionHTTPClient: HTTPClient {
 
     private let session: URLSession
 
-    public init(session: URLSession = .shared) {
+    /// Every request AudioPaper makes goes through this session. It is ephemeral: no cookies are stored or
+    /// sent, and nothing is written to an HTTP disk cache, so the image sites a search points to can't leave
+    /// anything behind. Downloaded artwork is cached deliberately by `ArtworkCache` instead.
+    public static let privateSession: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieAcceptPolicy = .never
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return URLSession(configuration: configuration)
+    }()
+
+    public init(session: URLSession = URLSessionHTTPClient.privateSession) {
         self.session = session
     }
 

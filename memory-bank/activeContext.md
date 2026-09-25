@@ -18,4 +18,5 @@
 - DeviantArt credentials needed to verify that provider live.
 - Decide whether release builds should ship the fanart.tv project key (their terms expect a project key in the app plus an optional user key; the repo must not contain it).
 - Stylized band logos can slip past OCR.
+- Letterboxed video stills (black bars) pass the filters; could detect and crop the bars.
 - Spotify source plugin.

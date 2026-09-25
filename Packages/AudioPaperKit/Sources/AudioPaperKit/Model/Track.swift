@@ -42,6 +42,26 @@ public struct Track: Hashable, Sendable, Codable {
     public var songKey: String {
         "\(MusicBrainz.identityKey(artist))|\(Normalizer.key(title))"
     }
+
+    /// The individual artists in a collaboration credit — "LE SSERAFIM & j-hope", "A feat. B", "A, B & C",
+    /// "A x B" — or an empty array for a single name. Some real names contain these separators
+    /// ("Simon & Garfunkel"), so callers try the full credit first and use the parts only as a fallback.
+    public var creditedArtists: [String] {
+        let parts = artist
+            // "x" only in lowercase, so the capital X in "Lil Nas X" isn't read as a separator.
+            .split(separator: /\s*[,&]\s*|\s+(?i:feat\.?|ft\.?|featuring|with)\s+|\s+[x×]\s+/)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        return parts.count > 1 ? parts : []
+    }
+
+    /// This track credited to one artist of a collaboration, for per-artist lookups.
+    public func crediting(_ artist: String) -> Track {
+        var track = self
+        track.artist = artist
+        track.albumArtist = nil
+        return track
+    }
 }
 
 public enum PlaybackEvent: Hashable, Sendable {

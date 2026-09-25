@@ -4,7 +4,7 @@
 Build AudioPaper v0.1: a macOS 26 menu bar app that sets the wallpaper to the playing album's cover, then cross-fades filtered fan art and artist photos, with a plugin architecture for players and art sources. Publish it as a public repo.
 
 ## Outcome
-- ✅ Tests: 56 passing (`swift test` in `Packages/AudioPaperKit`)
+- ✅ Tests: 64 passing (`swift test` in `Packages/AudioPaperKit`)
 - ✅ Build: app builds signed (team 7JQGQ7CRH8) and unsigned (CI)
 - ✅ Verified live: sandboxed wallpaper setting on two displays, Music notifications, album → fan art flow, cross-fade, restore original, Mini Player (glass, position, open state), widgets in the gallery
 - ✅ Review: approved by the user
@@ -37,6 +37,7 @@ Build AudioPaper v0.1: a macOS 26 menu bar app that sets the wallpaper to the pl
 - Widgets never appeared from a DerivedData build → install to `/Applications`.
 - Widget photos went blank when the desktop lost focus → desaturated accented rendering (the first attempt looked ineffective only because macOS kept the old widget extension running; `install.sh` now stops it).
 - Clicking a widget did nothing visible → `audiopaper://` widget URL opens the Mini Player.
+- Collaboration credits ("LE SSERAFIM & j-hope") matched no artist → search each credited artist when the full credit finds nothing.
 
 ## Decisions
 - Sandboxed Developer ID distribution, not the App Store (also required by TheAudioDB's free key terms).

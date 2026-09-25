@@ -3,7 +3,7 @@ import Foundation
 /// Artist fan-art backgrounds from TheAudioDB. Works out of the box with the public free key (`123`,
 /// 30 requests/minute); a personal key from Settings is used instead when present.
 ///
-/// Images are artist-level (not per song), 1280×720, and made as backgrounds, so they're marked curated.
+/// Images are artist-level (not per song) backgrounds, 1280×720.
 /// The artist is looked up by MusicBrainz ID; a name search is only a fallback and must match exactly,
 /// accents included, because the free search returns a single hit ("Rose" for "ROSÉ").
 /// TheAudioDB's terms ask that the data source is credited and linked, which `Attribution` carries.
@@ -85,8 +85,7 @@ public struct TheAudioDBSource: FanArtSource {
                     pageURL: URL(string: "https://www.theaudiodb.com/artist/\(artist.idArtist)"),
                     sourceName: "TheAudioDB"
                 ),
-                matchScore: 0.8,
-                isCurated: true
+                matchScore: 0.8
             )
         }
     }

@@ -46,7 +46,7 @@ import Testing
             let host = try #require(candidate.imageURL.host())
             #expect(!BraveImageSource.isBlocked(host))
             #expect(!BraveImageSource.isBlocked(candidate.attribution.pageURL?.host()))
-            #expect(!(candidate.attribution.title ?? "").contains("&quot;"))
+            #expect(candidate.attribution.title == "Nine Inch Nails", "credited to the matched artist, not the page title")
         }
         #expect(response.results.count > candidates.count, "fixture contains Etsy/Redbubble results that must be dropped")
     }
@@ -114,12 +114,11 @@ import Testing
 }
 
 @Suite struct TheAudioDBSourceTests {
-    @Test func artistFanArtIsCuratedAndCredited() throws {
+    @Test func artistFanArtIsCredited() throws {
         let response = try Fixture.decode(TheAudioDBSource.Response.self, "theaudiodb-nin")
         let candidates = TheAudioDBSource.candidates(from: response, for: .sample(), match: .byID)
         #expect(candidates.count == 4)
         for candidate in candidates {
-            #expect(candidate.isCurated)
             #expect(candidate.attribution.sourceName == "TheAudioDB")
             #expect(candidate.attribution.pageURL?.absoluteString == "https://www.theaudiodb.com/artist/111402")
         }
@@ -157,7 +156,6 @@ import Testing
         #expect(candidates.count == (response.artist4kbackground?.count ?? 0) + (response.artistbackground?.count ?? 0))
         #expect(candidates.first?.width == 3840)
         for candidate in candidates {
-            #expect(candidate.isCurated)
             #expect(candidate.attribution.sourceName == "fanart.tv")
             #expect(candidate.attribution.pageURL?.absoluteString == "https://fanart.tv/artist/b7ffd2af-418f-4be2-bdd1-22f8b48613da/")
         }
@@ -195,6 +193,12 @@ import Testing
     @Test func recordingSearchPicksTheArtistWhoRecordedTheSong() throws {
         let response = try Fixture.decode(MusicBrainz.RecordingSearch.self, "musicbrainz-recording-new-trick")
         #expect(MusicBrainz.resolve(response, artist: "ROSÉ") == "7f233cda-eacb-4235-b681-5f7be343a1a2")
+    }
+
+    @Test func featuredArtistResolvesFromTheRecording() throws {
+        let response = try JSONDecoder().decode(MusicBrainz.RecordingSearch.self, from: Data(#"{"recordings":[{"score":100,"artist-credit":[{"name":"LE SSERAFIM","artist":{"id":"ls"}},{"name":"j-hope","artist":{"id":"jh"}}]}]}"#.utf8))
+        #expect(MusicBrainz.resolve(response, artist: "j-hope") == "jh")
+        #expect(MusicBrainz.resolve(response, artist: "LE SSERAFIM") == "ls")
     }
 
     @Test func accentExactArtistBeatsFoldedNamesakes() throws {

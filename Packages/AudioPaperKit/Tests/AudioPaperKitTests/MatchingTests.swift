@@ -52,3 +52,28 @@ import Testing
         #expect(original > tribute)
     }
 }
+
+@Suite struct CreditedArtistTests {
+    @Test(arguments: [
+        ("LE SSERAFIM & j-hope", ["LE SSERAFIM", "j-hope"]),
+        ("Calvin Harris feat. Dua Lipa", ["Calvin Harris", "Dua Lipa"]),
+        ("Drake ft. Rihanna", ["Drake", "Rihanna"]),
+        ("A, B & C", ["A", "B", "C"]),
+        ("Lil Nas X x Jack Harlow", ["Lil Nas X", "Jack Harlow"]),
+        ("Beyoncé with JAY-Z", ["Beyoncé", "JAY-Z"]),
+    ])
+    func collaborationsSplitIntoArtists(credit: String, expected: [String]) {
+        #expect(Track.sample(artist: credit).creditedArtists == expected)
+    }
+
+    @Test(arguments: ["BABYMONSTER", "Nine Inch Nails", "Lil Nas X", "Xiu Xiu"])
+    func singleArtistsDoNotSplit(name: String) {
+        #expect(Track.sample(artist: name).creditedArtists.isEmpty)
+    }
+
+    @Test func creditingKeepsTheSongButNotTheAlbumArtist() {
+        let track = Track(title: "SPAGHETTI", artist: "LE SSERAFIM & j-hope", album: "SPAGHETTI", albumArtist: "LE SSERAFIM & j-hope", sourceID: "t")
+        let solo = track.crediting("j-hope")
+        #expect(solo.artist == "j-hope" && solo.title == "SPAGHETTI" && solo.albumArtist == nil)
+    }
+}

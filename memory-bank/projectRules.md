@@ -11,6 +11,11 @@
 **Pattern**: After UI changes, capture and inspect AudioPaper's own windows; never capture the user's screen (a region capture once picked up an unrelated terminal).
 **Implementation**: `screencapture -x -o -l <windowID>` with the ID from `CGWindowListCopyWindowInfo` (filter owner "AudioPaper", layer 0, on screen). Open windows via System Events menu clicks. Translucency can't be judged from a window-only capture, so ask the user.
 
+### Keep PRIVACY.md and NETWORK.md true
+**Context**: 2026-09-25 — the user asked for a full privacy/network account; it is published in the repo.
+**Pattern**: Any change that adds or alters a network request, a data source, a stored item or a permission updates `PRIVACY.md` and `NETWORK.md` in the same change.
+**Implementation**: Verify claims against the code (limits, hosts, triggers) before writing them; every request goes through `URLSessionHTTPClient`.
+
 ### Secrets never reach the repo
 **Context**: The repo is public; `.env` holds real Brave and fanart.tv keys.
 **Pattern**: Before every commit, scan exactly the staged tree.

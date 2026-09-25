@@ -96,7 +96,10 @@ public final class NowPlayingCoordinator {
                 self.present(showing, animated: false)
             }
         }
-        Task { await pruneCache() }
+        Task {
+            await MusicBrainz.rememberArtistIDs(in: cache.artistIDsFile)
+            await pruneCache()
+        }
     }
 
     /// Re-subscribes after the enabled players change.

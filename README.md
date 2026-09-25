@@ -18,16 +18,18 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 2. **Shows the album cover.** It's looked up online, at up to 3000×3000, from the Apple Music catalog, then MusicBrainz / Cover Art Archive, and finally the artwork Music itself has. The cover sits centered over a blurred, colour-matched wash of itself.
 3. **Cross-fades in fan art and artist photos.** It asks fanart.tv (fan-made 1080p and 4K artist backgrounds), TheAudioDB (curated artist backgrounds, no key needed) and DeviantArt first. Brave Image Search fills in only when fewer than three images pass the filters, which saves its quota for artists the others don't cover.
 
-   Artists are identified through MusicBrainz using the song itself, so namesakes aren't confused (ROSÉ of BLACKPINK is not Rose, the French singer), and art is fetched by that ID rather than by name.
+   Artists are identified through MusicBrainz using the song itself, so namesakes aren't confused (ROSÉ of BLACKPINK is not Rose, the French singer), and art is fetched by that ID rather than by name. Collaborations ("LE SSERAFIM & j-hope", "feat.") get art of each credited artist.
 
-   Results are filtered on your Mac with Apple's Vision framework:
+   Results are filtered on your Mac with Apple's Vision framework (after skipping anything smaller than 1280×720):
    - rejects screenshots and documents (Vision's "utility" image check)
    - rejects images with prominent text (titles, lyric cards, logos, UI), while allowing small incidental text like shirt numbers
    - rejects screens, ads, print, product shots and other scenes that aren't art or photography
    - drops duplicates of the cover, of what's on screen, and of each other, but keeps different photos from the same shoot
    - ranks what's left by Vision's aesthetics score, with a boost for images it classifies as artwork
 
-   Survivors fill the screen edge to edge. If filling would crop too much, the whole image is fitted instead, with its edges feathered into a blurred extension of itself.
+   Survivors fill the screen edge to edge. If filling would crop too much (portrait images, for example), the whole image is fitted instead, with its edges feathered into a blurred extension of itself.
+
+   Credits name the artist and where the image came from; for web results that's the artist the image was matched to plus the site, since wallpaper sites' page titles rarely say who's pictured.
 4. **Rotates like a slideshow.** A new image fades in every 45 seconds (you can change this). The fade is drawn in a click-through window just above the desktop, and then the real wallpaper is set underneath. So the picture stays after you quit, and it shows up in Mission Control on every Space and every display.
 
 ## Where it lives
@@ -80,7 +82,11 @@ Settings reopens on the tab you used last.
 
 ## Privacy
 
+The full account is in **[PRIVACY.md](./PRIVACY.md)** (who learns what, what's stored) and **[NETWORK.md](./NETWORK.md)** (every host, request and timing). In brief:
+
+- No telemetry, analytics, accounts or AudioPaper server.
 - Searches send only the **artist, album and song names** to the lookup services listed below. Nothing else about you or your library leaves your Mac.
+- Requests use a private network session: no cookies, no web cache. Replays and repeat artists are answered from the cache.
 - All image filtering (text, screenshots, duplicates, aesthetics) runs **on your Mac** with Vision.
 - API keys live in your **Keychain**.
 - The widgets read a small snapshot (the track, credits and thumbnails) that the app writes to its own App Group container. It never leaves your Mac.

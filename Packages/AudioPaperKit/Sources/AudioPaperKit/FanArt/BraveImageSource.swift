@@ -129,7 +129,9 @@ public struct BraveImageSource: FanArtSource {
                 kind: .fanArt,
                 providerID: "brave",
                 attribution: Attribution(
-                    title: title,
+                    // Wallpaper sites title pages with SEO filler ("Colorful Glasses Singer Pose Wallpaper"),
+                    // so the credit names the artist the result was matched to; the page stays one click away.
+                    title: track.artist,
                     pageURL: pageURL,
                     sourceName: result.source ?? host
                 ),
