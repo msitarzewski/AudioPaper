@@ -22,3 +22,6 @@
 - Fan-art pipeline: Brave fallback gated on images that pass, duplicate threshold 0.2, incidental text allowed, versioned cache keys.
 - Settings → Storage: live cache size, limit, Clear Cache…; LRU pruning; panes size to content without extra padding.
 - Docs: README and memory bank brought up to date.
+
+### 2026-09-25: Display icon
+- Replaced the camera with GlassPowerTools' display (same bezel/screen geometry) and the Heroicons solid musical note on a red screen, 112% scale; menu bar template icons redrawn to match; `build_icons.py` builds multiple designs (`--ship <design> <palette>`); Heroicons MIT notice in `THIRD-PARTY-NOTICES.md`.

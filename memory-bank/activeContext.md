@@ -8,7 +8,7 @@
 - Fan-art sources: fanart.tv (user's project key in `.env`/Keychain as `FAN_ART_API_KEY`, never in the repo), TheAudioDB (free key), DeviantArt, and Brave as a metered fallback. Keep all artist metadata so people can open profiles and source pages.
 - Photos are welcome (band and press photos, not only drawn art); small incidental text is fine, prominent text is not.
 - Album cover first, then a cross-fade rotation like a Photos-folder wallpaper. Automatic framing (fit when fill would crop >15%).
-- App icon: camera with a music note, vector gradients, red palette shipped (cobalt, emerald, violet, amber built as alternates).
+- App icon: the display design (GlassPowerTools' display with the Heroicons note on a red screen), enlarged 112%; replaced the camera, which "seemed out of place". Menu bar icon matches. Other palettes (cobalt, emerald, violet, amber) are built as alternates.
 - Cache: re-searches reuse downloaded images; people control the size limit and can clear it in Settings.
 - No DuckDuckGo (no official image API). No generative outpainting (no public Apple API).
 - Widgets follow the system widget style: grayscale while the desktop isn't focused (confirmed by the user), full colour otherwise. A click opens the Mini Player.

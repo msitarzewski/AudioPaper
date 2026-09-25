@@ -44,3 +44,4 @@ Build AudioPaper v0.1: a macOS 26 menu bar app that sets the wallpaper to the pl
 - No DuckDuckGo (unofficial scraping only).
 - Native menu in the menu bar and a Mini Player window instead of a popover (HIG); Dock icon only while needed.
 - Vector gradient icon layers rather than 3D PNG renders, so the system's glass, lighting and appearances stay live.
+- Final icon: GlassPowerTools-style display with the Heroicons note (the camera read as out of place).

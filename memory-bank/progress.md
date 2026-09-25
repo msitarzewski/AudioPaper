@@ -10,6 +10,7 @@
 - Widgets verified in the gallery once installed to `/Applications`; `scripts/install.sh`; desaturated artwork in the accented widget style.
 - Fan art: fallback gated on images that *pass*, duplicate threshold 0.2, incidental text allowed, versioned per-song cache keys (BABYMONSTER went from 1 image to 4).
 - Cache controls in Settings (size, limit, Clear Cache…), LRU pruning after each song; Settings panes size to their content.
+- App icon redesigned as a GlassPowerTools-style display with the Heroicons note (red); matching menu bar template icons; icon build supports multiple designs.
 - 56 tests passing. Verified live: sandboxed wallpaper setting, Music notifications, album + fan-art flow, both displays, Mini Player glass and position, widgets in the gallery.
 
 ## Next

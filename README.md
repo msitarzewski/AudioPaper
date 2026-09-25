@@ -125,7 +125,7 @@ project.yml                   XcodeGen project spec (the .xcodeproj is generated
 
 Players, cover providers, fan-art sources and image filters are all **plugins**, each a small Swift protocol. Adding one is a single file plus one line of registration; see [CONTRIBUTING.md](./CONTRIBUTING.md#adding-a-plugin).
 
-The interface follows Apple's Human Interface Guidelines for macOS: a menu (not a popover) in the menu bar, a Music-style Mini Player, settings panes that size to their content, and a layered vector app icon built in Icon Composer (`docs/icon/README.md`).
+The interface follows Apple's Human Interface Guidelines for macOS: a menu (not a popover) in the menu bar, a Music-style Mini Player, settings panes that size to their content, and a layered vector app icon built in Icon Composer: a sibling of GlassPowerTools' display, with a music note on the screen (`docs/icon/README.md`).
 
 ## Roadmap
 
@@ -140,4 +140,4 @@ AudioPaper is free and MIT-licensed. If it makes your desk nicer, you can [spons
 
 ## License
 
-[MIT](./LICENSE) © 2026 Michael Sitarzewski
+[MIT](./LICENSE) © 2026 Michael Sitarzewski. The icon's musical note is from Heroicons (MIT); see [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md).
