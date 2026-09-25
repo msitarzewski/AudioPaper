@@ -1,0 +1,118 @@
+# AudioPaper
+
+<img src="docs/icon.png" alt="AudioPaper icon" width="128" align="right">
+
+> Your desktop, set to the music you're playing.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Swift 6 + SwiftUI](https://img.shields.io/badge/Swift%206-SwiftUI-blue?logo=swift&logoColor=white)](https://developer.apple.com/swiftui/)
+[![macOS 26+](https://img.shields.io/badge/macOS-26%2B-lightgrey)](https://www.apple.com/macos)
+[![CI](https://github.com/msitarzewski/AudioPaper/actions/workflows/ci.yml/badge.svg)](https://github.com/msitarzewski/AudioPaper/actions/workflows/ci.yml)
+[![Sponsor](https://img.shields.io/badge/♥-Sponsor-EC4899?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/msitarzewski)
+
+AudioPaper is a small menu bar app for macOS 26 that changes your wallpaper whenever the song changes. It puts the album cover up straight away, then cross-fades in fan art and artist photos while the song plays, like a Photos-folder wallpaper slideshow. It's native, with no third-party dependencies, no accounts and no telemetry.
+
+## How it works
+
+1. **Hears the track change.** Apple Music posts a system notification on every change, so there's no polling and no special permission. On launch, AudioPaper asks Music once what's already playing.
+2. **Shows the album cover.** It's looked up online, at up to 3000×3000, from the Apple Music catalog, then MusicBrainz / Cover Art Archive, and finally the artwork Music itself has. The cover sits centered over a blurred, colour-matched wash of itself.
+3. **Cross-fades in fan art and artist photos.** It asks TheAudioDB (curated artist backgrounds, no key needed) and DeviantArt first. Brave Image Search is used only to fill gaps, which keeps its quota for artists the others don't cover. Results are filtered on your Mac with Apple's Vision framework:
+   - rejects screenshots and documents (Vision's "utility" image check)
+   - rejects anything carrying readable text: titles, lyrics, watermarks, UI
+   - rejects documents, product shots and other scenes that aren't art or photography
+   - drops near-duplicates of the cover, of what's on screen, and of each other
+   - ranks what's left by Vision's aesthetics score, with a boost for images it classifies as artwork
+
+   Survivors fill the screen edge to edge. If filling would crop too much, the whole image is fitted instead, with its edges feathered into a blurred extension of itself.
+4. **Rotates like a slideshow.** A new image fades in every 45 seconds (you can change this). The fade is drawn in a click-through window just above the desktop, and then the real wallpaper is set underneath. So the picture stays after you quit, and it shows up in Mission Control on every Space and every display.
+
+The menu bar popover credits every image: the artist, a link to their DeviantArt profile, and the page it was found on. It also has a filmstrip for picking an image, plus Pause, Next and **Restore my original wallpaper**.
+
+## Requirements
+
+- macOS 26 (Tahoe) or later
+- Apple Music (more players are planned; see [Roadmap](#roadmap))
+- Fan art works out of the box via TheAudioDB's free public key. For wider coverage, add a [Brave Search API](https://api-dashboard.search.brave.com/) key and/or a [DeviantArt application](https://www.deviantart.com/developers/) (client ID + secret) in Settings.
+
+## Build and run
+
+```sh
+brew install xcodegen
+git clone https://github.com/msitarzewski/AudioPaper
+cd AudioPaper
+xcodegen generate
+open AudioPaper.xcodeproj
+```
+
+Run the **AudioPaper** scheme. It appears in the menu bar rather than the Dock. Add API keys in **Settings → Accounts**; they're stored in your Keychain.
+
+Building from the command line, or without an Apple Developer team:
+
+```sh
+xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+```
+
+## Settings
+
+| Setting | Default | What it does |
+|---|---|---|
+| Wallpaper | Album cover, then fan art | Or album cover only |
+| Fan art framing | Automatic | Fill the screen, fit the whole image, or decide per image (fits when filling would crop more than 15%) |
+| Change fan art every | 45 s | 15 s – 5 min |
+| Restore my wallpaper when music stops | Off | Puts your own wallpaper back 30 s after playback stops |
+| Open at login | Off | Uses `SMAppService` |
+| Players / Fan art sources | All available | Turn each plugin on or off |
+
+## Privacy
+
+- Searches send only the **artist, album and song names** to the lookup services listed below. Nothing else about you or your library leaves your Mac.
+- All image filtering (text, screenshots, duplicates, aesthetics) runs **on your Mac** with Vision.
+- API keys live in your **Keychain**.
+- Downloaded images are cached in `~/Library/Containers/com.audiopaper/Data/Library/Caches/AudioPaper`, and pruned automatically at 500 MB.
+
+## Data sources
+
+AudioPaper uses these services. Each image shown in the app credits its source and links back to it.
+
+| Source | Used for | Key |
+|---|---|---|
+| [iTunes Search API](https://performance-partners.apple.com/search-api) | Album covers | None |
+| [MusicBrainz](https://musicbrainz.org) + [Cover Art Archive](https://coverartarchive.org) | Album covers when Apple's catalog doesn't know the release | None |
+| Music app | Last-resort cover for the track that's playing | None |
+| [TheAudioDB](https://www.theaudiodb.com) | Artist backgrounds (fan art and photos, 1280×720) | Free public key built in; optional personal key |
+| [DeviantArt API](https://www.deviantart.com/developers/) | Fan art, with artist profile links | Your own app credentials |
+| [Brave Search API](https://brave.com/search/api/) | Fan art and artist photos when the sources above come up short | Your own key (the free tier is 2,000 queries/month; AudioPaper caches results and spaces requests to stay within it) |
+
+Fan art belongs to the people who made it. AudioPaper shows it on your own desktop with credit, and never saves it anywhere else or shares it.
+
+## Architecture
+
+```
+App/                          SwiftUI menu bar app (MenuBarExtra + Settings)
+Packages/AudioPaperKit/       Everything else, as a Swift package
+  Sources/AudioPaperKit/
+    Sources/                  NowPlayingSource plugins (Apple Music)
+    Artwork/                  AlbumArtworkProvider plugins + chain
+    FanArt/                   FanArtSource plugins, Vision ArtworkFilters, FanArtPipeline
+    Wallpaper/                Core Image composer, NSWorkspace wallpaper service + cross-fade
+    NowPlayingCoordinator     Playback events → cover → fan art → rotation
+  Sources/apctl/              Developer CLI for trying the pipeline from the terminal
+project.yml                   XcodeGen project spec (the .xcodeproj is generated)
+```
+
+Players, cover providers, fan-art sources and image filters are all **plugins**, each a small Swift protocol. Adding one is a single file plus one line of registration; see [CONTRIBUTING.md](./CONTRIBUTING.md#adding-a-plugin).
+
+## Roadmap
+
+- More players: Spotify first (it posts the same kind of change notification Music does)
+- More art sources: fanart.tv artist backgrounds, Wikimedia Commons, Deezer
+- A paid TheAudioDB key would be needed before any Mac App Store release (their free key excludes app stores)
+- Smarter logo detection (stylized band logos can slip past text recognition)
+
+## Support
+
+AudioPaper is free and MIT-licensed. If it makes your desk nicer, you can [sponsor its development on GitHub](https://github.com/sponsors/msitarzewski).
+
+## License
+
+[MIT](./LICENSE) © 2026 Michael Sitarzewski

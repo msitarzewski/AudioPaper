@@ -1,0 +1,55 @@
+name: AudioPaper
+options:
+  bundleIdPrefix: com.audiopaper
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEAD_CODE_STRIPPING: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+packages:
+  AudioPaperKit:
+    path: Packages/AudioPaperKit
+targets:
+  AudioPaper:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+        excludes:
+          - AppIcon.icon
+      # Icon Composer document; Xcode compiles it into the asset catalog.
+      - path: App/AppIcon.icon
+        type: file
+        buildPhase: resources
+    dependencies:
+      - package: AudioPaperKit
+        product: AudioPaperKit
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: AudioPaper
+        LSApplicationCategoryType: public.app-category.music
+        LSUIElement: true
+        NSAppleEventsUsageDescription: AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.
+        NSHumanReadableCopyright: ""
+    entitlements:
+      path: App/AudioPaper.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.temporary-exception.apple-events:
+          - com.apple.Music
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.audiopaper
+        CODE_SIGN_STYLE: Automatic
+        # Contributors: override with your own team, or build with CODE_SIGNING_ALLOWED=NO (see CONTRIBUTING.md).
+        DEVELOPMENT_TEAM: 7JQGQ7CRH8
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO

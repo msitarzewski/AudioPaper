@@ -1,0 +1,13 @@
+# gitleaks configuration for AudioPaper.
+# Uses the default ruleset. API keys belong in the Keychain (app) or a git-ignored .env (apctl) —
+# never in source, fixtures, or screenshots.
+[extend]
+useDefault = true
+
+# AGENTS.md's troubleshooting table says "Token limit approaching", which the generic-api-key rule
+# reads as a token assignment. It's prose, not a secret.
+[[allowlists]]
+description = "AGENTS.md prose about context token limits"
+paths = ['''^AGENTS\.md$''']
+regexTarget = "match"
+regexes = ['''Token limit approaching''']

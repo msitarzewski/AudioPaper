@@ -1,0 +1,29 @@
+{
+  "has_more": false,
+  "next_offset": null,
+  "results": [
+    {
+      "deviationid": "A1B2C3D4-0000-0000-0000-000000000001",
+      "url": "https://www.deviantart.com/example-artist/art/Closer-Tribute-1000000001",
+      "title": "Closer",
+      "is_mature": false,
+      "author": { "userid": "1", "username": "example-artist", "usericon": "https://a.deviantart.net/avatars/e/x/example-artist.png" },
+      "content": { "src": "https://images-wixmp-example.wixmp.com/f/closer-tribute.jpg", "width": 2560, "height": 1440, "filesize": 812345 }
+    },
+    {
+      "deviationid": "A1B2C3D4-0000-0000-0000-000000000002",
+      "url": "https://www.deviantart.com/another-artist/art/Machine-Heart-1000000002",
+      "title": "Machine Heart",
+      "is_mature": true,
+      "author": { "userid": "2", "username": "another-artist" },
+      "content": { "src": "https://images-wixmp-example.wixmp.com/f/machine-heart.jpg", "width": 1920, "height": 1080 }
+    },
+    {
+      "deviationid": "A1B2C3D4-0000-0000-0000-000000000003",
+      "url": "https://www.deviantart.com/third-artist/art/Journal-1000000003",
+      "title": "A journal entry without an image",
+      "is_mature": false,
+      "author": { "userid": "3", "username": "third-artist" }
+    }
+  ]
+}

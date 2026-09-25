@@ -1,0 +1,25 @@
+# Tech Context
+
+- **Platform**: macOS 26.0+, Swift 6 language mode, built with Xcode 27 / Swift 6.4.
+- **Project**: XcodeGen (`project.yml`) generates `AudioPaper.xcodeproj` (git-ignored). Run `xcodegen generate` after adding/removing App files.
+- **Layout**: `Packages/AudioPaperKit` (SwiftPM library + `apctl` dev CLI + tests) and `App/` (SwiftUI menu bar app).
+- **Distribution**: App Sandbox + Developer ID (not Mac App Store). Bundle ID `com.audiopaper`, team `7JQGQ7CRH8` (same team as GlassPowerTools). Entitlements: `network.client`, `temporary-exception.apple-events` → `com.apple.Music`.
+- **Repo**: public at github.com/msitarzewski/AudioPaper (MIT). CI (`.github/workflows/ci.yml`) runs `swift test` and an unsigned app build on `macos-26`.
+- **Icon**: `App/AppIcon.icon` (Icon Composer, SVG layers), matching the house style: neutral light/graphite background, warm-gray display, red accent sleeve, white glass glyph. Preview with Icon Composer's `ictool` (`Xcode-beta.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool`).
+- **External services**
+  - iTunes Search API (no key) — album covers, `100x100bb` → `3000x3000bb`. Misses some catalog (older NIN, small indie releases).
+  - MusicBrainz + Cover Art Archive (no key, 1 req/s etiquette, User-Agent required).
+  - Brave Search image API — `X-Subscription-Token`. Current key is **free tier: 1 req/s, 2,000/month**. `BraveImageSource.limiter` enforces spacing.
+  - TheAudioDB — artist fan art (1280×720, "curated"). Free public key `123`, 30 req/min (`TheAudioDBSource.limiter`), optional personal key. Terms: credit + link TheAudioDB; free key not allowed for App Store apps.
+  - DeviantArt API — OAuth2 client credentials (`/oauth2/token`, `/browse/popular`, `/browse/tags`). **Not yet verified live**: no credentials yet.
+- **Credentials**: Keychain service `com.audiopaper.credentials` (accounts `BRAVE_API_KEY`, `DEVIANTART_CLIENT_ID`, `DEVIANTART_CLIENT_SECRET`, `THEAUDIODB_API_KEY`); fields auto-save, entered in Settings → Accounts. `apctl` reads `.env` (git-ignored).
+- **Commands**
+  - Tests: `cd Packages/AudioPaperKit && swift test`
+  - Filter spike: `swift run apctl fanart "<artist>" "<song>" [outDir]`, `apctl cover`, `apctl labels <files>`
+  - App: `xcodegen generate && xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath build/DerivedData build`
+- **Gotchas**
+  - Keychain reads can block on an access prompt after the signing identity changes; keep them off the main thread (the coordinator checks `isConfigured` in a detached task).
+  - zsh has a `log` builtin — use `/usr/bin/log show/stream`.
+  - `URL.path()` is percent-encoded; use `path(percentEncoded: false)` for file-system paths.
+  - `System Events` desktop picture is stale; query `NSWorkspace.desktopImageURL(for:)`.
+  - macOS ignores `setDesktopImageURL` with an unchanged URL — composer writes new file names each time.

@@ -1,0 +1,13 @@
+{
+  "artists": [
+    {
+      "idArtist": "111402",
+      "strArtist": "Nine Inch Nails",
+      "strArtistFanart": "https://r2.theaudiodb.com/images/media/artist/fanart/xqwpup1390674996.jpg",
+      "strArtistFanart2": "https://r2.theaudiodb.com/images/media/artist/fanart/31xsmj1639060469.jpg",
+      "strArtistFanart3": "https://r2.theaudiodb.com/images/media/artist/fanart/xwsspp1346698351.jpg",
+      "strArtistFanart4": "https://r2.theaudiodb.com/images/media/artist/fanart/0mkeg91613121228.jpg",
+      "strMusicBrainzID": "b7ffd2af-418f-4be2-bdd1-22f8b48613da"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+    "resultCount": 2,
+    "results": [
+        {
+            "wrapperType": "collection",
+            "collectionType": "Album",
+            "artistId": 657515,
+            "collectionId": 1109714933,
+            "amgArtistId": 41092,
+            "artistName": "Radiohead",
+            "collectionName": "In Rainbows",
+            "collectionCensoredName": "In Rainbows",
+            "artistViewUrl": "https://music.apple.com/us/artist/radiohead/657515?uo=4",
+            "collectionViewUrl": "https://music.apple.com/us/album/in-rainbows/1109714933?uo=4",
+            "artworkUrl60": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/dd/50/c7/dd50c790-99ac-d3d0-5ab8-e3891fb8fd52/634904032463.png/60x60bb.jpg",
+            "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/dd/50/c7/dd50c790-99ac-d3d0-5ab8-e3891fb8fd52/634904032463.png/100x100bb.jpg",
+            "collectionPrice": 9.99,
+            "collectionExplicitness": "notExplicit",
+            "trackCount": 10,
+            "copyright": "\u2117 2007 LLLP LLP under exclusive license to XL Recordings Ltd",
+            "country": "USA",
+            "currency": "USD",
+            "releaseDate": "2007-10-10T07:00:00Z",
+            "primaryGenreName": "Alternative"
+        },
+        {
+            "wrapperType": "collection",
+            "collectionType": "Album",
+            "artistId": 218352633,
+            "collectionId": 317258286,
+            "amgArtistId": 1083352,
+            "artistName": "Vitamin String Quartet",
+            "collectionName": "Vitamin String Quartet Performs Radiohead's In Rainbows",
+            "collectionCensoredName": "Vitamin String Quartet Performs Radiohead's In Rainbows",
+            "artistViewUrl": "https://music.apple.com/us/artist/vitamin-string-quartet/218352633?uo=4",
+            "collectionViewUrl": "https://music.apple.com/us/album/vitamin-string-quartet-performs-radioheads-in-rainbows/317258286?uo=4",
+            "artworkUrl60": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/fc/9b/25/fc9b2521-8660-aba5-8898-bc5c02a8ce5d/dj.dmofttoi.jpg/60x60bb.jpg",
+            "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/fc/9b/25/fc9b2521-8660-aba5-8898-bc5c02a8ce5d/dj.dmofttoi.jpg/100x100bb.jpg",
+            "collectionPrice": 9.99,
+            "collectionExplicitness": "notExplicit",
+            "trackCount": 11,
+            "copyright": "\u2117 2009 Vitamin Records",
+            "country": "USA",
+            "currency": "USD",
+            "releaseDate": "2009-06-02T07:00:00Z",
+            "primaryGenreName": "Rock"
+        }
+    ]
+}

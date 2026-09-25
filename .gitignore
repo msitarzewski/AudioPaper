@@ -1,0 +1,28 @@
+# Secrets — API keys live in .env for the apctl dev tool and in the Keychain for the app.
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+
+# Xcode — the project is generated from project.yml by XcodeGen, so it is never committed.
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xcuserdatad/
+DerivedData/
+build/
+*.xcresult
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# Coverage / profiling
+*.profraw
+*.profdata
+
+# Wallpapers rendered by `apctl render` into the working directory
+*.heic

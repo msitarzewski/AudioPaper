@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: AudioPaperKit tests
+        working-directory: Packages/AudioPaperKit
+        run: swift test
+
+      - name: Generate project
+        run: brew install xcodegen && xcodegen generate
+
+      - name: Build app (unsigned)
+        run: >
+          xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper
+          -configuration Debug -derivedDataPath build
+          CODE_SIGNING_ALLOWED=NO build

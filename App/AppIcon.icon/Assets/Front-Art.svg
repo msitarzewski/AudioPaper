@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Album art as a picture: a sun over two peaks, set inside the sleeve. -->
+  <circle fill="#000" cx="578" cy="412" r="40"/>
+  <path fill="#000" d="M324 640l110-160a14 14 0 0 1 23 0l68 99 36-44a14 14 0 0 1 22 0l67 105z"/>
+</svg>
