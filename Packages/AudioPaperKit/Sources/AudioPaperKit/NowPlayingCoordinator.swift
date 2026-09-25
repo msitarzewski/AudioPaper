@@ -11,7 +11,13 @@ public final class NowPlayingCoordinator {
     public private(set) var isPlaying = false { didSet { stateChanged() } }
     public private(set) var albumArtwork: Artwork? { didSet { stateChanged() } }
     public private(set) var fanArt: [Artwork] = [] { didSet { stateChanged() } }
+    /// The image AudioPaper is showing: the app (Mini Player, menu, widgets) switches to it at once, and the
+    /// wallpaper follows as soon as it's rendered and cross-faded (`onDesktop`).
     public private(set) var showing: Artwork? { didSet { stateChanged() } }
+    /// What the desktop actually shows, a moment behind `showing` while a new image renders and fades in.
+    @ObservationIgnored private var onDesktop: Artwork?
+    /// Whether an image is being rendered or faded in right now.
+    @ObservationIgnored private var isPresenting = false
     public private(set) var isSearchingFanArt = false
     public private(set) var status = "Waiting for music"
     /// When true, playback is still tracked but the wallpaper is left alone.
@@ -51,6 +57,9 @@ public final class NowPlayingCoordinator {
     @ObservationIgnored private let composer: WallpaperComposer
     @ObservationIgnored private let display: any WallpaperDisplay
     @ObservationIgnored private let debounce: Duration
+    /// How long a new song's cover stays up before the fan art takes over: a placeholder while the
+    /// artist's images load, not a full slide.
+    @ObservationIgnored private let coverHold: Duration
 
     @ObservationIgnored private var albumKey: String?
     /// The pool the current song's fan art belongs to, so shown images can be recorded.
@@ -71,7 +80,8 @@ public final class NowPlayingCoordinator {
         composer: WallpaperComposer = WallpaperComposer(),
         display: any WallpaperDisplay,
         preferences: Preferences,
-        debounce: Duration = .milliseconds(1500)
+        debounce: Duration = .milliseconds(1500),
+        coverHold: Duration = .seconds(10)
     ) {
         self.registry = registry
         self.albumChain = albumChain
@@ -81,6 +91,7 @@ public final class NowPlayingCoordinator {
         self.display = display
         self.preferences = preferences
         self.debounce = debounce
+        self.coverHold = coverHold
     }
 
     public var availableSources: [any NowPlayingSource] { registry.available }
@@ -154,8 +165,10 @@ public final class NowPlayingCoordinator {
         stopRotation()
         presentation?.cancel()
         presentationGeneration += 1
+        isPresenting = false
         display.restoreOriginals()
         showing = nil
+        onDesktop = nil
         status = "Original wallpaper restored"
     }
 
@@ -173,8 +186,14 @@ public final class NowPlayingCoordinator {
             track = newTrack
             status = "Now playing"
             trackTask?.cancel()
+            // The previous song's slideshow ends now, not after the lookup.
+            stopRotation()
+            fanArt = []
             trackTask = Task { [weak self, debounce] in
-                // Skipping through tracks quickly shouldn't trigger a lookup for each one.
+                // A cover that's already downloaded goes up at once: the app first, the wallpaper right after.
+                // Otherwise the old song's art is cleared, rather than lingering while the new cover is found.
+                await self?.showCachedCover(for: newTrack)
+                // Skipping through tracks quickly shouldn't trigger a network lookup for each one.
                 try? await Task.sleep(for: debounce)
                 guard !Task.isCancelled else { return }
                 await self?.load(newTrack)
@@ -189,7 +208,6 @@ public final class NowPlayingCoordinator {
     }
 
     private func load(_ track: Track) async {
-        fanArt = []
         if albumKey != track.albumKey {
             albumArtwork = await resolveAlbum(for: track)
             albumKey = track.albumKey
@@ -199,13 +217,31 @@ public final class NowPlayingCoordinator {
             if showing != albumArtwork { present(albumArtwork, animated: true) }
         } else {
             status = "No cover found for “\(track.album)”"
-            // Don't leave the previous album's art up for a different record.
-            if showing != nil { restoreOriginalWallpaper() }
+            // Don't leave the previous album's art up for a different record — including one still on its
+            // way to the desktop, which restoring cancels.
+            if onDesktop != nil || isPresenting { restoreOriginalWallpaper() }
         }
         guard preferences.mode == .albumThenFanArt else { return }
+        // The cover holds the place for a few seconds while the artist's images load; then the fan art takes over.
+        startRotation(firstAfter: coverHold)
         await loadFanArt(for: track)
+    }
+
+    /// On a song change: puts the new album's cover up straight away when it's already downloaded (no
+    /// network), otherwise clears the previous song's art from the app.
+    private func showCachedCover(for track: Track) async {
+        if track.albumKey == albumKey, let albumArtwork {
+            if showing != albumArtwork { present(albumArtwork, animated: true) }
+            return
+        }
+        guard !track.album.isEmpty, let cached = await cache.artworks(forKey: "album:" + track.albumKey)?.first else {
+            showing = nil
+            return
+        }
         guard !Task.isCancelled else { return }
-        startRotation()
+        albumArtwork = cached
+        albumKey = track.albumKey
+        present(cached, animated: true)
     }
 
     private func resolveAlbum(for track: Track) async -> Artwork? {
@@ -240,7 +276,8 @@ public final class NowPlayingCoordinator {
         poolKey = key
         let pool = await cache.pool(forKey: key)
         fanArt = pool.selection(count: Self.imagesPerPlay)
-        if let first = fanArt.first { present(first, animated: true) }
+        // Fan art waits its turn after the cover; it goes up at once only when there's no cover to show.
+        if albumArtwork == nil, let first = fanArt.first { present(first, animated: true) }
         guard pool.shouldSearch(song: track.songKey) else { return }
 
         // New-song searches are budgeted, so a flood of track changes (a process spoofing Music's
@@ -270,7 +307,7 @@ public final class NowPlayingCoordinator {
             case let .accepted(artwork):
                 found.append(artwork)
                 fanArt.append(artwork)
-                if fanArt.count == 1 { present(artwork, animated: true) }
+                if albumArtwork == nil, showing == nil { present(artwork, animated: true) }
             case .incomplete:
                 complete = false
             case .rejected:
@@ -300,12 +337,16 @@ public final class NowPlayingCoordinator {
         guard !isSuspended else { return }
         presentationGeneration += 1
         let generation = presentationGeneration
+        // The app shows it now; the wallpaper follows once it's rendered.
+        showing = artwork
+        isPresenting = true
         let previous = presentation
         let composer = self.composer
         let framing = preferences.fanArtFraming
         presentation = Task { [weak self] in
             await previous?.value
             guard let self, generation == self.presentationGeneration else { return }
+            defer { if generation == self.presentationGeneration { self.isPresenting = false } }
             let screens = self.display.screens
             let files: [UInt32: URL]
             do {
@@ -314,11 +355,13 @@ public final class NowPlayingCoordinator {
                 }.value
             } catch {
                 log.error("Render failed: \(error.localizedDescription, privacy: .public)")
+                // The app shouldn't claim an image the desktop never got.
+                if generation == self.presentationGeneration { self.showing = self.onDesktop }
                 return
             }
             guard generation == self.presentationGeneration else { return }
-            await self.display.show(files, animated: animated && self.showing != nil)
-            self.showing = artwork
+            await self.display.show(files, animated: animated && self.onDesktop != nil)
+            self.onDesktop = artwork
             self.recordShown(artwork)
             composer.prune(keeping: Set(files.values))
         }
@@ -337,13 +380,17 @@ public final class NowPlayingCoordinator {
         return fanArt[(index + 1) % fanArt.count]
     }
 
-    private func startRotation() {
+    /// Rotates through the fan art every `rotationInterval`; the first change can come sooner (`firstAfter`),
+    /// as when a new song's cover is only holding the place.
+    private func startRotation(firstAfter first: Duration? = nil) {
         stopRotation()
         guard isPlaying, !isSuspended else { return }
         rotationTask = Task { [weak self] in
+            var delay = first
             while !Task.isCancelled {
-                let interval = self?.preferences.rotationInterval ?? 45
-                try? await Task.sleep(for: .seconds(interval))
+                let interval = Duration.seconds(self?.preferences.rotationInterval ?? 45)
+                try? await Task.sleep(for: delay.map { min($0, interval) } ?? interval)
+                delay = nil
                 guard !Task.isCancelled, let self else { return }
                 if self.fanArt.count > 1 || (self.fanArt.count == 1 && self.showing != self.fanArt.first),
                    let next = self.nextInRotation() {

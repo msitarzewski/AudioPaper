@@ -67,3 +67,7 @@
 
 ### 2026-09-25: One signature for local and release builds
 - The user was asked for the login password twice after installing 0.1.1: the legacy login keychain ties each item (one per saved key) to the app's designated requirement, and Debug builds were signed with Apple Development while releases use Developer ID. `scripts/install.sh` now signs local builds with the Developer ID (manual style) when available; verified identical designated requirements. Users updating between releases never saw this (same Developer ID).
+
+### 2026-09-25: App first, cover first
+- User: on a song change the app lagged a few seconds, then the art updated, then the wallpaper. Causes: the UI followed `showing`, set only after render + 1.6 s fade; the 1.5 s debounce applied even to downloaded covers; and pooled fan art was presented right after the cover, superseding it, so the cover was often never on the desktop. Now the app switches at `present`, downloaded covers skip the debounce, the cover holds one interval before fan art, and a no-cover song cancels an in-flight render (a race the existing test caught). 3 new tests (111). Render measured at 0.1–0.4 s at 5K, so not the bottleneck.
+- Follow-up (user): the cover is a placeholder until the good stuff loads, so it holds 10 s (`coverHold`), not a full interval.

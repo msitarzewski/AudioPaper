@@ -34,7 +34,7 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
    Survivors fill the screen edge to edge. If filling would crop too much (portrait images, for example), the whole image is fitted instead, with its edges feathered into a blurred extension of itself.
 
    Credits name the artist and where the image came from; for web results that's the artist the image was matched to plus the site, since wallpaper sites' page titles rarely say who's pictured.
-4. **Rotates like a slideshow.** A new image fades in every 45 seconds (you can change this). The fade is drawn in a click-through window just above the desktop, and then the real wallpaper is set underneath. So the picture stays after you quit, and it shows up in Mission Control on every Space and every display.
+4. **Rotates like a slideshow.** The cover holds the place for about 10 seconds while the artist's images load, then a new image fades in every 45 seconds (you can change this). The menu, Mini Player and widgets switch to each image the moment it's chosen, and the wallpaper follows as soon as it's drawn; a cover AudioPaper has seen before goes up without waiting. The fade is drawn in a click-through window just above the desktop, and then the real wallpaper is set underneath. So the picture stays after you quit, and it shows up in Mission Control on every Space and every display.
 
 ## Where it lives
 

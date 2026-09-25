@@ -29,11 +29,11 @@
 - **Accessibility audit** (WCAG2ICT + Apple HIG; site WCAG 2.2 AA): spoken names for the artwork, photos, links and Settings fields; Reduce Motion; keyboard-safe "…" menu; widget descriptions; site links underlined and light-mode contrast fixed (Lighthouse 100 on every page, both schemes).
 - Settings opens in front from the menu (`SettingsWindow.show`).
 - Site: Credits page; BABYMETAL and BLACKPINK Mini Player screenshots (only covers + Commons photos), screenshots under CC BY-SA 4.0.
-- 0.1.1 built (version 0.1.1, build 2; pipeline version 6).
+- **v0.1.1 released** (version 0.1.1, build 2; pipeline version 6).
+- **v0.1.2**: song changes show the new cover in the app at once and on the desktop right after; downloaded covers skip the debounce; the cover holds 10 s before fan art (was often skipped).
 - 108 tests.
 
 ## Next
-- **Publish 0.1.1** (built and notarized; commit, tag and release once the user says so).
 - Commons relevance: prefer files that name the artist (a NIN-cap photo of Gabriel Boric and a speaker stack came through).
 - A hands-on VoiceOver + Full Keyboard Access session.
 - **GitHub Pages website** and a **notarized release** — plan in `NEXT-SESSION.md`.
