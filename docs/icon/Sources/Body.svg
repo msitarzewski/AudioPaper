@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Camera body with viewfinder hump; the flash window is knocked out (evenodd) so the ground shows through. -->
+  <path fill="#fff" fill-rule="evenodd" d="M244 330H404L438 272A20 20 0 0 1 456 260H568A20 20 0 0 1 586 272L620 330H780A72 72 0 0 1 852 402V698A72 72 0 0 1 780 770H244A72 72 0 0 1 172 698V402A72 72 0 0 1 244 330ZM234 374H310A14 14 0 0 1 324 388V412A14 14 0 0 1 310 426H234A14 14 0 0 1 220 412V388A14 14 0 0 1 234 374Z"/>
+</svg>

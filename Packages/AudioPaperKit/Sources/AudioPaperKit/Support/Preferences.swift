@@ -31,6 +31,21 @@ public final class Preferences {
     public var fanArtFraming: FanArtFraming {
         didSet { defaults.set(fanArtFraming.rawValue, forKey: "fanArtFraming") }
     }
+    /// HIG: people, not the app, decide whether the menu bar extra is shown.
+    public var showInMenuBar: Bool {
+        didSet { defaults.set(showInMenuBar, forKey: "showInMenuBar") }
+    }
+    /// Mini Player window options, as in Music's MiniPlayer.
+    public var miniPlayerFloatsOnTop: Bool {
+        didSet { defaults.set(miniPlayerFloatsOnTop, forKey: "miniPlayerFloatsOnTop") }
+    }
+    /// Whether the Mini Player was open, so it comes back after relaunch.
+    public var miniPlayerOpen: Bool {
+        didSet { defaults.set(miniPlayerOpen, forKey: "miniPlayerOpen") }
+    }
+    public var miniPlayerOnAllDesktops: Bool {
+        didSet { defaults.set(miniPlayerOnAllDesktops, forKey: "miniPlayerOnAllDesktops") }
+    }
     public var restoreWhenStopped: Bool {
         didSet { defaults.set(restoreWhenStopped, forKey: "restoreWhenStopped") }
     }
@@ -48,6 +63,10 @@ public final class Preferences {
         rotationInterval = defaults.object(forKey: "rotationInterval") as? Double ?? 45
         fanArtFraming = defaults.string(forKey: "fanArtFraming").flatMap(FanArtFraming.init(rawValue:)) ?? .automatic
         restoreWhenStopped = defaults.bool(forKey: "restoreWhenStopped")
+        showInMenuBar = defaults.object(forKey: "showInMenuBar") as? Bool ?? true
+        miniPlayerFloatsOnTop = defaults.bool(forKey: "miniPlayerFloatsOnTop")
+        miniPlayerOnAllDesktops = defaults.bool(forKey: "miniPlayerOnAllDesktops")
+        miniPlayerOpen = defaults.bool(forKey: "miniPlayerOpen")
         enabledSources = Set(defaults.stringArray(forKey: "enabledSources") ?? ["apple-music"])
         disabledFanArtSources = Set(defaults.stringArray(forKey: "disabledFanArtSources") ?? [])
     }

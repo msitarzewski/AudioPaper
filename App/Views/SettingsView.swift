@@ -5,16 +5,18 @@ import SwiftUI
 struct SettingsView: View {
     let coordinator: NowPlayingCoordinator
     @Bindable var preferences: Preferences
+    /// HIG: "Restore the most recently viewed pane."
+    @AppStorage("settingsPane") private var pane = "general"
 
     var body: some View {
-        TabView {
-            Tab("General", systemImage: "gearshape") {
+        TabView(selection: $pane) {
+            Tab("General", systemImage: "gearshape", value: "general") {
                 GeneralSettings(coordinator: coordinator, preferences: preferences)
             }
-            Tab("Sources", systemImage: "music.note.list") {
+            Tab("Sources", systemImage: "music.note.list", value: "sources") {
                 SourceSettings(coordinator: coordinator, preferences: preferences)
             }
-            Tab("Accounts", systemImage: "key") {
+            Tab("Accounts", systemImage: "key", value: "accounts") {
                 AccountSettings()
             }
         }
@@ -48,6 +50,10 @@ private struct GeneralSettings: View {
             }
             .disabled(preferences.mode == .albumOnly)
             Toggle("Restore my wallpaper when music stops", isOn: $preferences.restoreWhenStopped)
+            Toggle(isOn: $preferences.showInMenuBar) {
+                Text("Show in menu bar")
+                Text("When hidden, AudioPaper appears in the Dock instead. Open it again from Finder to get back here.")
+            }
             Toggle("Open at login", isOn: $launchAtLogin)
                 .onChange(of: launchAtLogin) { _, enabled in
                     do {

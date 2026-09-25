@@ -26,7 +26,12 @@ AudioPaper is a small menu bar app for macOS 26 that changes your wallpaper when
    Survivors fill the screen edge to edge. If filling would crop too much, the whole image is fitted instead, with its edges feathered into a blurred extension of itself.
 4. **Rotates like a slideshow.** A new image fades in every 45 seconds (you can change this). The fade is drawn in a click-through window just above the desktop, and then the real wallpaper is set underneath. So the picture stays after you quit, and it shows up in Mission Control on every Space and every display.
 
-The menu bar popover credits every image: the artist, a link to their DeviantArt profile, and the page it was found on. It also has a filmstrip for picking an image, plus Pause, Next and **Restore my original wallpaper**.
+## Where it lives
+
+- **Menu bar:** a standard macOS menu, per Apple's guidelines. It shows the track, credits the art (with a link to the artist's profile and the page it came from), and has Next Image, Pause, Restore Original Wallpaper, Show Mini Player (⌥⌘M), Settings… and Quit. You can hide the menu bar icon in Settings.
+- **Mini Player:** a small window modelled on Music's MiniPlayer. It shows the artwork, the credit, a strip of every image in rotation, and the controls. It can *Float on Top* and *Show on All Desktops*.
+- **Widgets:** *Now Playing* (small, medium, large), with working Pause and Next Image buttons on medium and large, and *Artwork* (every size), which shows the current wallpaper image with its credit. Add them with **Edit Widgets** on the desktop.
+- **Dock:** AudioPaper stays out of the Dock unless the Mini Player is open or the menu bar icon is hidden, so there's always a way back in. Clicking the Dock icon opens the Mini Player, and right-clicking it shows the wallpaper actions.
 
 ## Requirements
 
@@ -59,6 +64,7 @@ xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath bui
 | Wallpaper | Album cover, then fan art | Or album cover only |
 | Fan art framing | Automatic | Fill the screen, fit the whole image, or decide per image (fits when filling would crop more than 15%) |
 | Change fan art every | 45 s | 15 s – 5 min |
+| Show in menu bar | On | When off, AudioPaper appears in the Dock instead |
 | Restore my wallpaper when music stops | Off | Puts your own wallpaper back 30 s after playback stops |
 | Open at login | Off | Uses `SMAppService` |
 | Players / Fan art sources | All available | Turn each plugin on or off |
@@ -89,7 +95,8 @@ Fan art belongs to the people who made it. AudioPaper shows it on your own deskt
 ## Architecture
 
 ```
-App/                          SwiftUI menu bar app (MenuBarExtra + Settings)
+App/                          SwiftUI app: menu bar menu, Mini Player window, Settings, Dock behaviour
+Widgets/                      WidgetKit extension (Now Playing, Artwork); reads the App Group snapshot
 Packages/AudioPaperKit/       Everything else, as a Swift package
   Sources/AudioPaperKit/
     Sources/                  NowPlayingSource plugins (Apple Music)

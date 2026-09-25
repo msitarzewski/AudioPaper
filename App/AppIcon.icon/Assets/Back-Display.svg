@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <!-- The desktop: a widescreen display with a short stand. -->
-  <path fill="#000" fill-rule="evenodd" d="M214 250h596a62 62 0 0 1 62 62v360a62 62 0 0 1-62 62H214a62 62 0 0 1-62-62V312a62 62 0 0 1 62-62Z"/>
-  <path fill="#000" d="M462 734h100l14 58h-128z"/>
-  <rect fill="#000" x="392" y="786" width="240" height="30" rx="15"/>
-</svg>

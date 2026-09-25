@@ -40,9 +40,9 @@ public struct FanartTVSource: FanArtSource {
 
     public func candidates(for track: Track, limit: Int) async throws -> [ArtworkCandidate] {
         guard let projectKey = secrets.value(for: .fanartTVProjectKey) else { return [] }
-        let artistKey = Normalizer.key(track.artist)
+        let artistKey = MusicBrainz.identityKey(track.artist)
         if let known = await Self.memo.get(artistKey) { return known }
-        guard let mbid = try await MusicBrainz.artistID(for: track.artist, http: http) else {
+        guard let mbid = try await MusicBrainz.artistID(for: track, http: http) else {
             await Self.memo.set(artistKey, [])
             return []
         }

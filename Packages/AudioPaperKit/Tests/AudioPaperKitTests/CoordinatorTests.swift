@@ -121,6 +121,17 @@ final class RecordingDisplay: WallpaperDisplay {
         #expect(coordinator.showing == nil)
     }
 
+    @Test func stateChangesAreReportedCoalesced() async {
+        var calls = 0
+        coordinator.onStateChange = { calls += 1 }
+        coordinator.start()
+        source.send(.playing(.sample()))
+        await waitUntil { coordinator.showing != nil }
+        try? await Task.sleep(for: .milliseconds(50))
+        #expect(calls >= 1)
+        #expect(calls < 6, "several property changes in one turn collapse into one report")
+    }
+
     @Test func restoreHandsBackOriginal() async {
         coordinator.start()
         source.send(.playing(.sample()))

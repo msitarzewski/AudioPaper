@@ -1,0 +1,49 @@
+{
+  "recordings": [
+    {
+      "id": "afe63650-f900-45de-b737-dae148c714f6",
+      "score": 100,
+      "title": "new trick",
+      "artist-credit": [
+        {
+          "name": "ROS\u00c9",
+          "artist": {
+            "id": "7f233cda-eacb-4235-b681-5f7be343a1a2",
+            "name": "ROS\u00c9",
+            "disambiguation": "BLACKPINK"
+          }
+        }
+      ]
+    },
+    {
+      "id": "6b1d3eba-3f2f-4038-bd65-1cc78b36fa97",
+      "score": 100,
+      "title": "new trick",
+      "artist-credit": [
+        {
+          "name": "ROS\u00c9",
+          "artist": {
+            "id": "7f233cda-eacb-4235-b681-5f7be343a1a2",
+            "name": "ROS\u00c9",
+            "disambiguation": "BLACKPINK"
+          }
+        }
+      ]
+    },
+    {
+      "id": "6571f00d-6e66-4319-9488-a8d8048b01b9",
+      "score": 100,
+      "title": "new trick",
+      "artist-credit": [
+        {
+          "name": "ROS\u00c9",
+          "artist": {
+            "id": "7f233cda-eacb-4235-b681-5f7be343a1a2",
+            "name": "ROS\u00c9",
+            "disambiguation": "BLACKPINK"
+          }
+        }
+      ]
+    }
+  ]
+}

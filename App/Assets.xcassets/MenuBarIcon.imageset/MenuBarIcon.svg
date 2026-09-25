@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="16" viewBox="0.5 5.5 35 28">
+  <!-- Menu bar template: camera body with the lens ring cut out; the glass carries a knocked-out eighth note. -->
+  <path fill-rule="evenodd" d="M5 10H11L13 6.8A1.6 1.6 0 0 1 14.4 6H21.6A1.6 1.6 0 0 1 23 6.8L25 10H31A4 4 0 0 1 35 14V29A4 4 0 0 1 31 33H5A4 4 0 0 1 1 29V14A4 4 0 0 1 5 10ZM5 13H7.4A0.8 0.8 0 0 1 8.2 13.8V15A0.8 0.8 0 0 1 7.4 15.8H5A0.8 0.8 0 0 1 4.2 15V13.8A0.8 0.8 0 0 1 5 13ZM18 12.4A9 9 0 1 0 18 30.4A9 9 0 1 0 18 12.4Z"/>
+  <path fill-rule="evenodd" transform="translate(18 21.4) scale(0.89) translate(-18 -21.5)" d="M18 13.2A8.3 8.3 0 1 0 18 29.8A8.3 8.3 0 1 0 18 13.2ZM14.3 25.6A2.7 2.05 -24 1 0 19.3 23.5A2.7 2.05 -24 1 0 14.3 25.6ZM18.2 16.4H19.5V24H18.2ZM19.5 16.4C19.9 18 21.3 18.8 22.4 19.9C23.3 20.9 23.3 22.3 22.6 23.6C22.7 22 21.7 20.9 19.5 20.2Z"/>
+</svg>

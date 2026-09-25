@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <g transform="translate(512 512) scale(1.22) translate(-512 -512)">
+  <!-- Lens barrel: a true ring (aperture knocked out) so the glass beneath shows through. -->
+  <path fill="#fff" fill-rule="evenodd" d="M512 364A192 192 0 1 1 512 748A192 192 0 1 1 512 364ZM512 416A140 140 0 1 0 512 696A140 140 0 1 0 512 416Z"/>
+  </g>
+</svg>

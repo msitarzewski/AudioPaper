@@ -32,14 +32,15 @@ public struct Track: Hashable, Sendable, Codable {
         return artist
     }
 
-    /// Identity of the album, used to skip redundant cover lookups.
+    /// Identity of the album, used to skip redundant cover lookups. The artist part keeps accents,
+    /// because they can distinguish artists ("ROSÉ" vs "Rose").
     public var albumKey: String {
-        "\(Normalizer.key(primaryArtist))|\(Normalizer.key(album))"
+        "\(MusicBrainz.identityKey(primaryArtist))|\(Normalizer.key(album))"
     }
 
     /// Identity of the song, used to key fan-art lookups.
     public var songKey: String {
-        "\(Normalizer.key(artist))|\(Normalizer.key(title))"
+        "\(MusicBrainz.identityKey(artist))|\(Normalizer.key(title))"
     }
 }
 

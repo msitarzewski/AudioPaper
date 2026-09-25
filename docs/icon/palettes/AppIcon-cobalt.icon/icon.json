@@ -1,0 +1,199 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "linear-gradient": [
+          "srgb:0.98500,0.98500,0.98500,1.00000",
+          "srgb:0.94500,0.94500,0.94500,1.00000"
+        ]
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "linear-gradient": [
+          "srgb:0.11000,0.11500,0.12500,1.00000",
+          "srgb:0.03500,0.03800,0.04500,1.00000"
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "Note",
+      "layers": [
+        {
+          "name": "Note",
+          "image-name": "Note.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.1
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.05
+      }
+    },
+    {
+      "name": "Lens",
+      "layers": [
+        {
+          "name": "Lens",
+          "image-name": "Lens.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "srgb:0.62000,0.62000,0.65000,1.00000",
+                  "srgb:0.32000,0.32000,0.35000,1.00000"
+                ]
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "linear-gradient": [
+                  "srgb:0.84000,0.85000,0.87000,1.00000",
+                  "srgb:0.58000,0.59000,0.62000,1.00000"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.22
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.05
+      }
+    },
+    {
+      "name": "Accent",
+      "layers": [
+        {
+          "name": "Glass",
+          "image-name": "Glass.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "srgb:0.28000,0.48047,0.76282,1.00000",
+                  "srgb:0.00000,0.18376,0.44259,1.00000"
+                ]
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "linear-gradient": [
+                  "srgb:0.28000,0.48047,0.76282,1.00000",
+                  "srgb:0.00000,0.18376,0.44259,1.00000"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Shutter",
+          "image-name": "Shutter.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "srgb:0.28000,0.48047,0.76282,1.00000",
+                  "srgb:0.00000,0.18376,0.44259,1.00000"
+                ]
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "linear-gradient": [
+                  "srgb:0.28000,0.48047,0.76282,1.00000",
+                  "srgb:0.00000,0.18376,0.44259,1.00000"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.12
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.05
+      }
+    },
+    {
+      "name": "Body",
+      "layers": [
+        {
+          "name": "Body",
+          "image-name": "Body.svg",
+          "glass": true,
+          "fill-specializations": [
+            {
+              "value": {
+                "linear-gradient": [
+                  "srgb:0.80000,0.80000,0.82000,1.00000",
+                  "srgb:0.52000,0.52000,0.54000,1.00000"
+                ]
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "linear-gradient": [
+                  "srgb:1.00000,1.00000,1.00000,1.00000",
+                  "srgb:0.80000,0.80000,0.83000,1.00000"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.22
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.05
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

@@ -10,6 +10,8 @@
 - fanart.tv integrated (`FanartTVSource`); the user's project key is `FAN_ART_API_KEY` in `.env` / Keychain. It is NOT embedded in the app or repo. Coverage: strong for established artists (NIN, Radiohead, Troye Sivan), none for newer ones (Frost Children, 2hollis, Sleepover); Brave fills those.
 - Public repo on the user's GitHub with README, CONTRIBUTING, SECURITY, FUNDING (sponsors), CI, issue templates.
 
+- Menu bar is a native menu; the rich view is the Mini Player window; widgets (Now Playing, Artwork); Dock only when needed; red gradient camera icon; "Show in menu bar" + Settings restores last pane. All approved by the user.
+
 ## Open items
 - DeviantArt credentials needed to verify that provider live.
 - Decide whether release builds should ship the fanart.tv project key (their terms expect a project key in the app plus an optional user key; the repo must not contain it).

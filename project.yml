@@ -29,10 +29,13 @@ targets:
     dependencies:
       - package: AudioPaperKit
         product: AudioPaperKit
+      - target: AudioPaperWidgets
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: AudioPaper
+        # Shared with the widget extension; must match the application-groups entitlement.
+        AudioPaperAppGroup: $(DEVELOPMENT_TEAM).com.audiopaper
         LSApplicationCategoryType: public.app-category.music
         LSUIElement: true
         NSAppleEventsUsageDescription: AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.
@@ -46,6 +49,8 @@ targets:
         com.apple.security.automation.apple-events: true
         com.apple.security.temporary-exception.apple-events:
           - com.apple.Music
+        com.apple.security.application-groups:
+          - $(DEVELOPMENT_TEAM).com.audiopaper
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.audiopaper
@@ -55,3 +60,33 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
+
+  AudioPaperWidgets:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Widgets
+    dependencies:
+      - package: AudioPaperKit
+        product: AudioPaperKit
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: AudioPaper
+        AudioPaperAppGroup: $(DEVELOPMENT_TEAM).com.audiopaper
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Widgets/AudioPaperWidgets.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - $(DEVELOPMENT_TEAM).com.audiopaper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.audiopaper.widgets
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 7JQGQ7CRH8
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES

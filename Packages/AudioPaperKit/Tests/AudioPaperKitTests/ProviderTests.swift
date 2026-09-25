@@ -59,6 +59,9 @@ import Testing
         #expect(BraveImageSource.relevance(title: "Run It — Sleepover fan art", pageURL: nil, track: band) == 1)
         #expect(BraveImageSource.relevance(title: "Music Nine Inch Nails Wallpaper", pageURL: nil, track: .sample()) == 0.6)
         #expect(BraveImageSource.relevance(title: "Closer poster", pageURL: nil, track: .sample()) == nil, "must name the artist")
+        let rose = Track.sample("new trick", artist: "ROSÉ", album: "new trick")
+        #expect(BraveImageSource.relevance(title: "Rose singer album wallpaper", pageURL: nil, track: rose) == nil, "accents distinguish artists")
+        #expect(BraveImageSource.relevance(title: "Rosé new trick fan art", pageURL: nil, track: rose) == 1)
         #expect(BraveImageSource.relevance(title: "HD Wallpaper: Nine Inch Nails Inspired Art", pageURL: nil, track: .sample()) == 0.5)
     }
 
@@ -113,7 +116,7 @@ import Testing
 @Suite struct TheAudioDBSourceTests {
     @Test func artistFanArtIsCuratedAndCredited() throws {
         let response = try Fixture.decode(TheAudioDBSource.Response.self, "theaudiodb-nin")
-        let candidates = TheAudioDBSource.candidates(from: response, for: .sample())
+        let candidates = TheAudioDBSource.candidates(from: response, for: .sample(), match: .byID)
         #expect(candidates.count == 4)
         for candidate in candidates {
             #expect(candidate.isCurated)
@@ -124,7 +127,13 @@ import Testing
 
     @Test func differentArtistIsIgnored() throws {
         let response = try Fixture.decode(TheAudioDBSource.Response.self, "theaudiodb-nin")
-        #expect(TheAudioDBSource.candidates(from: response, for: .sample(artist: "Nine Days")).isEmpty)
+        #expect(TheAudioDBSource.candidates(from: response, for: .sample(artist: "Nine Days"), match: .byName).isEmpty)
+    }
+
+    @Test func nameFallbackRequiresAccentExactMatch() throws {
+        let rose = try JSONDecoder().decode(TheAudioDBSource.Response.self, from: Data(#"{"artists":[{"idArtist":"1","strArtist":"Rose","strArtistFanart":"https://r2.theaudiodb.com/rose.jpg"}]}"#.utf8))
+        #expect(TheAudioDBSource.candidates(from: rose, for: .sample("new trick", artist: "ROSÉ"), match: .byName).isEmpty)
+        #expect(TheAudioDBSource.candidates(from: rose, for: .sample(artist: "Rose"), match: .byName).count == 1)
     }
 
     @Test func usesFreeKeyUnlessPersonalKeyIsSet() async throws {
@@ -132,12 +141,12 @@ import Testing
         let source = TheAudioDBSource(http: http, secrets: StubSecrets(values: [:]))
         #expect(source.isConfigured)
         _ = try await source.candidates(for: .sample(artist: "Free Key Artist \(UUID())"), limit: 10)
-        #expect(http.requests.first?.path().contains("/json/123/") == true)
+        #expect(http.requests.first { $0.host() == "www.theaudiodb.com" }?.path().contains("/json/123/") == true)
 
         let personal = StubHTTP { _ in try? Fixture.data("theaudiodb-nin") }
         _ = try await TheAudioDBSource(http: personal, secrets: StubSecrets(values: [.theAudioDBAPIKey: "mine"]))
             .candidates(for: .sample(artist: "Personal Key Artist \(UUID())"), limit: 10)
-        #expect(personal.requests.first?.path().contains("/json/mine/") == true)
+        #expect(personal.requests.first { $0.host() == "www.theaudiodb.com" }?.path().contains("/json/mine/") == true)
     }
 }
 
@@ -181,6 +190,17 @@ import Testing
     @Test func ambiguousArtistNameResolvesToNothing() throws {
         let response = try Fixture.decode(MusicBrainz.ArtistSearch.self, "musicbrainz-artist-sleepover")
         #expect(MusicBrainz.resolve(response, name: "Sleepover") == nil, "several artists are named Sleepover")
+    }
+
+    @Test func recordingSearchPicksTheArtistWhoRecordedTheSong() throws {
+        let response = try Fixture.decode(MusicBrainz.RecordingSearch.self, "musicbrainz-recording-new-trick")
+        #expect(MusicBrainz.resolve(response, artist: "ROSÉ") == "7f233cda-eacb-4235-b681-5f7be343a1a2")
+    }
+
+    @Test func accentExactArtistBeatsFoldedNamesakes() throws {
+        let response = try JSONDecoder().decode(MusicBrainz.ArtistSearch.self, from: Data(#"{"artists":[{"id":"rose-fr","name":"Rose","score":100},{"id":"rose-kr","name":"ROSÉ","score":95}]}"#.utf8))
+        #expect(MusicBrainz.resolve(response, name: "ROSÉ") == "rose-kr")
+        #expect(MusicBrainz.resolve(response, name: "Rose") == "rose-fr")
     }
 
     @Test func uniqueExactNameResolves() throws {

@@ -5,3 +5,4 @@
 - [activeContext.md](activeContext.md) — current state and user decisions
 - [progress.md](progress.md) — done / next
 - [tasks/2026-09/README.md](tasks/2026-09/README.md) — September 2026 task log
+- [projectRules.md](projectRules.md) — standing rules (Apple HIG)

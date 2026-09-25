@@ -98,6 +98,11 @@ public struct BraveImageSource: FanArtSource {
             return !tokens.isEmpty && tokens.allSatisfy(words.contains)
         }
         guard mentions(track.artist) else { return nil }
+        // Accents distinguish artists ("ROSÉ" vs "Rose"): when the name has them, the result must too.
+        if track.artist.unicodeScalars.contains(where: { !$0.isASCII }),
+           !"\(title ?? "") \(slug)".lowercased().contains(Normalizer.searchTerm(track.artist).lowercased()) {
+            return nil
+        }
         if !track.title.isEmpty, mentions(track.title) { return 1 }
         if !track.album.isEmpty, mentions(track.album) { return 0.8 }
         if !words.isDisjoint(with: musicWords) { return 0.6 }

@@ -7,16 +7,39 @@ import Observation
 @MainActor
 @Observable
 public final class NowPlayingCoordinator {
-    public private(set) var track: Track?
-    public private(set) var isPlaying = false
-    public private(set) var albumArtwork: Artwork?
-    public private(set) var fanArt: [Artwork] = []
-    public private(set) var showing: Artwork?
+    public private(set) var track: Track? { didSet { stateChanged() } }
+    public private(set) var isPlaying = false { didSet { stateChanged() } }
+    public private(set) var albumArtwork: Artwork? { didSet { stateChanged() } }
+    public private(set) var fanArt: [Artwork] = [] { didSet { stateChanged() } }
+    public private(set) var showing: Artwork? { didSet { stateChanged() } }
     public private(set) var isSearchingFanArt = false
     public private(set) var status = "Waiting for music"
     /// When true, playback is still tracked but the wallpaper is left alone.
     public var isSuspended = false {
-        didSet { isSuspended ? stopRotation() : resume() }
+        didSet {
+            isSuspended ? stopRotation() : resume()
+            stateChanged()
+        }
+    }
+
+    /// Everything shown to people, in order: the album cover, then the fan art rotation.
+    public var slides: [Artwork] {
+        (albumArtwork.map { [$0] } ?? []) + fanArt
+    }
+
+    /// Called (coalesced, on the main actor) after anything people can see changes; the app uses it
+    /// to refresh the shared widget snapshot.
+    @ObservationIgnored public var onStateChange: (@MainActor () -> Void)?
+    @ObservationIgnored private var stateChangePending = false
+
+    private func stateChanged() {
+        guard onStateChange != nil, !stateChangePending else { return }
+        stateChangePending = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.stateChangePending = false
+            self.onStateChange?()
+        }
     }
 
     public let preferences: Preferences
