@@ -59,6 +59,13 @@ import Testing
         #expect(BraveImageSource.relevance(title: "Run It — Sleepover fan art", pageURL: nil, track: band) == 1)
         #expect(BraveImageSource.relevance(title: "Music Nine Inch Nails Wallpaper", pageURL: nil, track: .sample()) == 0.6)
         #expect(BraveImageSource.relevance(title: "Closer poster", pageURL: nil, track: .sample()) == nil, "must name the artist")
+        let ray = Track.sample("Crush", artist: "Ray Noir", album: "Gothstar EP")
+        #expect(BraveImageSource.relevance(title: "Blu-ray Noir 4K Collection", pageURL: nil, track: ray) == nil, "the name as a phrase, not scattered words")
+        #expect(BraveImageSource.relevance(title: "Noir films on Ray's list", pageURL: nil, track: ray) == nil)
+        #expect(BraveImageSource.relevance(title: "Ray Noir April 2026 promo credit Felix Bartlett", pageURL: nil, track: ray) == 0.5)
+        #expect(BraveImageSource.relevance(title: "Colorful Glasses Singer Pose Wallpaper", pageURL: URL(string: "https://wallpapers.com/kim-petras"), track: .sample(artist: "Kim Petras")) != nil, "named in the page slug")
+        #expect(BraveImageSource.relevance(title: "j-hope Jack In The Box photoshoot", pageURL: nil, track: .sample(artist: "j-hope")) != nil, "hyphenated names still match")
+        #expect(BraveImageSource.relevance(title: "Weeknd After Hours album wallpaper", pageURL: nil, track: .sample(artist: "The Weeknd")) != nil, "leading The is optional")
         let rose = Track.sample("new trick", artist: "ROSÉ", album: "new trick")
         #expect(BraveImageSource.relevance(title: "Rose singer album wallpaper", pageURL: nil, track: rose) == nil, "accents distinguish artists")
         #expect(BraveImageSource.relevance(title: "Rosé new trick fan art", pageURL: nil, track: rose) == 1)
@@ -210,6 +217,64 @@ import Testing
     @Test func uniqueExactNameResolves() throws {
         let response = try JSONDecoder().decode(MusicBrainz.ArtistSearch.self, from: Data(#"{"artists":[{"id":"a","name":"Nine Inch Nails","score":100},{"id":"b","name":"Nine Inch Nails Tribute","score":80}]}"#.utf8))
         #expect(MusicBrainz.resolve(response, name: "Nine Inch Nails") == "a")
+    }
+}
+
+@Suite struct WikimediaCommonsTests {
+    @Test func musicBrainzLinksTheArtistToWikidata() throws {
+        let response = try Fixture.decode(MusicBrainz.ArtistRelations.self, "musicbrainz-urlrels-kim-petras")
+        #expect(MusicBrainz.wikidataID(in: response) == "Q60964")
+    }
+
+    @Test func wikidataNamesTheCommonsCategory() throws {
+        let response = try Fixture.decode(WikimediaCommonsSource.EntityResponse.self, "wikidata-kim-petras")
+        #expect(WikimediaCommonsSource.category(in: response) == "Kim Petras")
+    }
+
+    @Test func realEntitiesWithNonStringValuesStillDecode() throws {
+        // Real items carry hundreds of claims whose values are objects (dates, quantities); the trimmed
+        // fixture hid that the first version of the decoder rejected them.
+        let json = #"{"entities":{"Q60964":{"claims":{"P569":[{"mainsnak":{"datavalue":{"value":{"time":"+1992-08-27T00:00:00Z","precision":11}}}}],"P2002":[{"mainsnak":{"snaktype":"somevalue"}}],"P373":[{"mainsnak":{"datavalue":{"value":"Kim Petras"}}}]}}}}"#
+        let response = try JSONDecoder().decode(WikimediaCommonsSource.EntityResponse.self, from: Data(json.utf8))
+        #expect(WikimediaCommonsSource.category(in: response) == "Kim Petras")
+    }
+
+    @Test func photosAreCreditedWithPhotographerAndLicense() throws {
+        let response = try Fixture.decode(WikimediaCommonsSource.CategoryResponse.self, "commons-kim-petras")
+        let candidates = WikimediaCommonsSource.candidates(from: response, artist: "Kim Petras")
+        #expect(!candidates.isEmpty)
+        for candidate in candidates {
+            #expect(candidate.attribution.sourceName == "Wikimedia Commons")
+            #expect(candidate.attribution.title == "Kim Petras")
+            #expect(candidate.attribution.license?.hasPrefix("CC") == true)
+            #expect(candidate.attribution.pageURL?.host() == "commons.wikimedia.org")
+            #expect(candidate.kindLabel == "Photo")
+            #expect(candidate.creditLine.hasPrefix("Photo · CC"))
+            #expect(!(candidate.attribution.creatorName ?? "").contains("<"), "HTML stripped")
+        }
+    }
+
+    @Test func originalsAreUsedWithTrackingRemoved() throws {
+        let response = try Fixture.decode(WikimediaCommonsSource.CategoryResponse.self, "commons-kim-petras")
+        let candidates = WikimediaCommonsSource.candidates(from: response, artist: "Kim Petras")
+        let tour = try #require(candidates.first { $0.imageURL.lastPathComponent == "Kim_Petras_Aaron_Joseph_Clarity_Tour_2019.jpg" })
+        #expect(tour.width == 3456 && tour.height == 4608, "under 4000 px wide: the original, at its real size")
+        for candidate in candidates {
+            #expect(candidate.imageURL.query() == nil, "no utm_ tracking parameters")
+            #expect(candidate.imageURL.host() == "upload.wikimedia.org")
+        }
+    }
+
+    @Test func hugeOriginalsUseTheStandardRendition() throws {
+        let json = #"{"query":{"pages":[{"title":"File:Big.jpg","imageinfo":[{"url":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Big.jpg?utm_source=x","width":6000,"height":4000,"thumburl":"https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Big.jpg/1920px-Big.jpg?utm_source=x","descriptionurl":"https://commons.wikimedia.org/wiki/File:Big.jpg"}]}]}}"#
+        let response = try JSONDecoder().decode(WikimediaCommonsSource.CategoryResponse.self, from: Data(json.utf8))
+        let big = try #require(WikimediaCommonsSource.candidates(from: response, artist: "A").first)
+        #expect(big.imageURL.absoluteString == "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Big.jpg/1920px-Big.jpg")
+        #expect(big.width == 1920 && big.height == 1280)
+    }
+
+    @Test func artistCreditHTMLBecomesPlainText() {
+        #expect(WikimediaCommonsSource.plainText(#"<a href="//commons.wikimedia.org/wiki/User:Yan">Yan Mayen</a>"#) == "Yan Mayen")
     }
 }
 

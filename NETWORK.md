@@ -2,7 +2,7 @@
 
 Every network request AudioPaper makes: host, trigger, what's sent, and how often. For what this means for your privacy, see [PRIVACY.md](./PRIVACY.md).
 
-All requests go through one client (`URLSessionHTTPClient`, `Packages/AudioPaperKit/Sources/AudioPaperKit/Support/HTTPClient.swift`) using a private, ephemeral session: **no cookies stored or sent, no HTTP disk cache**. Each request carries the User-Agent `AudioPaper/0.1 ( macOS album-art wallpaper app )` and no Referer. Outgoing connections only; AudioPaper opens no listening sockets.
+All requests go through one client (`URLSessionHTTPClient`, `Packages/AudioPaperKit/Sources/AudioPaperKit/Support/HTTPClient.swift`) using a private, ephemeral session: **no cookies stored or sent, no HTTP disk cache**. Each request carries the User-Agent `AudioPaper/0.1 (https://github.com/msitarzewski/AudioPaper; macOS album-art wallpaper app)` (a contact address, as Wikimedia and MusicBrainz ask of API clients) and no Referer. Outgoing connections only; AudioPaper opens no listening sockets.
 
 ## When requests happen
 
@@ -10,8 +10,9 @@ All requests go through one client (`URLSessionHTTPClient`, `Packages/AudioPaper
 |---|---|
 | App launch | Music is asked locally (Apple Events) what's playing. If that song isn't cached, its lookups follow, exactly as for a new song. Nothing else. |
 | A **new album** starts (cover not cached) | Album cover lookup, below |
-| A **new song** starts (fan art not cached) | Artist identity and fan-art lookups, below |
-| Replaying a song or album already cached | **None** |
+| A **new song** starts, and its artist's pool has room | Artist identity and fan-art lookups, below. Each song is searched once, ever. |
+| Replaying a song or album already cached | **None** (the artist's pooled images are shown, least recently seen first) |
+| A song by an artist whose pool is full (24 images) | **None** |
 | A song with nothing found in the last 7 days | **None** |
 | Wallpaper rotation, Mini Player, widgets, Settings | **None**, except DeviantArt artist avatars (below) |
 | Clicking a credit or source link | Opens the page in your browser; AudioPaper makes no request |
@@ -32,12 +33,14 @@ Providers are tried in order; the first confident match wins and later ones aren
 
 ## Artist identity (per new artist)
 
-Needed by fanart.tv and TheAudioDB, which are keyed by MusicBrainz ID. Rate-limited to one request per 1.1 s.
+Needed by fanart.tv, TheAudioDB and Wikimedia Commons, which are keyed by exact identity. Rate-limited to one request per 1.1 s.
 
 | Host | Request | Sends |
 |---|---|---|
 | `musicbrainz.org` | `GET /ws/2/recording?query=recording:"…" AND artist:"…"&limit=10` | song title + artist |
 | `musicbrainz.org` | `GET /ws/2/artist?query=artist:"…"&limit=5` (only if the recording search is inconclusive) | artist |
+| `musicbrainz.org` | `GET /ws/2/artist/{MBID}?inc=url-rels` — the artist's Wikidata link, for Commons | artist ID |
+| `www.wikidata.org` | `GET /wiki/Special:EntityData/{QID}.json` — the artist's Commons category | Wikidata ID |
 
 **1–2 requests per artist, once.** Results are remembered on disk (unresolved names for 7 days), so an artist you've played before costs nothing, even after a relaunch. A collaboration credit ("A & B") is looked up as a whole first, and per artist only if that finds nothing.
 
@@ -49,17 +52,19 @@ The primary sources are asked in parallel. Brave is asked afterwards, only if fe
 |---|---|---|---|
 | `webservice.fanart.tv` | `GET /v3/music/{artist MBID}?api_key=…[&client_key=…]` | artist ID, your fanart.tv key(s) | 1 per artist (remembered until quit) |
 | `www.theaudiodb.com` | `GET /api/v1/json/{key}/artist-mb.php?i={MBID}` (or `search.php?s={artist}` without an ID); spaced 2.1 s | artist ID or name, the key (free public key `123`, or yours) | 1 per artist (remembered until quit) |
+| `commons.wikimedia.org` | `GET /w/api.php?action=query&generator=categorymembers&gcmtitle=Category:{artist}` (files with size, photographer, license); spaced 0.5 s | the artist's Commons category | 1 per artist (remembered until quit) |
 | `www.deviantart.com` | `POST /oauth2/token` (client credentials), then `GET /api/v1/oauth2/browse/popular?q={artist song}` and `browse/tags?tag={artist}` | artist + song; your client ID/secret to the token endpoint only | 2 (+1 token about hourly). Only with your credentials |
-| `api.search.brave.com` | `GET /res/v1/images/search?q=…&count=50&safesearch=strict` with header `X-Subscription-Token` | `"{artist} {song} fan art wallpaper"`, then `"{artist} fan art wallpaper"`; spaced 1.1 s | 0–2. Only with your key, only as a fallback |
+| `api.search.brave.com` | `GET /res/v1/images/search?q=…&count=50&safesearch=strict` with header `X-Subscription-Token` | `"{artist} {song} fan art wallpaper"`, then `"{artist} fan art wallpaper"`, then `"{artist} press photo"` — each only while relevant results are still short; spaced 1.1 s | 0–3. Only with your key, only as a fallback |
 
 ### Image downloads (per new song)
 
-Candidates the sources report as too small are skipped without downloading. The rest are downloaded 4 at a time and checked on your Mac, stopping once 8 pass. Downloaded images are cached, so a later re-search reuses them.
+Candidates the sources report as too small (under 1280×720) are skipped without downloading, as are images already in the artist's pool. The rest are downloaded 4 at a time and checked on your Mac, stopping once 8 pass (or the pool is full). Downloaded images are cached, so a later re-search reuses them.
 
 | Host | When |
 |---|---|
 | `assets.fanart.tv` | fanart.tv images |
 | `r2.theaudiodb.com` | TheAudioDB images |
+| `upload.wikimedia.org`, `thumb.wikimedia.org` | Commons photos: originals up to 4000 px wide, a 1920 px rendition for larger ones; Commons' `utm_*` tracking parameters are removed |
 | DeviantArt's image servers (`images-wixmp-*.wixmp.com`), avatars from `a.deviantart.net` | DeviantArt images and artist avatars |
 | **Any website** | Images found by Brave Search, fetched from the site that hosts them |
 
@@ -74,9 +79,10 @@ When the Mini Player credits a DeviantArt artist, their avatar is fetched from D
 | Situation | Requests |
 |---|---|
 | Replaying something you've heard | **0** |
-| New song, same album and artist as before | fanart.tv/TheAudioDB answered from memory; image downloads for any new candidates (often 0) |
-| New song by a new artist, curated sources only (default) | ~2 identity + 2 art APIs + ~4–10 images |
-| Same, plus Brave as fallback | + up to 2 searches + images from third-party sites |
+| New song by an artist you've played this session | fanart.tv, TheAudioDB and Commons answered from memory; downloads only for images not yet pooled (often 0) |
+| New song by a new artist, curated sources only (default) | ~2 identity + 2 for Commons (Wikidata link + category) + 3 art APIs + ~4–10 images |
+| Same, plus Brave as fallback | + up to 3 searches + images from third-party sites |
+| Artist's pool full (24 images) | **0** |
 | New album | + 2 (Apple search + cover) |
 
 ## Rate limits and quotas
@@ -85,6 +91,7 @@ When the Mini Player credits a DeviantArt artist, their avatar is fetched from D
 |---|---|---|
 | MusicBrainz | 1 request / 1.1 s (shared by all lookups) | 1 / s |
 | TheAudioDB | 1 request / 2.1 s | 30 / min on the free key |
+| Wikimedia (Wikidata, Commons) | 1 request / 0.5 s | "be reasonable"; a contact User-Agent is required |
 | Brave Search | 1 request / 1.1 s | 1 / s and 2,000 / month on the free plan |
 | Others | caching only | — |
 
@@ -92,4 +99,4 @@ When the Mini Player credits a DeviantArt artist, their avatar is fetched from D
 
 - **Watch it live:** macOS's Network privacy report, Little Snitch or LuLu will show exactly these hosts.
 - **Run the pipeline from the terminal:** `swift run apctl fanart "<artist>" "<song>"` (in `Packages/AudioPaperKit`) prints every candidate and verdict for one song, using your `.env` keys.
-- **Read the code:** each host appears in exactly one source file under `Packages/AudioPaperKit/Sources/AudioPaperKit/` (`Artwork/`, `FanArt/`, `Support/MusicBrainz.swift`).
+- **Read the code:** each host appears in exactly one source file under `Packages/AudioPaperKit/Sources/AudioPaperKit/` (`Artwork/`, `FanArt/`, `Support/MusicBrainz.swift`). The per-artist pool is `Cache/ArtistPool.swift`.

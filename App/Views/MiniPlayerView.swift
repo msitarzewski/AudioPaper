@@ -280,20 +280,21 @@ struct AttributionRow: View {
                 .clipShape(.circle)
 
             VStack(alignment: .leading, spacing: 1) {
-                if artwork.candidate.kind == .fanArt, let creator = attribution.creatorName {
+                if let credit = artwork.candidate.creatorCredit {
                     if let profile = attribution.creatorProfileURL {
-                        Link("Art by \(creator)", destination: profile)
+                        Link(credit, destination: profile)
                             .font(.callout.weight(.medium))
                     } else {
-                        Text("Art by \(creator)").font(.callout.weight(.medium))
+                        Text(credit).font(.callout.weight(.medium)).lineLimit(1)
                     }
                 } else {
                     Text(attribution.title ?? "Artwork")
                         .font(.callout.weight(.medium))
                         .lineLimit(1)
                 }
-                Text(artwork.candidate.kind == .albumCover ? "Album cover · \(attribution.sourceName)" : "Fan art · \(attribution.sourceName)")
+                Text(artwork.candidate.creditLine)
                     .font(.caption)
+                    .lineLimit(1)
                     .foregroundStyle(.secondary)
             }
             Spacer()

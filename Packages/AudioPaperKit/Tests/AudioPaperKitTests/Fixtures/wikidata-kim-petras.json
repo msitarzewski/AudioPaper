@@ -1,0 +1,26 @@
+{
+  "entities": {
+    "Q60964": {
+      "claims": {
+        "P18": [
+          {
+            "mainsnak": {
+              "datavalue": {
+                "value": "Kim Petras (42743719761) (a).jpg"
+              }
+            }
+          }
+        ],
+        "P373": [
+          {
+            "mainsnak": {
+              "datavalue": {
+                "value": "Kim Petras"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

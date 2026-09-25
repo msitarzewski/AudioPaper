@@ -1,0 +1,24 @@
+{
+  "id": "54fc0558-12b5-4854-9d57-9441bcd73a72",
+  "name": "Kim Petras",
+  "relations": [
+    {
+      "type": "official homepage",
+      "url": {
+        "resource": "https://kimpetras.com/"
+      }
+    },
+    {
+      "type": "official homepage",
+      "url": {
+        "resource": "http://kimpetrasonline.com/"
+      }
+    },
+    {
+      "type": "wikidata",
+      "url": {
+        "resource": "https://www.wikidata.org/wiki/Q60964"
+      }
+    }
+  ]
+}

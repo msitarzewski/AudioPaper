@@ -56,10 +56,25 @@ public actor ArtworkCache {
         return present.count == artworks.count ? present : nil
     }
 
-    /// When the list for `key` was last stored, so an empty result can be trusted for a while.
-    public func storedDate(forKey key: String) -> Date? {
-        let file = indexDir.appending(path: Self.hash(key) + ".json")
-        return try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
+    /// The artist's fan-art pool, minus any images the cache has since evicted.
+    public func pool(forKey key: String) -> ArtistPool {
+        let file = indexDir.appending(path: Self.hash(key) + ".pool.json")
+        guard let data = try? Data(contentsOf: file), var pool = try? JSONDecoder().decode(ArtistPool.self, from: data) else {
+            return ArtistPool()
+        }
+        pool.removeMissingFiles()
+        return pool
+    }
+
+    /// Reads, changes and writes a pool in one step, so concurrent updates (a search adding images while
+    /// the rotation records what was shown) can't overwrite each other.
+    @discardableResult
+    public func updatePool(forKey key: String, _ change: @Sendable (inout ArtistPool) -> Void) throws -> ArtistPool {
+        var pool = pool(forKey: key)
+        change(&pool)
+        try FileManager.default.createDirectory(at: indexDir, withIntermediateDirectories: true)
+        try JSONEncoder().encode(pool).write(to: indexDir.appending(path: Self.hash(key) + ".pool.json"), options: .atomic)
+        return pool
     }
 
     public func store(_ artworks: [Artwork], forKey key: String) throws {

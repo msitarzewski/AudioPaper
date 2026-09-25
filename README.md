@@ -16,7 +16,9 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 
 1. **Hears the track change.** Apple Music posts a system notification on every change, so there's no polling and no special permission. On launch, AudioPaper asks Music once what's already playing.
 2. **Shows the album cover.** It's looked up online, at up to 3000×3000, from the Apple Music catalog, then MusicBrainz / Cover Art Archive, and finally the artwork Music itself has. The cover sits centered over a blurred, colour-matched wash of itself.
-3. **Cross-fades in fan art and artist photos.** It asks fanart.tv (fan-made 1080p and 4K artist backgrounds), TheAudioDB (curated artist backgrounds, no key needed) and DeviantArt first. Brave Image Search fills in only when fewer than three images pass the filters, which saves its quota for artists the others don't cover.
+3. **Cross-fades in fan art and artist photos.** It asks fanart.tv (fan-made 1080p and 4K artist backgrounds), TheAudioDB (curated artist backgrounds, no key needed), Wikimedia Commons (freely licensed photos, credited to the photographer) and DeviantArt first. Brave Image Search fills in only when fewer than three images pass the filters, which saves its quota for artists the others don't cover.
+
+   Each artist builds a pool of up to 24 images as you play their songs (each song is searched once), and every play shows the ones you've seen least recently, so favourites stay fresh without extra network use.
 
    Artists are identified through MusicBrainz using the song itself, so namesakes aren't confused (ROSÉ of BLACKPINK is not Rose, the French singer), and art is fetched by that ID rather than by name. Collaborations ("LE SSERAFIM & j-hope", "feat.") get art of each credited artist.
 
@@ -102,6 +104,7 @@ AudioPaper uses these services. Each image shown in the app credits its source a
 | [MusicBrainz](https://musicbrainz.org) + [Cover Art Archive](https://coverartarchive.org) | Album covers when Apple's catalog doesn't know the release; artist identity (by song) for fanart.tv and TheAudioDB | None |
 | Music app | Last-resort cover for the track that's playing | None |
 | [fanart.tv](https://fanart.tv) | Fan-made artist backgrounds (1920×1080 and 4K), by MusicBrainz ID | A project key, plus your optional personal key |
+| [Wikimedia Commons](https://commons.wikimedia.org) (via [Wikidata](https://www.wikidata.org)) | Freely licensed artist photos, credited with photographer and license | None |
 | [TheAudioDB](https://www.theaudiodb.com) | Artist backgrounds (fan art and photos, 1280×720) | Free public key built in; optional personal key |
 | [DeviantArt API](https://www.deviantart.com/developers/) | Fan art, with artist profile links | Your own app credentials |
 | [Brave Search API](https://brave.com/search/api/) | Fan art and artist photos when the sources above come up short | Your own key (the free tier is 2,000 queries/month; AudioPaper caches results and spaces requests to stay within it) |
@@ -136,7 +139,7 @@ The interface follows Apple's Human Interface Guidelines for macOS: a menu (not 
 ## Roadmap
 
 - More players: Spotify first (it posts the same kind of change notification Music does)
-- More art sources: Wikimedia Commons, Deezer
+- More art sources: Deezer
 - A paid TheAudioDB key would be needed before any Mac App Store release (their free key excludes app stores)
 - Smarter logo detection (stylized band logos can slip past text recognition)
 

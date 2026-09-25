@@ -13,11 +13,13 @@ Designs (masters in Sources/<design>/):
   display  GlassPowerTools' display (same bezel and screen geometry) with the note on its screen
 
 Colour roles (GlassPowerTools convention), as vector linear gradients (top → bottom):
-  primary   (lens glass, shutter; screen)  the accent, lit → deep, in both appearances
-  secondary (camera body; bezel, stand)    silver in light, white → pale grey in dark
+  primary   (lens glass, shutter; screen)  the accent, lit top-left → deep bottom-right, both appearances
+  secondary (camera body; bezel, stand)    silver in both appearances
+  inset     (display: screen rim)          a shadow line, deepest along the top (no glass)
   barrel    (lens ring)                    a deeper neutral in both, so it reads against the body
   glyph     (music note)                   solid white in both, always on the primary
 """
+import colorsys
 import json
 import shutil
 import subprocess
@@ -39,8 +41,13 @@ PALETTES = {
 }
 WHITE = (1.0, 1.0, 1.0)
 # Neutral gradients, top → bottom, as (light appearance, dark appearance). Vector fills, so the system's
-# Liquid Glass stays live on top; no shading is baked into the artwork.
-SECONDARY = (((0.80, 0.80, 0.82), (0.52, 0.52, 0.54)), ((1.0, 1.0, 1.0), (0.80, 0.80, 0.83)))
+# Liquid Glass stays live on top; no shading is baked into the artwork. Silver in both appearances, as
+# GlassPowerTools' shipped display is (flat white in dark mode read as unlit).
+SECONDARY = (((0.93, 0.93, 0.95), (0.68, 0.68, 0.71)), ((0.92, 0.92, 0.94), (0.64, 0.64, 0.68)))
+# The screen's inset rim: a shadow, deepest along the top edge (black with alpha).
+INSET = (((0, 0, 0, 0.55), (0, 0, 0, 0.18)),) * 2
+# The primary accent is lit from the top-left, like a real screen (Icon Composer gradient orientation).
+DIAGONAL = {"start": {"x": 0, "y": 0}, "stop": {"x": 1, "y": 1}}
 # The lens barrel sits on the body; a deeper neutral keeps it legible against it.
 BARREL = (((0.62, 0.62, 0.65), (0.32, 0.32, 0.35)), ((0.84, 0.85, 0.87), (0.58, 0.59, 0.62)))
 
@@ -56,7 +63,7 @@ DESIGNS = {
     # Mirrors GlassPowerTools' layer stack: glyph, bezel (a true frame), screen, then the base.
     "display": [
         ("Note", 0.10, [("Note", "glyph")]),
-        ("Bezel", 0.22, [("Bezel", "secondary")]),
+        ("Bezel", 0.22, [("Inset", "inset"), ("Bezel", "secondary")]),
         ("Screen", 0.12, [("Screen", "primary")]),
         ("Stand", 0.22, [("Stand", "secondary")]),
     ],
@@ -70,33 +77,44 @@ DESIGN_SCALE = {"camera": 1.0, "display": 1.12}
 APPEARANCES = ["Default", "Dark", "ClearLight", "ClearDark", "TintedDark"]
 
 
-def srgb(rgb):
-    return "srgb:" + ",".join(f"{v:.5f}" for v in (*rgb, 1))
+def srgb(color):
+    """An Icon Composer colour from (r, g, b) or (r, g, b, alpha)."""
+    rgba = color if len(color) == 4 else (*color, 1)
+    return "srgb:" + ",".join(f"{v:.5f}" for v in rgba)
 
 
-def shade(rgb, factor):
-    """Lighten (factor > 1, toward white) or darken (factor < 1) a colour."""
-    if factor >= 1:
-        return tuple(c + (1 - c) * (factor - 1) for c in rgb)
-    return tuple(c * factor for c in rgb)
+def lit(rgb):
+    """The accent at full brightness, slightly less saturated — brighter without washing toward pink."""
+    h, s, v = colorsys.rgb_to_hsv(*rgb)
+    return colorsys.hsv_to_rgb(h, s * 0.9, min(1.0, v * 1.12))
 
 
-def fill(value):
+def deep(rgb):
+    h, s, v = colorsys.rgb_to_hsv(*rgb)
+    return colorsys.hsv_to_rgb(h, min(1.0, s * 1.05), v * 0.62)
+
+
+def fill(value, orientation=None):
     if isinstance(value[0], tuple):
-        return {"linear-gradient": [srgb(value[0]), srgb(value[1])]}
+        gradient = {"linear-gradient": [srgb(value[0]), srgb(value[1])]}
+        if orientation:
+            gradient["orientation"] = orientation
+        return gradient
     return {"solid": srgb(value)}
 
 
 def fills(role, accent):
     """Per-appearance fill: a colour (solid) or a (top, bottom) pair (linear gradient)."""
     light, dark = {
-        # The accent keeps its hue in both appearances, shading from a lit top to a deep base.
-        "primary": ((shade(accent, 1.28), shade(accent, 0.66)),) * 2,
+        # The accent keeps its hue in both appearances, lit at the top-left and deep at the bottom-right.
+        "primary": ((lit(accent), deep(accent)),) * 2,
         "secondary": SECONDARY,
         "barrel": BARREL,
+        "inset": INSET,
         "glyph": (WHITE, WHITE),
     }[role]
-    return [{"value": fill(light)}, {"appearance": "dark", "value": fill(dark)}]
+    orientation = DIAGONAL if role == "primary" else None
+    return [{"value": fill(light, orientation)}, {"appearance": "dark", "value": fill(dark, orientation)}]
 
 
 def scaled_svg(source: Path, design: str) -> str:
@@ -122,7 +140,8 @@ def build(design, name, accent):
         entries = []
         for layer, role in layers:
             (icon / "Assets" / f"{layer}.svg").write_text(scaled_svg(SOURCES / design / f"{layer}.svg", design))
-            entries.append({"name": layer, "image-name": f"{layer}.svg", "glass": True,
+            # The inset is a shadow line, not a glass object, so it gets no glass treatment of its own.
+            entries.append({"name": layer, "image-name": f"{layer}.svg", "glass": role != "inset",
                             "fill-specializations": fills(role, accent)})
         groups.append({
             "name": group,

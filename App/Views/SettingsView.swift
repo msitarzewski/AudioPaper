@@ -142,6 +142,9 @@ private struct SourceSettings: View {
                         Text(source.displayName)
                         if !source.isConfigured {
                             Text("Add credentials in Accounts to use this source.")
+                        } else if source.isFallback {
+                            // Makes "curated only" a clear choice: switch this off.
+                            Text("Searches the open web, only when the sources above find too little.")
                         }
                     }
                     .disabled(!source.isConfigured)

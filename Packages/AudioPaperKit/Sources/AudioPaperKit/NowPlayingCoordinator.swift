@@ -53,6 +53,8 @@ public final class NowPlayingCoordinator {
     @ObservationIgnored private let debounce: Duration
 
     @ObservationIgnored private var albumKey: String?
+    /// The pool the current song's fan art belongs to, so shown images can be recorded.
+    @ObservationIgnored private var poolKey: String?
     @ObservationIgnored private var eventsTask: Task<Void, Never>?
     @ObservationIgnored private var trackTask: Task<Void, Never>?
     @ObservationIgnored private var rotationTask: Task<Void, Never>?
@@ -222,17 +224,23 @@ public final class NowPlayingCoordinator {
         }
     }
 
+    /// Images shown per play of a song; the artist's pool can hold more (`ArtistPool.capacity`).
+    public static let imagesPerPlay = 8
+
+    static func poolKey(for track: Track) -> String {
+        "pool:v\(FanArtPipeline.version):" + MusicBrainz.identityKey(track.artist)
+    }
+
+    /// Shows this play's selection from the artist's pool at once, then — only if this song hasn't been
+    /// searched yet and the pool has room — searches, adding new finds to the rotation and the pool.
     private func loadFanArt(for track: Track) async {
-        let key = "fanart:v\(FanArtPipeline.version):" + track.songKey
-        if let cached = await cache.artworks(forKey: key) {
-            if let first = cached.first {
-                fanArt = cached
-                present(first, animated: true)
-                return
-            }
-            // "Nothing found" is remembered for a week so obscure songs don't spend search quota on every play.
-            if let searched = await cache.storedDate(forKey: key), searched.timeIntervalSinceNow > -7 * 24 * 3600 { return }
-        }
+        let key = Self.poolKey(for: track)
+        poolKey = key
+        let pool = await cache.pool(forKey: key)
+        fanArt = pool.selection(count: Self.imagesPerPlay)
+        if let first = fanArt.first { present(first, animated: true) }
+        guard pool.shouldSearch(song: track.songKey) else { return }
+
         let enabled = fanArtSources.filter { !preferences.disabledFanArtSources.contains($0.id) }
         // `isConfigured` reads the Keychain, which can block on an access prompt; keep it off the main thread.
         let sources = await Task.detached { enabled.filter(\.isConfigured) }.value
@@ -240,19 +248,28 @@ public final class NowPlayingCoordinator {
 
         isSearchingFanArt = true
         defer { isSearchingFanArt = false }
-        // Skip the album cover and whatever is on screen, so the first fan art is a visible change.
-        let exclude = [albumArtwork, showing].compactMap { $0 }.compactMap { ImageLoading.image(at: $0.fileURL, maxPixelSize: 1024) }
-        let pipeline = FanArtPipeline(sources: sources, cache: cache)
-        for await event in pipeline.run(for: track, excluding: exclude) {
+        // Nothing that looks like the album cover, what's on screen, or an image already pooled.
+        let lookalikes = ([albumArtwork, showing].compactMap { $0 } + pool.artworks)
+            .compactMap { ImageLoading.image(at: $0.fileURL, maxPixelSize: 512) }
+        var pipeline = FanArtPipeline(sources: sources, cache: cache)
+        pipeline.maxAccepted = min(Self.imagesPerPlay, pool.room)
+        var found: [Artwork] = []
+        for await event in pipeline.run(for: track, excluding: lookalikes, known: Set(pool.artworks.map(\.candidate.imageURL))) {
             guard !Task.isCancelled else { return }
             if case let .accepted(artwork) = event {
+                found.append(artwork)
                 fanArt.append(artwork)
                 if fanArt.count == 1 { present(artwork, animated: true) }
             }
         }
-        // The first image went up as soon as it passed; the rest of the rotation runs best-first.
-        fanArt.sort { ($0.qualityScore ?? -.infinity) > ($1.qualityScore ?? -.infinity) }
-        try? await cache.store(fanArt, forKey: key)
+        // New finds join the rotation after this play's selection, best first.
+        let selected = fanArt.count - found.count
+        fanArt = Array(fanArt.prefix(selected)) + fanArt.dropFirst(selected).sorted { ($0.qualityScore ?? -.infinity) > ($1.qualityScore ?? -.infinity) }
+        let finds = found
+        try? await cache.updatePool(forKey: key) { pool in
+            pool.add(finds)
+            pool.recordSearch(song: track.songKey, found: finds.count)
+        }
         await pruneCache()
     }
 
@@ -282,8 +299,16 @@ public final class NowPlayingCoordinator {
             guard generation == self.presentationGeneration else { return }
             await self.display.show(files, animated: animated && self.showing != nil)
             self.showing = artwork
+            self.recordShown(artwork)
             composer.prune(keeping: Set(files.values))
         }
+    }
+
+    /// Notes when a pooled image was last on screen, so the next play favours others.
+    private func recordShown(_ artwork: Artwork) {
+        guard artwork.candidate.kind == .fanArt, let key = poolKey else { return }
+        let cache = self.cache
+        Task { try? await cache.updatePool(forKey: key) { $0.markShown(artwork.id) } }
     }
 
     private func nextInRotation() -> Artwork? {

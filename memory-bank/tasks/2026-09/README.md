@@ -26,6 +26,9 @@
 ### 2026-09-25: Collaboration credits
 - "LE SSERAFIM & j-hope" found no fan art (no artist by that combined name). The pipeline now falls back to each credited artist when the full credit finds nothing; MusicBrainz recording matches accept any credited artist; pipeline version 3 re-searches cached songs. SPAGHETTI: 0 → 8 images (both artists).
 
+### 2026-09-25: Artist pool, Wikimedia Commons, smarter web search
+- Per-artist pool (≤24, each song searched once, least-recently-seen rotation); Commons via MusicBrainz → Wikidata → category with "Photo by … · license" credits (Kim Petras: 7 Commons photos, no Brave needed); Brave relevance now matches the artist as a phrase ("Blu-ray Noir" ≠ "Ray Noir") with a "press photo" follow-up query; Brave relabelled as web-search fallback. Bugs caught on the way: Wikidata values aren't all strings (trimmed fixture hid it), Commons renditions only at standard widths, Swift Regex lacks look-behind. Docs: README, PRIVACY, NETWORK.
+
 ### 2026-09-25: Size rules and web credits
 - Kim Petras had 2 images: curated sources had one (logo) image each, and Brave's 1280×720 and portrait results were rejected by a stricter web-only floor and a landscape-only shape limit. Now one 1280×720 floor for all sources and portrait allowed (fit framing handles it): 8 images, all verified to be her. Brave credits name the matched artist + site instead of SEO page titles. Pipeline version 4. Possible follow-up: crop letterbox bars from video stills.
 

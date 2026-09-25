@@ -18,17 +18,18 @@ AudioPaper changes your wallpaper to match the music you're playing. To do that,
 | **Internet Archive** (Cover Art Archive) | Which cover is fetched | Hosts MusicBrainz's covers |
 | **fanart.tv** | Which artist (by ID) | Artist backgrounds |
 | **TheAudioDB** | Which artist (by ID, or by name if there's no ID) | Artist backgrounds |
+| **Wikimedia** (Wikidata, Commons) | Which artist (by ID) | Freely licensed artist photos |
 | **DeviantArt** (only with your credentials) | Each new song (artist + title) | Fan art |
 | **Brave Search** (only with your key, and only as a fallback) | Each new song it's used for ("artist song fan art wallpaper") | Fan art when the sources above find too little |
 | **Websites Brave points to** | Your IP address, when one of their images is downloaded | They host the image; they don't learn what you're listening to |
 
-**In practice, MusicBrainz sees the most:** roughly a list of the new songs you play, because that's how AudioPaper tells artists with the same name apart (ROSÉ of BLACKPINK is not Rose, the French singer). Apple sees new albums. The others see artists, or, if you've enabled them, song searches.
+**In practice, MusicBrainz sees the most:** roughly a list of the new songs you play, because that's how AudioPaper tells artists with the same name apart (ROSÉ of BLACKPINK is not Rose, the French singer). Apple sees new albums. The others see artists, or, if you've enabled them, song searches. Each song is searched only once, ever.
 
-Every request identifies itself with the User-Agent `AudioPaper/0.1 ( macOS album-art wallpaper app )`. It includes no account, device ID or tracking identifier.
+Every request identifies itself with the User-Agent `AudioPaper/0.1 (https://github.com/msitarzewski/AudioPaper; macOS album-art wallpaper app)` — the project's address, which Wikimedia and MusicBrainz ask API clients to include. It includes no account, device ID or tracking identifier, and the tracking parameters Wikimedia adds to its image links are removed.
 
 ## What AudioPaper does to keep this small
 
-- **Caching.** Album covers and each song's results are kept on disk, so replays make no requests. If nothing is found for a song, that's remembered for a week. Artist identities are remembered too, so artists you've played before don't need looking up again.
+- **Caching.** Album covers and each artist's images are kept on disk: every song is searched once, and replays make no requests. Each artist builds a pool of up to 24 images, and every play shows the ones you've seen least recently, so repeat plays stay fresh without going back online. If nothing is found for a song, that's remembered for a week. Artist identities are remembered too, so artists you've played before don't need looking up again.
 - **Fallback only.** Brave, the one service that searches the open web, is asked only when the curated sources return fewer than three usable images.
 - **No cookies, no web cache.** Every request goes through a private network session that never stores or sends cookies and writes nothing to an HTTP cache. Image sites can't leave anything behind or recognise a returning visitor by cookie.
 - **Rate limits.** Requests to each service are spaced out (1–2 seconds apart), and each service gets at most a handful of calls per song.
@@ -40,7 +41,7 @@ All of it stays inside AudioPaper's sandbox container (`~/Library/Containers/com
 
 | What | Where | How long |
 |---|---|---|
-| Downloaded artwork and search results | Caches | Up to the limit you set (500 MB by default), least recently used first; **Settings → General → Clear Cache…** removes it |
+| Downloaded artwork, each artist's image pool (with when each image was last shown) and which songs were searched | Caches | Up to the limit you set (500 MB by default), least recently used first; **Settings → General → Clear Cache…** removes it |
 | Remembered artist identities | Caches (with the search results) | Until you clear the cache; unresolved names expire after a week |
 | Rendered wallpapers | Application Support | Only the current ones are kept |
 | Your original wallpaper's location | Preferences | Until you restore it |

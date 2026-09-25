@@ -10,6 +10,8 @@ public struct Attribution: Hashable, Sendable, Codable {
     public var pageURL: URL?
     /// Human-readable origin, e.g. "DeviantArt", "etsy.com", "Apple Music".
     public var sourceName: String
+    /// License, when the source states one (e.g. "CC BY-SA 4.0"); shown in the credit.
+    public var license: String?
 
     public init(
         title: String? = nil,
@@ -17,7 +19,8 @@ public struct Attribution: Hashable, Sendable, Codable {
         creatorProfileURL: URL? = nil,
         creatorAvatarURL: URL? = nil,
         pageURL: URL? = nil,
-        sourceName: String
+        sourceName: String,
+        license: String? = nil
     ) {
         self.title = title
         self.creatorName = creatorName
@@ -25,12 +28,39 @@ public struct Attribution: Hashable, Sendable, Codable {
         self.creatorAvatarURL = creatorAvatarURL
         self.pageURL = pageURL
         self.sourceName = sourceName
+        self.license = license
     }
 }
 
 public enum ArtworkKind: String, Hashable, Sendable, Codable {
     case albumCover
     case fanArt
+}
+
+extension ArtworkCandidate {
+    /// What the image is, for credits: "Album cover", "Photo" (Wikimedia Commons) or "Fan art".
+    public var kindLabel: String {
+        switch kind {
+        case .albumCover: "Album cover"
+        case .fanArt: providerID == "wikimedia" ? "Photo" : "Fan art"
+        }
+    }
+
+    /// The credit's second line: kind, license and source, e.g. "Photo · CC BY-SA 4.0 · Wikimedia Commons".
+    public var creditLine: String {
+        [kindLabel, attribution.license, attribution.sourceName].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    /// Who made it — "Photo by Yan Mayen", "Art by example-artist" — or nil when unknown (and for covers).
+    public var creatorCredit: String? {
+        guard kind == .fanArt, let creator = attribution.creatorName else { return nil }
+        return "\(kindLabel == "Photo" ? "Photo" : "Art") by \(creator)"
+    }
+
+    /// One line for tight spaces (widgets): the maker plus license or source, else `creditLine`.
+    public var shortCredit: String {
+        creatorCredit.map { "\($0) · \(attribution.license ?? attribution.sourceName)" } ?? creditLine
+    }
 }
 
 /// A remote image that may become a wallpaper.

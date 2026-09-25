@@ -25,6 +25,7 @@ final class AppModel {
             fanArtSources: [
                 FanartTVSource(secrets: secrets),
                 TheAudioDBSource(secrets: secrets),
+                WikimediaCommonsSource(),
                 DeviantArtSource(secrets: secrets),
                 BraveImageSource(secrets: secrets),
             ],

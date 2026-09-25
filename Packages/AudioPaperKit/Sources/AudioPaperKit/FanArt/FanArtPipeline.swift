@@ -7,7 +7,7 @@ import Vision
 /// Order of work is cheapest first: reported size → download → decode → Vision filters → duplicate check.
 public struct FanArtPipeline: Sendable {
     /// Bump when sources, filters or thresholds change, so cached per-song results are searched again.
-    public static let version = 4
+    public static let version = 5
 
     public enum Event: Sendable {
         case accepted(Artwork)
@@ -39,30 +39,33 @@ public struct FanArtPipeline: Sendable {
         self.cache = cache
     }
 
-    /// - Parameter excluding: images that must not reappear (the album cover, art shown for the previous song).
-    public func run(for track: Track, excluding: [CGImage] = []) -> AsyncStream<Event> {
+    /// - Parameters:
+    ///   - excluding: images that must not reappear, compared by look (the album cover, what's on screen,
+    ///     the artist's pooled images).
+    ///   - known: image URLs already pooled; skipped without downloading.
+    public func run(for track: Track, excluding: [CGImage] = [], known: Set<URL> = []) -> AsyncStream<Event> {
         AsyncStream { continuation in
             let task = Task {
-                await execute(track: track, excluding: excluding, continuation: continuation)
+                await execute(track: track, excluding: excluding, known: known, continuation: continuation)
                 continuation.finish()
             }
             continuation.onTermination = { _ in task.cancel() }
         }
     }
 
-    private func execute(track: Track, excluding: [CGImage], continuation: AsyncStream<Event>.Continuation) async {
+    private func execute(track: Track, excluding: [CGImage], known: Set<URL>, continuation: AsyncStream<Event>.Continuation) async {
         var accepted = AcceptedSet()
         for image in excluding {
             if let print = try? await Self.featurePrint(image) { accepted.prints.append(print) }
         }
         let configured = sources.filter(\.isConfigured)
 
-        let primary = await gatherCrediting(from: configured.filter { !$0.isFallback }, for: track)
+        let primary = await gatherCrediting(from: configured.filter { !$0.isFallback }, for: track).filter { !known.contains($0.imageURL) }
         await process(primary, into: &accepted, continuation: continuation)
 
         // Metered fallbacks fill in only when too few images *passed* the filters (not merely were found).
         guard !Task.isCancelled, accepted.count < fallbackThreshold else { return }
-        let seen = Set(primary.map(\.imageURL))
+        let seen = known.union(primary.map(\.imageURL))
         let fallback = await gatherCrediting(from: configured.filter(\.isFallback), for: track).filter { !seen.contains($0.imageURL) }
         await process(fallback, into: &accepted, continuation: continuation)
     }

@@ -3,7 +3,7 @@ import Foundation
 /// Fan art from the Brave Search image API (`X-Subscription-Token`), safe search forced to strict.
 public struct BraveImageSource: FanArtSource {
     public let id = "brave"
-    public let displayName = "Brave Image Search"
+    public let displayName = "Web search (Brave)"
 
     /// Sites whose images are almost always merch mockups, thumbnails, or lyric cards.
     /// Matched against both the image host and the page it was found on.
@@ -48,7 +48,10 @@ public struct BraveImageSource: FanArtSource {
         let artist = Normalizer.searchTerm(track.artist)
         let song = Normalizer.searchTerm(track.title)
         // "wallpaper" steers results toward desktop-sized images; the artist-wide query widens the pool.
-        let queries = ["\(artist) \(song) fan art wallpaper", "\(artist) fan art wallpaper"]
+        // For artists without fan art, "fan art wallpaper" drifts to namesakes (Ray Noir → the cartoon
+        // Chat Noir), so "{artist} press photo" follows when relevant results are still short: it finds
+        // large promo shots. ("4k" was tried and found film-noir Blu-ray listings.)
+        let queries = ["\(artist) \(song) fan art wallpaper", "\(artist) fan art wallpaper", "\(artist) press photo"]
         var results: [ArtworkCandidate] = []
         for (index, query) in queries.enumerated() {
             let url = URL.api("https://api.search.brave.com/res/v1/images/search", [
@@ -66,10 +69,10 @@ public struct BraveImageSource: FanArtSource {
                 log.error("Brave query failed: \(error.localizedDescription, privacy: .public)")
                 break
             }
-            // Song-specific results rank ahead of artist-wide ones.
+            // Song-specific results rank ahead of artist-wide ones, fan art ahead of photos.
             results += Self.candidates(from: response, for: track).map { candidate in
                 var candidate = candidate
-                candidate.matchScore *= index == 0 ? 1 : 0.8
+                candidate.matchScore *= [1, 0.8, 0.6][index]
                 return candidate
             }
             if results.count >= limit { break }
@@ -91,16 +94,23 @@ public struct BraveImageSource: FanArtSource {
     /// Single-word artist names are often ordinary words ("Sleepover", "Cake"), so for those naming the artist
     /// isn't enough: the result must also mention the song, the album, or something musical.
     static func relevance(title: String?, pageURL: URL?, track: Track) -> Double? {
-        let slug = (pageURL?.path(percentEncoded: false) ?? "").replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
-        let words = Set(Normalizer.key("\(title ?? "") \(slug)").split(separator: " ").map(String.init))
+        let titleText = phraseText(title ?? "")
+        let slugText = phraseText((pageURL?.path(percentEncoded: false) ?? "").replacing(/[-_\/]/, with: " "))
+        let words = Set("\(titleText) \(slugText)".split(whereSeparator: { $0 == " " || $0 == "-" }).map(String.init))
+        /// The name as a whole phrase, not scattered words: "Blu-ray Noir" must not count as "Ray Noir".
+        /// In titles a hyphen binds words ("blu-ray"); in page slugs hyphens separate them.
         func mentions(_ name: String) -> Bool {
-            let tokens = Normalizer.key(name).split(separator: " ").map(String.init)
-            return !tokens.isEmpty && tokens.allSatisfy(words.contains)
+            let phrase = phraseText(Normalizer.searchTerm(name))
+            guard !phrase.isEmpty else { return false }
+            let variants = phrase.hasPrefix("the ") ? [phrase, String(phrase.dropFirst(4))] : [phrase]
+            return variants.contains { variant in
+                containsPhrase(variant, in: titleText) || containsPhrase(variant.replacingOccurrences(of: "-", with: " "), in: slugText)
+            }
         }
         guard mentions(track.artist) else { return nil }
         // Accents distinguish artists ("ROSÉ" vs "Rose"): when the name has them, the result must too.
         if track.artist.unicodeScalars.contains(where: { !$0.isASCII }),
-           !"\(title ?? "") \(slug)".lowercased().contains(Normalizer.searchTerm(track.artist).lowercased()) {
+           !"\(title ?? "") \(pageURL?.path(percentEncoded: false) ?? "")".lowercased().contains(Normalizer.searchTerm(track.artist).lowercased()) {
             return nil
         }
         if !track.title.isEmpty, mentions(track.title) { return 1 }
@@ -109,6 +119,23 @@ public struct BraveImageSource: FanArtSource {
         // A multi-word name ("Nine Inch Nails") is specific enough on its own; a single word is not.
         if Normalizer.key(track.artist).split(separator: " ").count >= 2 { return 0.5 }
         return nil
+    }
+
+    /// Case- and accent-folded text with "&" as "and" and punctuation as spaces, keeping hyphens.
+    static func phraseText(_ string: String) -> String {
+        let folded = string.decodingHTMLEntities()
+            .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .replacingOccurrences(of: "&", with: " and ")
+        let spaced = String(folded.unicodeScalars.map { CharacterSet.alphanumerics.contains($0) || $0 == "-" ? Character($0) : " " })
+        return spaced.split(separator: " ").joined(separator: " ")
+    }
+
+    /// Whether `phrase` appears in `text` as whole words (letters, digits and hyphens bind a word).
+    /// NSRegularExpression, because Swift's `Regex` has no look-behind.
+    static func containsPhrase(_ phrase: String, in text: String) -> Bool {
+        let pattern = "(?<![\\p{L}\\p{N}-])" + NSRegularExpression.escapedPattern(for: phrase) + "(?![\\p{L}\\p{N}-])"
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return false }
+        return regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil
     }
 
     static func candidates(from response: Response, for track: Track) -> [ArtworkCandidate] {

@@ -10,6 +10,9 @@
 - Album cover first, then a cross-fade rotation like a Photos-folder wallpaper. Automatic framing (fit when fill would crop >15%).
 - App icon: the display design (GlassPowerTools' display with the Heroicons note on a red screen), enlarged 112%; replaced the camera, which "seemed out of place". Menu bar icon matches. Other palettes (cobalt, emerald, violet, amber) are built as alternates.
 - Cache: re-searches reuse downloaded images; people control the size limit and can clear it in Settings.
+- Per-artist pool of up to 24 images (each song searched once; each play shows the least recently seen 8) — "we can't have a zillion".
+- Wikimedia Commons added as a primary source; Brave labelled "Web search (Brave)" with a note that it only fills gaps (turning it off = curated only; no separate "curated" toggle, per HIG's fewer-settings guidance).
+- DuckDuckGo: declined twice (no official API).
 - No DuckDuckGo (no official image API). No generative outpainting (no public Apple API).
 - Widgets follow the system widget style: grayscale while the desktop isn't focused (confirmed by the user), full colour otherwise. A click opens the Mini Player.
 - Commits and pushes only when the user asks (their global rule).

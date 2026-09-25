@@ -9,7 +9,7 @@ and GlassPowerTools' `App/GlassPowerTools.icon` history).
 
 | Design | Masters | Layers (top → bottom; Icon Composer allows four groups) |
 |---|---|---|
-| `display` (shipped) | `Sources/display/` | Note · Bezel (screen aperture knocked out, a true frame) · Screen · Stand |
+| `display` (shipped) | `Sources/display/` | Note · Bezel (Inset rim + bezel, screen aperture knocked out, a true frame) · Screen · Stand |
 | `camera` (earlier) | `Sources/camera/` | Note · Lens (barrel ring) · Accent (glass + shutter) · Body (flash window knocked out) |
 
 Each SVG is one white mask for one layer. The display's note is the solid "musical-note" from
@@ -22,10 +22,15 @@ so the system's Liquid Glass, lighting and appearances stay live:
 
 | Role | Display | Camera | Light | Dark |
 |---|---|---|---|---|
-| Primary | screen | lens glass, shutter | accent, lit → deep | same |
-| Secondary | bezel, stand | body | silver | white → pale grey |
+| Primary | screen | lens glass, shutter | accent, lit top-left → deep bottom-right (a diagonal gradient `orientation`) | same |
+| Secondary | bezel, stand | body | silver | silver |
+| Inset | screen rim | — | black 55% → 18% alpha, no glass | same |
 | Barrel | — | lens ring | deeper grey | light grey |
 | Glyph | note | note | white | white |
+
+The inset rim, diagonal lighting and silver-in-both-appearances match GlassPowerTools' rendered display
+(its screen reads as recessed into the bezel) while staying vector, so the system's glass stays live.
+"Lit" raises the accent's brightness (HSV) rather than mixing toward white, which had turned red pink.
 
 Palettes: red (shipped; GlassPowerTools' screen red), cobalt (family alternate), emerald, violet, amber.
 

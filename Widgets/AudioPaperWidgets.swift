@@ -239,10 +239,7 @@ struct Credit: View {
     }
 
     private func line(for item: WidgetSnapshot.Image) -> String {
-        switch item.kind {
-        case .albumCover: "Album cover · \(item.sourceName)"
-        case .fanArt: item.creatorName.map { "Art by \($0) · \(item.sourceName)" } ?? "Fan art · \(item.sourceName)"
-        }
+        item.credit
     }
 }
 

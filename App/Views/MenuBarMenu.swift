@@ -39,8 +39,12 @@ struct MenuBarMenu: View {
         }
         if let showing = coordinator.showing {
             let attribution = showing.candidate.attribution
-            if let profile = attribution.creatorProfileURL, let creator = attribution.creatorName {
-                Button("Art by \(creator)") { openURL(profile) }
+            if let credit = showing.candidate.creatorCredit {
+                if let profile = attribution.creatorProfileURL {
+                    Button(credit) { openURL(profile) }
+                } else {
+                    Text(credit)
+                }
             }
             if let page = attribution.pageURL {
                 Button(showing.candidate.kind == .albumCover ? "View Album on \(attribution.sourceName)" : "View Image on \(attribution.sourceName)") {

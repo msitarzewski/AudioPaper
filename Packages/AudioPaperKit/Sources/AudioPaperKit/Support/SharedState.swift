@@ -18,6 +18,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         public var sourceName: String
         public var pageURL: URL?
         public var creatorProfileURL: URL?
+        /// One-line credit, e.g. "Photo by Yan Mayen · CC BY-SA 4.0" (`ArtworkCandidate.shortCredit`).
+        public var credit: String
     }
 
     public var track: Track?
@@ -83,7 +85,8 @@ public enum SharedStore {
             return WidgetSnapshot.Image(
                 id: artwork.id, file: file, kind: artwork.candidate.kind,
                 title: attribution.title, creatorName: attribution.creatorName, sourceName: attribution.sourceName,
-                pageURL: attribution.pageURL, creatorProfileURL: attribution.creatorProfileURL
+                pageURL: attribution.pageURL, creatorProfileURL: attribution.creatorProfileURL,
+                credit: artwork.candidate.shortCredit
             )
         }
 

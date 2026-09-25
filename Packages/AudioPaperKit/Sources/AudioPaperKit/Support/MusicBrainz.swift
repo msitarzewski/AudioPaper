@@ -41,6 +41,41 @@ public enum MusicBrainz {
         }
     }
 
+    struct ArtistRelations: Decodable {
+        struct Relation: Decodable {
+            struct Link: Decodable { var resource: String }
+            var type: String
+            var url: Link?
+        }
+        var relations: [Relation]?
+    }
+
+    static let wikidataIDs = WikidataMemo()
+
+    actor WikidataMemo {
+        private var ids: [String: String?] = [:]
+        func get(_ mbid: String) -> String?? { ids[mbid] }
+        func set(_ mbid: String, _ qid: String?) { ids[mbid] = .some(qid) }
+    }
+
+    /// The artist's Wikidata item (e.g. "Q60964"), from MusicBrainz's curated links — an exact identity,
+    /// no name matching. Remembered per session.
+    static func wikidataID(forArtist mbid: String, http: any HTTPClient) async throws -> String? {
+        if let known = await wikidataIDs.get(mbid) { return known }
+        try await limiter.wait()
+        let url = URL.api("https://musicbrainz.org/ws/2/artist/\(mbid)", ["inc": "url-rels", "fmt": "json"])
+        let response = try await http.json(ArtistRelations.self, from: URLRequest(url: url))
+        let qid = wikidataID(in: response)
+        await wikidataIDs.set(mbid, qid)
+        return qid
+    }
+
+    static func wikidataID(in response: ArtistRelations) -> String? {
+        response.relations?
+            .first { $0.type == "wikidata" }?
+            .url?.resource.split(separator: "/").last.map(String.init)
+    }
+
     /// Keeps resolved artist IDs on disk (the app passes a file inside its cache, so Clear Cache removes it).
     public static func rememberArtistIDs(in file: URL) async {
         await artistIDs.persist(at: file)

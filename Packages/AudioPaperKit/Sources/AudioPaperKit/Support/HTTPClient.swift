@@ -21,7 +21,8 @@ public enum HTTPError: Error, LocalizedError {
 }
 
 public struct URLSessionHTTPClient: HTTPClient {
-    public static let userAgent = "AudioPaper/0.1 ( macOS album-art wallpaper app )"
+    /// Identifies AudioPaper, with a contact address as Wikimedia and MusicBrainz ask of API clients.
+    public static let userAgent = "AudioPaper/0.1 (https://github.com/msitarzewski/AudioPaper; macOS album-art wallpaper app)"
 
     private let session: URLSession
 
