@@ -4,7 +4,7 @@
 Build AudioPaper v0.1: a macOS 26 menu bar app that sets the wallpaper to the playing album's cover, then cross-fades filtered fan art and artist photos, with a plugin architecture for players and art sources. Publish it as a public repo.
 
 ## Outcome
-- ✅ Tests: 41 passing (`swift test` in `Packages/AudioPaperKit`)
+- ✅ Tests: 46 passing (`swift test` in `Packages/AudioPaperKit`)
 - ✅ Build: app builds signed (team 7JQGQ7CRH8) and unsigned (CI)
 - ✅ Verified live: sandboxed wallpaper setting on two displays, Music notifications, album → fan art flow, cross-fade, restore original
 - ✅ Review: approved by the user

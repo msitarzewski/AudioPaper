@@ -6,11 +6,12 @@
 - Fan-art sources: TheAudioDB (free key), DeviantArt and Brave. Keep all artist metadata so users can open profiles and source pages.
 - Photos are welcome (band and press photos, not only drawn art).
 - Fan art: album cover first, then cross-fade rotation like a Photos-folder wallpaper. Automatic framing (fit when fill would crop >15%).
-- No DuckDuckGo (no official image API). fanart.tv: the user started registering a project key; not integrated yet.
+- No DuckDuckGo (no official image API).
+- fanart.tv integrated (`FanartTVSource`); the user's project key is `FAN_ART_API_KEY` in `.env` / Keychain. It is NOT embedded in the app or repo. Coverage: strong for established artists (NIN, Radiohead, Troye Sivan), none for newer ones (Frost Children, 2hollis, Sleepover); Brave fills those.
 - Public repo on the user's GitHub with README, CONTRIBUTING, SECURITY, FUNDING (sponsors), CI, issue templates.
 
 ## Open items
 - DeviantArt credentials needed to verify that provider live.
-- fanart.tv source once the key exists (terms: inform users, allow a personal key alongside the project key, no commercial use).
+- Decide whether release builds should ship the fanart.tv project key (their terms expect a project key in the app plus an optional user key; the repo must not contain it).
 - Stylized band logos can slip past OCR.
 - Spotify source plugin.

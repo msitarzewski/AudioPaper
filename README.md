@@ -16,7 +16,7 @@ AudioPaper is a small menu bar app for macOS 26 that changes your wallpaper when
 
 1. **Hears the track change.** Apple Music posts a system notification on every change, so there's no polling and no special permission. On launch, AudioPaper asks Music once what's already playing.
 2. **Shows the album cover.** It's looked up online, at up to 3000×3000, from the Apple Music catalog, then MusicBrainz / Cover Art Archive, and finally the artwork Music itself has. The cover sits centered over a blurred, colour-matched wash of itself.
-3. **Cross-fades in fan art and artist photos.** It asks TheAudioDB (curated artist backgrounds, no key needed) and DeviantArt first. Brave Image Search is used only to fill gaps, which keeps its quota for artists the others don't cover. Results are filtered on your Mac with Apple's Vision framework:
+3. **Cross-fades in fan art and artist photos.** It asks fanart.tv (fan-made 1080p and 4K artist backgrounds), TheAudioDB (curated artist backgrounds, no key needed) and DeviantArt first. Brave Image Search is used only to fill gaps, which keeps its quota for artists the others don't cover. Results are filtered on your Mac with Apple's Vision framework:
    - rejects screenshots and documents (Vision's "utility" image check)
    - rejects anything carrying readable text: titles, lyrics, watermarks, UI
    - rejects documents, product shots and other scenes that aren't art or photography
@@ -32,7 +32,7 @@ The menu bar popover credits every image: the artist, a link to their DeviantArt
 
 - macOS 26 (Tahoe) or later
 - Apple Music (more players are planned; see [Roadmap](#roadmap))
-- Fan art works out of the box via TheAudioDB's free public key. For wider coverage, add a [Brave Search API](https://api-dashboard.search.brave.com/) key and/or a [DeviantArt application](https://www.deviantart.com/developers/) (client ID + secret) in Settings.
+- Fan art works out of the box via TheAudioDB's free public key. For more and better images, add a [fanart.tv](https://fanart.tv) API key, and for artists those don't cover, a [Brave Search API](https://api-dashboard.search.brave.com/) key and/or a [DeviantArt application](https://www.deviantart.com/developers/) (client ID + secret), all in Settings → Accounts.
 
 ## Build and run
 
@@ -77,8 +77,9 @@ AudioPaper uses these services. Each image shown in the app credits its source a
 | Source | Used for | Key |
 |---|---|---|
 | [iTunes Search API](https://performance-partners.apple.com/search-api) | Album covers | None |
-| [MusicBrainz](https://musicbrainz.org) + [Cover Art Archive](https://coverartarchive.org) | Album covers when Apple's catalog doesn't know the release | None |
+| [MusicBrainz](https://musicbrainz.org) + [Cover Art Archive](https://coverartarchive.org) | Album covers when Apple's catalog doesn't know the release; artist IDs for fanart.tv | None |
 | Music app | Last-resort cover for the track that's playing | None |
+| [fanart.tv](https://fanart.tv) | Fan-made artist backgrounds (1920×1080 and 4K), by MusicBrainz ID | A project key, plus your optional personal key |
 | [TheAudioDB](https://www.theaudiodb.com) | Artist backgrounds (fan art and photos, 1280×720) | Free public key built in; optional personal key |
 | [DeviantArt API](https://www.deviantart.com/developers/) | Fan art, with artist profile links | Your own app credentials |
 | [Brave Search API](https://brave.com/search/api/) | Fan art and artist photos when the sources above come up short | Your own key (the free tier is 2,000 queries/month; AudioPaper caches results and spaces requests to stay within it) |
@@ -105,7 +106,7 @@ Players, cover providers, fan-art sources and image filters are all **plugins**,
 ## Roadmap
 
 - More players: Spotify first (it posts the same kind of change notification Music does)
-- More art sources: fanart.tv artist backgrounds, Wikimedia Commons, Deezer
+- More art sources: Wikimedia Commons, Deezer
 - A paid TheAudioDB key would be needed before any Mac App Store release (their free key excludes app stores)
 - Smarter logo detection (stylized band logos can slip past text recognition)
 

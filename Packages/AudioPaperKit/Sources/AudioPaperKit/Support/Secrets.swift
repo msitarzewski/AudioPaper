@@ -7,6 +7,8 @@ public enum SecretKey: String, CaseIterable, Sendable {
     case deviantArtClientID = "DEVIANTART_CLIENT_ID"
     case deviantArtClientSecret = "DEVIANTART_CLIENT_SECRET"
     case theAudioDBAPIKey = "THEAUDIODB_API_KEY"
+    case fanartTVProjectKey = "FAN_ART_API_KEY"
+    case fanartTVClientKey = "FAN_ART_CLIENT_KEY"
 }
 
 public protocol SecretStore: Sendable {

@@ -10,6 +10,7 @@ struct AudioPaperApp: App {
         let coordinator = NowPlayingCoordinator(
             albumChain: AlbumArtworkChain(providers: [ITunesSearchProvider(), CoverArtArchiveProvider(), AppleMusicArtworkProvider()]),
             fanArtSources: [
+                FanartTVSource(secrets: secrets),
                 TheAudioDBSource(secrets: secrets),
                 DeviantArtSource(secrets: secrets),
                 BraveImageSource(secrets: secrets),

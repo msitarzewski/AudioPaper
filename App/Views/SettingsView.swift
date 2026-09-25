@@ -119,6 +119,8 @@ private struct AccountSettings: View {
     @State private var deviantArtID = ""
     @State private var deviantArtSecret = ""
     @State private var theAudioDB = ""
+    @State private var fanartProject = ""
+    @State private var fanartPersonal = ""
 
     var body: some View {
         Form {
@@ -131,6 +133,18 @@ private struct AccountSettings: View {
                     isConfigured: !brave.isEmpty,
                     linkTitle: "Get a Brave Search API key",
                     destination: URL(string: "https://api-dashboard.search.brave.com/")!
+                )
+            }
+            Section {
+                CredentialField(label: "Project API key", key: .fanartTVProjectKey, isSecret: true, text: $fanartProject)
+                CredentialField(label: "Personal API key (optional)", key: .fanartTVClientKey, isSecret: true, text: $fanartPersonal)
+            } header: {
+                Text("fanart.tv")
+            } footer: {
+                CredentialFooter(
+                    isConfigured: !fanartProject.isEmpty,
+                    linkTitle: "fanart.tv (sign in to create a project key)",
+                    destination: URL(string: "https://fanart.tv")!
                 )
             }
             Section {

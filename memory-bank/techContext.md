@@ -10,9 +10,10 @@
   - iTunes Search API (no key) — album covers, `100x100bb` → `3000x3000bb`. Misses some catalog (older NIN, small indie releases).
   - MusicBrainz + Cover Art Archive (no key, 1 req/s etiquette, User-Agent required).
   - Brave Search image API — `X-Subscription-Token`. Current key is **free tier: 1 req/s, 2,000/month**. `BraveImageSource.limiter` enforces spacing.
+  - fanart.tv — `webservice.fanart.tv/v3/music/{mbid}?api_key=…&client_key=…`; `artist4kbackground` + `artistbackground`, sorted by likes. Project key in Keychain `FAN_ART_API_KEY`, optional personal `FAN_ART_CLIENT_KEY`. Site is behind Cloudflare (curl gets 403); the API is fine.
   - TheAudioDB — artist fan art (1280×720, "curated"). Free public key `123`, 30 req/min (`TheAudioDBSource.limiter`), optional personal key. Terms: credit + link TheAudioDB; free key not allowed for App Store apps.
   - DeviantArt API — OAuth2 client credentials (`/oauth2/token`, `/browse/popular`, `/browse/tags`). **Not yet verified live**: no credentials yet.
-- **Credentials**: Keychain service `com.audiopaper.credentials` (accounts `BRAVE_API_KEY`, `DEVIANTART_CLIENT_ID`, `DEVIANTART_CLIENT_SECRET`, `THEAUDIODB_API_KEY`); fields auto-save, entered in Settings → Accounts. `apctl` reads `.env` (git-ignored).
+- **Credentials**: Keychain service `com.audiopaper.credentials` (accounts `BRAVE_API_KEY`, `DEVIANTART_CLIENT_ID`, `DEVIANTART_CLIENT_SECRET`, `THEAUDIODB_API_KEY`, `FAN_ART_API_KEY`, `FAN_ART_CLIENT_KEY`); fields auto-save, entered in Settings → Accounts. `apctl` reads `.env` (git-ignored).
 - **Commands**
   - Tests: `cd Packages/AudioPaperKit && swift test`
   - Filter spike: `swift run apctl fanart "<artist>" "<song>" [outDir]`, `apctl cover`, `apctl labels <files>`

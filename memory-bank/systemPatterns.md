@@ -3,7 +3,7 @@
 ## Plugin protocols (AudioPaperKit)
 - `NowPlayingSource` (`Sources/NowPlayingSource.swift`) — `events() -> AsyncStream<PlaybackEvent>`; registered in `SourceRegistry.standard`. Compiled-in; no dynamic bundles (library validation).
 - `AlbumArtworkProvider` → ordered `AlbumArtworkChain` (iTunes → Cover Art Archive → Music app's own artwork, 800 px last resort).
-- `FanArtSource` (TheAudioDB, DeviantArt, Brave) → `FanArtPipeline`. Sources marked `isFallback` (Brave) are asked only when the primaries return fewer than 3 candidates. `ArtworkCandidate.isCurated` relaxes the size floor to 1280×720.
+- `FanArtSource` (fanart.tv, TheAudioDB, DeviantArt, Brave) → `FanArtPipeline`. Sources marked `isFallback` (Brave) are asked only when the primaries return fewer than 3 candidates. `ArtworkCandidate.isCurated` relaxes the size floor to 1280×720.
 - `ArtworkFilter` — pipeline steps returning `.accept(score:)` / `.reject(reason)`.
 
 ## Fan-art pipeline (cheapest first)
@@ -14,6 +14,9 @@ A result's title or page slug must name the artist, plus the song (1.0), the alb
 
 ## Coordinator flow (`NowPlayingCoordinator`)
 playing → 1.5 s debounce → album cover (cached per album key; redrawn only when the album changes) → fan art (cached per song key, empty results remembered for 7 days) → rotation every `rotationInterval`. No cover for a new album → restore original wallpaper (never leave the wrong album up). Presentations are serialized; newer requests supersede queued ones.
+
+## MusicBrainz
+`MusicBrainz` (Support/MusicBrainz.swift) owns the shared 1 req/s limiter (used by the cover lookup too) and artist-name → MBID resolution. Several exact-name artists ≥90 score means ambiguous → nil (a wrong artist is worse than none).
 
 ## Preferences
 New plugins must start enabled: fan-art sources are stored as `disabledFanArtSources`.

@@ -36,6 +36,7 @@ public struct CoverArtArchiveProvider: AlbumArtworkProvider {
         let url = URL.api("https://musicbrainz.org/ws/2/release-group", [
             "query": "releasegroup:\"\(album)\" AND artist:\"\(artist)\"", "fmt": "json", "limit": "5",
         ])
+        try await MusicBrainz.limiter.wait()
         let response = try await http.json(Response.self, from: URLRequest(url: url))
         return Self.bestMatch(in: response, for: track)
     }

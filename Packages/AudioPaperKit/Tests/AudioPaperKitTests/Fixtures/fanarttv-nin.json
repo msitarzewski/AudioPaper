@@ -1,0 +1,38 @@
+{
+  "name": "Nine Inch Nails",
+  "mbid_id": "b7ffd2af-418f-4be2-bdd1-22f8b48613da",
+  "artistbackground": [
+    {
+      "id": "50817",
+      "likes": "3",
+      "url": "https://assets.fanart.tv/fanart/nine-inch-nails-50498f8502059.jpg"
+    },
+    {
+      "id": "50818",
+      "likes": "2",
+      "url": "https://assets.fanart.tv/fanart/nine-inch-nails-50498f85027ce.jpg"
+    },
+    {
+      "id": "2136",
+      "likes": "1",
+      "url": "https://assets.fanart.tv/fanart/nine-inch-nails-4dd44596db394.jpg"
+    },
+    {
+      "id": "118313",
+      "likes": "1",
+      "url": "https://assets.fanart.tv/fanart/nine-inch-nails-534bb8075c858.jpg"
+    }
+  ],
+  "artist4kbackground": [
+    {
+      "id": "454857",
+      "likes": "0",
+      "url": "https://assets.fanart.tv/fanart/nine-inch-nails-690071e225a1d.jpg"
+    },
+    {
+      "id": "454860",
+      "likes": "0",
+      "url": "https://assets.fanart.tv/fanart/nine-inch-nails-690073c17e5f1.jpg"
+    }
+  ]
+}

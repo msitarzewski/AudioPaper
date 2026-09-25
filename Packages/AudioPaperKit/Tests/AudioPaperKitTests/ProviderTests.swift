@@ -141,6 +141,54 @@ import Testing
     }
 }
 
+@Suite struct FanartTVSourceTests {
+    @Test func fourKBackgroundsComeFirstAndEverythingIsCredited() throws {
+        let response = try Fixture.decode(FanartTVSource.Response.self, "fanarttv-nin")
+        let candidates = FanartTVSource.candidates(from: response, mbid: "b7ffd2af-418f-4be2-bdd1-22f8b48613da")
+        #expect(candidates.count == (response.artist4kbackground?.count ?? 0) + (response.artistbackground?.count ?? 0))
+        #expect(candidates.first?.width == 3840)
+        for candidate in candidates {
+            #expect(candidate.isCurated)
+            #expect(candidate.attribution.sourceName == "fanart.tv")
+            #expect(candidate.attribution.pageURL?.absoluteString == "https://fanart.tv/artist/b7ffd2af-418f-4be2-bdd1-22f8b48613da/")
+        }
+    }
+
+    @Test func sendsPersonalKeyAlongsideProjectKey() async throws {
+        // Unique per run so the per-artist memo from other tests can't answer first.
+        let artist = "Keyed Artist \(UUID().uuidString.prefix(8))"
+        let http = StubHTTP { url in
+            url.host() == "musicbrainz.org"
+                ? Data(#"{"artists":[{"id":"mbid-1","name":"\#(artist)","score":100}]}"#.utf8)
+                : try? Fixture.data("fanarttv-nin")
+        }
+        let source = FanartTVSource(http: http, secrets: StubSecrets(values: [.fanartTVProjectKey: "project", .fanartTVClientKey: "personal"]))
+        let candidates = try await source.candidates(for: .sample(artist: artist), limit: 10)
+        #expect(!candidates.isEmpty)
+        let request = try #require(http.requests.first { $0.host() == "webservice.fanart.tv" })
+        #expect(request.path() == "/v3/music/mbid-1")
+        let items = URLComponents(url: request, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        #expect(items.contains(URLQueryItem(name: "api_key", value: "project")))
+        #expect(items.contains(URLQueryItem(name: "client_key", value: "personal")))
+    }
+
+    @Test func unconfiguredWithoutProjectKey() {
+        #expect(!FanartTVSource(http: StubHTTP { _ in nil }, secrets: StubSecrets(values: [:])).isConfigured)
+    }
+}
+
+@Suite struct MusicBrainzTests {
+    @Test func ambiguousArtistNameResolvesToNothing() throws {
+        let response = try Fixture.decode(MusicBrainz.ArtistSearch.self, "musicbrainz-artist-sleepover")
+        #expect(MusicBrainz.resolve(response, name: "Sleepover") == nil, "several artists are named Sleepover")
+    }
+
+    @Test func uniqueExactNameResolves() throws {
+        let response = try JSONDecoder().decode(MusicBrainz.ArtistSearch.self, from: Data(#"{"artists":[{"id":"a","name":"Nine Inch Nails","score":100},{"id":"b","name":"Nine Inch Nails Tribute","score":80}]}"#.utf8))
+        #expect(MusicBrainz.resolve(response, name: "Nine Inch Nails") == "a")
+    }
+}
+
 @Suite struct AppleMusicSourceTests {
     let info: [AnyHashable: Any] = [
         "Player State": "Playing", "Name": "Closer", "Artist": "Nine Inch Nails",

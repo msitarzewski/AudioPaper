@@ -53,7 +53,10 @@ case "fanart" where args.count >= 3:
     let outDir = args.count > 3 ? URL(filePath: args[3], directoryHint: .isDirectory) : nil
     if let outDir { try FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true) }
     let pipeline = FanArtPipeline(
-        sources: [TheAudioDBSource(secrets: secrets), DeviantArtSource(secrets: secrets), BraveImageSource(secrets: secrets)],
+        sources: [
+            FanartTVSource(secrets: secrets), TheAudioDBSource(secrets: secrets),
+            DeviantArtSource(secrets: secrets), BraveImageSource(secrets: secrets),
+        ],
         cache: cache
     )
     let configured = pipeline.sources.filter(\.isConfigured).map(\.id)
