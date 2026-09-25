@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>AudioPaper</title>
+    <link>https://msitarzewski.github.io/AudioPaper/appcast.xml</link>
+    <description>AudioPaper updates</description>
+    <language>en</language>
+    <item>
+      <title>AudioPaper 0.1.3</title>
+      <pubDate>Fri, 25 Sep 2026 22:16:21 GMT</pubDate>
+      <sparkle:version>4</sparkle:version>
+      <sparkle:shortVersionString>0.1.3</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/msitarzewski/AudioPaper/releases/tag/v0.1.3</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<h2>AudioPaper 0.1.3</h2>
+<ul>
+<li><b>Automatic updates.</b> AudioPaper can now update itself. Choose whether it checks automatically; Check for Updates… checks now.</li>
+<li><b>A note on images:</b> art is found on the internet automatically and may be mislabelled or unexpected. Next Image skips one.</li>
+</ul>]]></description>
+      <enclosure url="https://github.com/msitarzewski/AudioPaper/releases/download/v0.1.3/AudioPaper-0.1.3.zip" length="4945467" type="application/octet-stream" sparkle:edSignature="+nKjT02aV9DLqsB316f1ldaNCWRlmlDx/eHRVG/DASpY7hyu5XSXihJYKoL1JOkdJF1X3W5M3n0PBt6Bwa0CDg=="/>
+    </item>
+  </channel>
+</rss>
