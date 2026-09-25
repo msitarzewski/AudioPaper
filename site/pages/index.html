@@ -1,0 +1,106 @@
+<!--
+title: AudioPaper
+description: A free macOS app that sets your wallpaper to the album cover of the song you're playing, then to credited fan art and artist photos. No accounts, no telemetry.
+-->
+<header class="hero">
+  <img class="hero-icon" src="icon-256.png" alt="The AudioPaper icon: a red display with a white music note on it." width="144" height="144">
+  <h1>AudioPaper</h1>
+  <p class="tagline">Your desktop, set to the music you’re playing.</p>
+  <p class="sub">When the song changes, the wallpaper changes to its album cover. While the song plays, fan art and photos of the artist fade in and out, each one credited with a link to where it came from.</p>
+  <div class="actions">
+    <a class="button primary" href="https://github.com/msitarzewski/AudioPaper/releases/latest">Download</a>
+    <a class="button" href="help.html">How to use it</a>
+    <a class="button" href="https://github.com/msitarzewski/AudioPaper">Source code</a>
+  </div>
+  <p class="facts">Free · MIT licence · macOS 26 or later · Apple Music · no account, no telemetry</p>
+</header>
+
+<figure class="demo">
+  <div class="desktop" role="img" aria-label="Illustration of a Mac desktop. First the album cover sits in the middle of a blurred wash of its own colours. Then a full-screen artwork fades in over it, with a small credit in the corner.">
+    <div class="scene cover"><div class="album"></div></div>
+    <div class="scene art"></div>
+    <div class="menubar"></div>
+    <span class="credit">Credit · artist name · source ↗</span>
+  </div>
+  <figcaption>An illustration, not a screenshot: the art AudioPaper shows belongs to other people, so it isn’t used here.</figcaption>
+</figure>
+
+<section class="section">
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li>
+      <h3>It hears the song change</h3>
+      <p>Apple Music announces every track change to the system. AudioPaper listens for that; it doesn’t poll, and it never controls playback.</p>
+    </li>
+    <li>
+      <h3>It puts up the cover</h3>
+      <p>The album cover is looked up online, up to 3000 × 3000, and centred over a blurred wash of its own colours.</p>
+    </li>
+    <li>
+      <h3>It fades in art of the artist</h3>
+      <p>Fan art and photos from fanart.tv, TheAudioDB, Wikimedia Commons and others. A new one every 45 seconds, or whatever you choose.</p>
+    </li>
+    <li>
+      <h3>It says where each one came from</h3>
+      <p>Every image carries a credit and a link: the person who made it where known, and always the page it came from.</p>
+    </li>
+  </ol>
+  <p style="margin-top:22px">Before anything reaches your screen, your Mac checks it with Apple’s Vision framework: images with big text, screenshots, ads and product photos are dropped, and so are duplicates. The details, with every number, are in the <a href="reference.html">reference</a>.</p>
+</section>
+
+<section class="section">
+  <div class="split">
+    <div>
+      <h2>What leaves your Mac</h2>
+      <p>To find art, AudioPaper has to ask for it. So the <strong>names</strong> of the artist, album and song you play are sent to the lookup services, along with your IP address, as with any request online.</p>
+      <p>Nothing else is: not your library, your play counts, your playlists, your settings or the images you’ve seen. There is no AudioPaper server, account or analytics. Each song is searched once; replaying it sends nothing, unless you clear the cache.</p>
+      <p><a href="privacy.html">Who learns what</a> · <a href="network.html">Every request, host by host</a></p>
+    </div>
+    <div>
+      <h2>Whose art it is</h2>
+      <p>Fan art belongs to the people who made it, and photos to the people who took them. AudioPaper shows them on your own desktop with their credit, and never copies them anywhere else.</p>
+      <p>Most images come from sites built to share them with apps like this one (fanart.tv, TheAudioDB, Wikimedia Commons). If you add a Brave Search key, AudioPaper can also find images on ordinary websites when those sites have too little. Those websites didn’t ask to be included. That source is off unless you add a key, and you can switch it off again at any time.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="split">
+    <div>
+      <h2>What it asks of you</h2>
+      <ul class="plain">
+        <li><strong>A Mac on macOS 26</strong> and <strong>Apple Music</strong>. Other players aren’t supported yet.</li>
+        <li><strong>One permission</strong>, asked once: to read from Music what’s already playing when AudioPaper starts. If you say no, it still works from the next song on.</li>
+        <li><strong>Disk space</strong> for the art it downloads: up to 500 MB by default, which you can change or clear.</li>
+        <li><strong>Nothing to sign up for.</strong> Art from TheAudioDB and Wikimedia Commons works without a key. A free fanart.tv key, or a Brave Search key, finds more if you want it.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Leaving is easy</h2>
+      <p><strong>Restore Original Wallpaper</strong>, in the menu, puts your own wallpaper back. Quit, drag AudioPaper to the Trash, and it’s gone; the <a href="help.html#uninstall">Help page</a> lists the two folders it leaves behind, if you want those gone too.</p>
+      <p>A desktop that changes with every song isn’t for everyone. You can also pause changes, keep only the album cover, or slow the rotation down to five minutes.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="split">
+    <div>
+      <h2>Who made this, and what’s in it for them</h2>
+      <p>AudioPaper is written by <a href="https://github.com/msitarzewski">Michael Sitarzewski</a>, working with an AI coding assistant, Claude; every commit in the history says so. The code is public and MIT-licensed: anyone can read it, change it, or build their own copy.</p>
+      <p>The app earns nothing: no price, no ads, no data sold or collected. If you want to support the work, there is a <a href="https://github.com/sponsors/msitarzewski">GitHub Sponsors</a> page; AudioPaper works the same whether you use it or not. The author gains something anyway: his name is on it.</p>
+    </div>
+    <div>
+      <h2>Check it yourself</h2>
+      <ul class="plain">
+        <li>Watch its connections with macOS’s own network privacy report, or Little Snitch or LuLu, and compare them with <a href="network.html">the list</a>.</li>
+        <li>From a copy of the source, run the art search for any song with <code>swift run apctl fanart "Artist" "Song"</code> and see every image it considered, and why each was kept or dropped.</li>
+        <li>Read <a href="https://github.com/msitarzewski/AudioPaper/tree/main/Packages/AudioPaperKit/Sources/AudioPaperKit">the source</a>: each service it contacts lives in one file.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section narrow">
+  <p class="handback">If you want your desktop to follow your music, it does that, and this page has told you what it costs. If you’d rather your desktop stay put, that’s a fine answer too.</p>
+</section>

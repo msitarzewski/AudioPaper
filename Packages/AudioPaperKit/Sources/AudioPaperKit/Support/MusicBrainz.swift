@@ -117,24 +117,36 @@ public enum MusicBrainz {
     ///
     /// The song is the strongest clue: a recording search for title + artist pins down which of several
     /// same-named artists is playing. A plain artist search is the fallback, and refuses ambiguity.
+    /// Text for a quoted Lucene phrase (`artist:"…"`). Quotes and backslashes are removed: a stray `\`
+    /// at the end of a title would otherwise escape the closing quote and break the query.
+    static func phrase(_ text: String) -> String {
+        Normalizer.searchTerm(text).filter { $0 != "\"" && $0 != "\\" }
+    }
+
     static func artistID(for track: Track, http: any HTTPClient) async throws -> String? {
         let key = identityKey(track.artist)
         if let known = await artistIDs.get(key) { return known }
         var id: String?
         if !track.title.isEmpty {
-            let title = Normalizer.searchTerm(track.title).replacingOccurrences(of: "\"", with: "")
-            let artist = Normalizer.searchTerm(track.artist).replacingOccurrences(of: "\"", with: "")
+            let title = phrase(track.title)
+            let artist = phrase(track.artist)
             let url = URL.api("https://musicbrainz.org/ws/2/recording", [
                 "query": "recording:\"\(title)\" AND artist:\"\(artist)\"", "fmt": "json", "limit": "10",
             ])
             try await limiter.wait()
-            // A failed recording search isn't fatal; the artist search below still runs.
-            if let response = try? await http.json(RecordingSearch.self, from: URLRequest(url: url)) {
-                id = resolve(response, artist: track.artist)
+            // A recording search that fails on this title (an odd query, a format change) isn't fatal: the
+            // artist search below still runs. An outage or rate limit is different — the answer is unknown,
+            // not "no match", so it propagates rather than being remembered as unresolved.
+            do {
+                id = resolve(try await http.json(RecordingSearch.self, from: URLRequest(url: url)), artist: track.artist)
+            } catch where HTTPError.isTransient(error) {
+                throw error
+            } catch {
+                log.info("Recording search failed, trying the artist search: \(error.localizedDescription, privacy: .public)")
             }
         }
         if id == nil {
-            let term = Normalizer.searchTerm(track.artist).replacingOccurrences(of: "\"", with: "")
+            let term = phrase(track.artist)
             let url = URL.api("https://musicbrainz.org/ws/2/artist", ["query": "artist:\"\(term)\"", "fmt": "json", "limit": "5"])
             try await limiter.wait()
             id = resolve(try await http.json(ArtistSearch.self, from: URLRequest(url: url)), name: track.artist)

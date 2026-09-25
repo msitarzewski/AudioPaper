@@ -224,6 +224,8 @@ public final class NowPlayingCoordinator {
         }
     }
 
+    private var searchBudget = SearchBudget()
+
     /// Images shown per play of a song; the artist's pool can hold more (`ArtistPool.capacity`).
     public static let imagesPerPlay = 8
 
@@ -241,6 +243,13 @@ public final class NowPlayingCoordinator {
         if let first = fanArt.first { present(first, animated: true) }
         guard pool.shouldSearch(song: track.songKey) else { return }
 
+        // New-song searches are budgeted, so a flood of track changes (a process spoofing Music's
+        // notification, say) can't spend a metered quota. Over budget, the song is simply searched on a
+        // later play; nothing is recorded.
+        guard searchBudget.allow() else {
+            log.info("Search budget reached; not searching this song now")
+            return
+        }
         let enabled = fanArtSources.filter { !preferences.disabledFanArtSources.contains($0.id) }
         // `isConfigured` reads the Keychain, which can block on an access prompt; keep it off the main thread.
         let sources = await Task.detached { enabled.filter(\.isConfigured) }.value
@@ -254,21 +263,32 @@ public final class NowPlayingCoordinator {
         var pipeline = FanArtPipeline(sources: sources, cache: cache)
         pipeline.maxAccepted = min(Self.imagesPerPlay, pool.room)
         var found: [Artwork] = []
+        var complete = true
         for await event in pipeline.run(for: track, excluding: lookalikes, known: Set(pool.artworks.map(\.candidate.imageURL))) {
             guard !Task.isCancelled else { return }
-            if case let .accepted(artwork) = event {
+            switch event {
+            case let .accepted(artwork):
                 found.append(artwork)
                 fanArt.append(artwork)
                 if fanArt.count == 1 { present(artwork, animated: true) }
+            case .incomplete:
+                complete = false
+            case .rejected:
+                break
             }
         }
+        // Skipped mid-search: the stream ends early, so this song hasn't really been searched.
+        guard !Task.isCancelled else { return }
         // New finds join the rotation after this play's selection, best first.
         let selected = fanArt.count - found.count
         fanArt = Array(fanArt.prefix(selected)) + fanArt.dropFirst(selected).sorted { ($0.qualityScore ?? -.infinity) > ($1.qualityScore ?? -.infinity) }
         let finds = found
-        try? await cache.updatePool(forKey: key) { pool in
+        let searchedFully = complete
+        _ = try? await cache.updatePool(forKey: key) { pool in
             pool.add(finds)
-            pool.recordSearch(song: track.songKey, found: finds.count)
+            // A source that was offline or rate limited may have art for this song: search it again next
+            // play (images already pooled are skipped) rather than remembering it as found-nothing.
+            if searchedFully { pool.recordSearch(song: track.songKey, found: finds.count) }
         }
         await pruneCache()
     }
@@ -355,5 +375,25 @@ public final class NowPlayingCoordinator {
             guard !Task.isCancelled, let self, !self.isPlaying else { return }
             self.restoreOriginalWallpaper()
         }
+    }
+}
+
+/// At most `limit` new-song searches in any `window`. Generous for real listening, even skipping through a
+/// playlist; bounds what a flood of fake track changes could cost.
+struct SearchBudget {
+    var limit: Int
+    var window: Duration
+    private var recent: [ContinuousClock.Instant] = []
+
+    init(limit: Int = 60, window: Duration = .seconds(3600)) {
+        self.limit = limit
+        self.window = window
+    }
+
+    mutating func allow(at now: ContinuousClock.Instant = .now) -> Bool {
+        recent.removeAll { now - $0 >= window }
+        guard recent.count < limit else { return false }
+        recent.append(now)
+        return true
     }
 }

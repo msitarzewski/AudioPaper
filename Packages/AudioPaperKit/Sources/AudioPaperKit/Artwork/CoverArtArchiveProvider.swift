@@ -31,8 +31,8 @@ public struct CoverArtArchiveProvider: AlbumArtworkProvider {
     }
 
     public func albumArtwork(for track: Track) async throws -> ArtworkCandidate? {
-        let album = Normalizer.searchTerm(track.album).replacingOccurrences(of: "\"", with: "")
-        let artist = Normalizer.searchTerm(track.primaryArtist).replacingOccurrences(of: "\"", with: "")
+        let album = MusicBrainz.phrase(track.album)
+        let artist = MusicBrainz.phrase(track.primaryArtist)
         let url = URL.api("https://musicbrainz.org/ws/2/release-group", [
             "query": "releasegroup:\"\(album)\" AND artist:\"\(artist)\"", "fmt": "json", "limit": "5",
         ])

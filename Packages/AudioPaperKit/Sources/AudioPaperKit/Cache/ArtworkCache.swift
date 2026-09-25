@@ -26,24 +26,28 @@ public actor ArtworkCache {
     public func download(_ candidate: ArtworkCandidate) async throws -> (URL, width: Int, height: Int) {
         try FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
         let file = imagesDir.appending(path: Self.hash(candidate.imageURL.absoluteString))
-        if FileManager.default.fileExists(atPath: file.path(percentEncoded: false)), !candidate.imageURL.isFileURL {
+        let isLocal = candidate.isLocal && candidate.imageURL.isFileURL
+        if FileManager.default.fileExists(atPath: file.path(percentEncoded: false)), !isLocal {
             // Reused: mark it recently used, so pruning removes images that haven't been needed longest.
             try? FileManager.default.setAttributes([.modificationDate: Date.now], ofItemAtPath: file.path(percentEncoded: false))
-        } else if candidate.imageURL.isFileURL {
+        } else if isLocal {
             // Artwork a player handed us locally; copy it so it lives as long as the cache entry.
             try? FileManager.default.removeItem(at: file)
             try FileManager.default.copyItem(at: candidate.imageURL, to: file)
         } else {
+            // The HTTP client refuses anything but https to a named host, so a `file:` or LAN address in a
+            // response never reaches the disk or the network.
             var request = URLRequest(url: candidate.imageURL, timeoutInterval: 20)
             request.setValue("image/*", forHTTPHeaderField: "Accept")
             let (data, _) = try await http.data(for: request)
             try data.write(to: file, options: .atomic)
         }
-        guard let size = ImageLoading.pixelSize(of: file) else {
+        // Checked from the header alone, before anything decodes the pixels.
+        guard let info = ImageLoading.inspect(file), info.isSafeToDecode else {
             try? FileManager.default.removeItem(at: file)
             throw CocoaError(.fileReadCorruptFile)
         }
-        return (file, size.width, size.height)
+        return (file, info.width, info.height)
     }
 
     public func artworks(forKey key: String) -> [Artwork]? {
@@ -126,15 +130,60 @@ public actor ArtworkCache {
 
 /// ImageIO helpers shared by the cache, the fan-art filters, and the wallpaper composer.
 public enum ImageLoading {
-    public static func pixelSize(of file: URL) -> (width: Int, height: Int)? {
+    /// What an image file claims to be, read from its header without decoding any pixels.
+    public struct Info: Sendable {
+        public var width: Int
+        public var height: Int
+        public var type: String
+
+        /// Formats AudioPaper decodes: the ones image services actually serve. Everything else is refused,
+        /// which keeps rarely used decoders away from untrusted bytes.
+        public static let allowedTypes: Set<String> = [
+            "public.jpeg", "public.png", "public.heic", "public.heif", "org.webmproject.webp", "public.tiff",
+        ]
+        /// A decoded image costs 4 bytes a pixel; 50 megapixels (200 MB) is ample for a 6K display and far
+        /// below what a "decompression bomb" — a small file claiming enormous dimensions — would ask for.
+        public static let maxPixels = 50_000_000
+        public static let maxEdge = 16_384
+
+        public var isSafeToDecode: Bool {
+            Self.allowedTypes.contains(type) && width > 0 && height > 0
+                && width <= Self.maxEdge && height <= Self.maxEdge && width * height <= Self.maxPixels
+        }
+    }
+
+    public static func inspect(_ file: URL) -> Info? {
         guard let source = CGImageSourceCreateWithURL(file as CFURL, nil),
+              let type = CGImageSourceGetType(source) as String?,
               let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
               let width = props[kCGImagePropertyPixelWidth] as? Int,
               let height = props[kCGImagePropertyPixelHeight] as? Int
         else { return nil }
         // EXIF orientations 5–8 are rotated 90°, so the displayed size is transposed.
         let orientation = props[kCGImagePropertyOrientation] as? Int ?? 1
-        return orientation >= 5 ? (height, width) : (width, height)
+        return orientation >= 5 ? Info(width: height, height: width, type: type) : Info(width: width, height: height, type: type)
+    }
+
+    public static func pixelSize(of file: URL) -> (width: Int, height: Int)? {
+        inspect(file).map { ($0.width, $0.height) }
+    }
+
+    /// Decodes image data from anywhere (an avatar, say) as a small thumbnail, or nil if it isn't a
+    /// format AudioPaper accepts or claims unreasonable dimensions.
+    public static func thumbnail(from data: Data, maxPixelSize: Int) -> CGImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let type = CGImageSourceGetType(source) as String?, Info.allowedTypes.contains(type),
+              let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = props[kCGImagePropertyPixelWidth] as? Int,
+              let height = props[kCGImagePropertyPixelHeight] as? Int,
+              Info(width: width, height: height, type: type).isSafeToDecode
+        else { return nil }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
+        ]
+        return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
     }
 
     /// Decodes a file, downsampled so its longest edge is at most `maxPixelSize`, with orientation applied.

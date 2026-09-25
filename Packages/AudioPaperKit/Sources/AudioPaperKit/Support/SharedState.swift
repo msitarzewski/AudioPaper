@@ -132,6 +132,15 @@ public enum WidgetCommand: String, CaseIterable, Sendable {
 
     public final class Observation: @unchecked Sendable {
         private let handler: @MainActor (WidgetCommand) -> Void
+        /// Any process can post these names, so repeats arriving faster than a person can tap are dropped.
+        static let minimumInterval: Duration = .milliseconds(400)
+        @MainActor private var lastDelivered: [WidgetCommand: ContinuousClock.Instant] = [:]
+
+        @MainActor fileprivate func deliver(_ command: WidgetCommand, at now: ContinuousClock.Instant = .now) {
+            if let last = lastDelivered[command], now - last < Self.minimumInterval { return }
+            lastDelivered[command] = now
+            handler(command)
+        }
 
         init(handler: @escaping @MainActor (WidgetCommand) -> Void) {
             self.handler = handler
@@ -141,7 +150,7 @@ public enum WidgetCommand: String, CaseIterable, Sendable {
                 CFNotificationCenterAddObserver(center, observer, { _, observer, name, _, _ in
                     guard let observer, let raw = name?.rawValue as String?, let command = WidgetCommand(rawValue: raw) else { return }
                     let observation = Unmanaged<Observation>.fromOpaque(observer).takeUnretainedValue()
-                    DispatchQueue.main.async { MainActor.assumeIsolated { observation.handler(command) } }
+                    DispatchQueue.main.async { MainActor.assumeIsolated { observation.deliver(command) } }
                 }, command.rawValue as CFString, nil, .deliverImmediately)
             }
         }

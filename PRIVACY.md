@@ -32,7 +32,8 @@ Every request identifies itself with the User-Agent `AudioPaper/0.1 (https://git
 - **Caching.** Album covers and each artist's images are kept on disk: every song is searched once, and replays make no requests. Each artist builds a pool of up to 24 images, and every play shows the ones you've seen least recently, so repeat plays stay fresh without going back online. If nothing is found for a song, that's remembered for a week. Artist identities are remembered too, so artists you've played before don't need looking up again.
 - **Fallback only.** Brave, the one service that searches the open web, is asked only when the curated sources return fewer than three usable images.
 - **No cookies, no web cache.** Every request goes through a private network session that never stores or sends cookies and writes nothing to an HTTP cache. Image sites can't leave anything behind or recognise a returning visitor by cookie.
-- **Rate limits.** Requests to each service are spaced out (1–2 seconds apart), and each service gets at most a handful of calls per song.
+- **Rate limits.** Requests to each service are spaced out (1–2 seconds apart), and each service gets at most a handful of calls per song. When a service asks AudioPaper to slow down, it waits as long as asked. At most 60 new songs are searched an hour.
+- **Nothing on your network.** Only `https` addresses on the public internet are contacted, even if a search result or redirect points elsewhere, so nothing on your own network is reachable through AudioPaper.
 - **Your keys stay yours.** API keys are stored in your Keychain and sent only to the service they belong to.
 
 ## What's stored on your Mac

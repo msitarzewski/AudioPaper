@@ -44,7 +44,8 @@ case "cover" where args.count == 3:
                 print("--    \(provider.id)  no match")
             }
         } catch {
-            print("!!    \(provider.id)  \(error)")
+            // The description only: a URLError's full dump includes the failing URL, which can carry an API key.
+            print("!!    \(provider.id)  \(error.localizedDescription)")
         }
     }
 
@@ -77,6 +78,8 @@ case "fanart" where args.count >= 3:
         case let .rejected(candidate, reason):
             rejected += 1
             print("❌ \(reason.padding(toLength: 34, withPad: " ", startingAt: 0)) \(candidate.imageURL.absoluteString.prefix(90))")
+        case let .incomplete(source, reason):
+            print("⚠️ \(source) unavailable (will be retried): \(reason)")
         }
     }
     print("accepted \(accepted), rejected \(rejected)")

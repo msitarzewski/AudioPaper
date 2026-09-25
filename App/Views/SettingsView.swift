@@ -186,6 +186,8 @@ private struct SourceSettings: View {
 }
 
 private struct AccountSettings: View {
+    /// Keys whose last save the Keychain refused; their section shows a warning instead of "Saved".
+    @State private var failed: Set<SecretKey> = []
     @State private var brave = ""
     @State private var deviantArtID = ""
     @State private var deviantArtSecret = ""
@@ -196,48 +198,52 @@ private struct AccountSettings: View {
     var body: some View {
         Form {
             Section {
-                CredentialField(label: "API key", key: .braveAPIKey, isSecret: true, text: $brave)
+                CredentialField(label: "API key", key: .braveAPIKey, isSecret: true, text: $brave, failed: $failed)
             } header: {
                 Text("Brave Search")
             } footer: {
                 CredentialFooter(
                     isConfigured: !brave.isEmpty,
+                    failed: !failed.isDisjoint(with: [.braveAPIKey]),
                     linkTitle: "Get a Brave Search API key",
                     destination: URL(string: "https://api-dashboard.search.brave.com/")!
                 )
             }
             Section {
-                CredentialField(label: "Project API key", key: .fanartTVProjectKey, isSecret: true, text: $fanartProject)
-                CredentialField(label: "Personal API key (optional)", key: .fanartTVClientKey, isSecret: true, text: $fanartPersonal)
+                CredentialField(label: "Project API key", key: .fanartTVProjectKey, isSecret: true, text: $fanartProject, failed: $failed)
+                CredentialField(label: "Personal API key (optional)", key: .fanartTVClientKey, isSecret: true, text: $fanartPersonal, failed: $failed)
             } header: {
                 Text("fanart.tv")
             } footer: {
                 CredentialFooter(
                     isConfigured: !fanartProject.isEmpty,
+                    failed: !failed.isDisjoint(with: [.fanartTVProjectKey, .fanartTVClientKey]),
                     linkTitle: "fanart.tv (sign in to create a project key)",
                     destination: URL(string: "https://fanart.tv")!
                 )
             }
             Section {
-                CredentialField(label: "Personal API key (optional)", key: .theAudioDBAPIKey, isSecret: true, text: $theAudioDB)
+                CredentialField(label: "Personal API key (optional)", key: .theAudioDBAPIKey, isSecret: true, text: $theAudioDB, failed: $failed)
             } header: {
                 Text("TheAudioDB")
             } footer: {
                 CredentialFooter(
                     isConfigured: true,
+                    failed: failed.contains(.theAudioDBAPIKey),
                     status: theAudioDB.isEmpty ? "Using the free public key" : "Saved in Keychain",
                     linkTitle: "About TheAudioDB's API",
                     destination: URL(string: "https://www.theaudiodb.com/free_music_api")!
                 )
             }
             Section {
-                CredentialField(label: "Client ID", key: .deviantArtClientID, isSecret: false, text: $deviantArtID)
-                CredentialField(label: "Client secret", key: .deviantArtClientSecret, isSecret: true, text: $deviantArtSecret)
+                CredentialField(label: "Client ID", key: .deviantArtClientID, isSecret: false, text: $deviantArtID, failed: $failed)
+                CredentialField(label: "Client secret", key: .deviantArtClientSecret, isSecret: true, text: $deviantArtSecret, failed: $failed)
             } header: {
                 Text("DeviantArt")
             } footer: {
                 CredentialFooter(
                     isConfigured: !deviantArtID.isEmpty && !deviantArtSecret.isEmpty,
+                    failed: !failed.isDisjoint(with: [.deviantArtClientID, .deviantArtClientSecret]),
                     linkTitle: "Register a DeviantArt application",
                     destination: URL(string: "https://www.deviantart.com/developers/")!
                 )
@@ -256,6 +262,7 @@ private struct CredentialField: View {
     let key: SecretKey
     let isSecret: Bool
     @Binding var text: String
+    @Binding var failed: Set<SecretKey>
     @State private var loaded = false
 
     var body: some View {
@@ -275,13 +282,18 @@ private struct CredentialField: View {
             guard loaded else { return }
             try? await Task.sleep(for: .milliseconds(500))
             guard !Task.isCancelled else { return }
-            KeychainSecretStore().set(text.trimmingCharacters(in: .whitespacesAndNewlines), for: key)
+            if KeychainSecretStore().set(text.trimmingCharacters(in: .whitespacesAndNewlines), for: key) {
+                failed.remove(key)
+            } else {
+                failed.insert(key)
+            }
         }
     }
 }
 
 private struct CredentialFooter: View {
     let isConfigured: Bool
+    var failed = false
     var status = "Saved in Keychain"
     let linkTitle: String
     let destination: URL
@@ -290,7 +302,10 @@ private struct CredentialFooter: View {
         HStack {
             Link(linkTitle, destination: destination)
             Spacer()
-            if isConfigured {
+            if failed {
+                Label("Couldn’t save to the Keychain", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            } else if isConfigured {
                 Label(status, systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.secondary)
                     .transition(.opacity)
@@ -330,9 +345,9 @@ private struct AboutSettings: View {
             HStack(spacing: 14) {
                 Link("GitHub", destination: Self.repository)
                 Text("·").foregroundStyle(.tertiary)
-                Link("Help", destination: Self.repository.appending(path: "blob/main/README.md"))
+                Link("Help", destination: Website.help)
                 Text("·").foregroundStyle(.tertiary)
-                Link("Privacy", destination: Self.repository.appending(path: "blob/main/PRIVACY.md"))
+                Link("Privacy", destination: Website.privacy)
                 Text("·").foregroundStyle(.tertiary)
                 Link("♥ Sponsor", destination: URL(string: "https://github.com/sponsors/msitarzewski")!)
             }

@@ -141,10 +141,10 @@ public struct BraveImageSource: FanArtSource {
     static func candidates(from response: Response, for track: Track) -> [ArtworkCandidate] {
         var seen = Set<String>()
         return response.results.compactMap { result in
-            let pageURL = result.url.flatMap(URL.init(string:))
+            let pageURL = result.url.flatMap(URL.init(string:))?.webLink
             let title = result.title?.decodingHTMLEntities()
-            guard let raw = result.properties?.url, let imageURL = URL(string: raw),
-                  let host = imageURL.host()?.lowercased(),
+            guard let raw = result.properties?.url, let imageURL = URL(string: raw).flatMap(Self.secure),
+                  imageURL.isAllowedRemote, let host = imageURL.host()?.lowercased(),
                   !isBlocked(host), !isBlocked(pageURL?.host()), !isBlocked(result.source),
                   let matchScore = relevance(title: title, pageURL: pageURL, track: track),
                   seen.insert(raw).inserted
@@ -160,10 +160,28 @@ public struct BraveImageSource: FanArtSource {
                     // so the credit names the artist the result was matched to; the page stays one click away.
                     title: track.artist,
                     pageURL: pageURL,
-                    sourceName: result.source ?? host
+                    // Named from the page's real address, not the result's self-reported `source`, so a
+                    // page can't label its link as some other site.
+                    sourceName: Self.siteName(pageURL?.host() ?? host)
                 ),
                 matchScore: matchScore
             )
         }
+    }
+
+    /// Web results often link images over plain http; most of those sites serve the same file over https,
+    /// which is the only way AudioPaper fetches anything.
+    static func secure(_ url: URL) -> URL? {
+        guard url.scheme?.lowercased() == "http" else { return url }
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        components?.scheme = "https"
+        if components?.port == 80 { components?.port = nil }
+        return components?.url
+    }
+
+    /// "www.example.com" → "example.com", for credits.
+    static func siteName(_ host: String) -> String {
+        let host = host.lowercased()
+        return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
 }

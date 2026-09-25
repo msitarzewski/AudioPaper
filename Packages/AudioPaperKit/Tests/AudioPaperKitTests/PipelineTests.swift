@@ -80,6 +80,7 @@ func fanArtCandidate(_ name: String, width: Int? = 1920, height: Int? = 1080) ->
             switch event {
             case let .accepted(artwork): accepted.append(artwork.candidate.imageURL.lastPathComponent)
             case let .rejected(candidate, reason): rejected[candidate.imageURL.lastPathComponent] = reason
+            case .incomplete: Issue.record("no source fails here")
             }
         }
         #expect(accepted == ["good.png"])
@@ -101,6 +102,7 @@ func fanArtCandidate(_ name: String, width: Int? = 1920, height: Int? = 1080) ->
                 switch event {
                 case let .accepted(artwork): accepted.append(artwork.candidate.imageURL.lastPathComponent)
                 case let .rejected(candidate, _): rejected.append(candidate.imageURL.lastPathComponent)
+                case .incomplete: break
                 }
             }
             return (accepted, rejected)

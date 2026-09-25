@@ -58,20 +58,36 @@ public struct KeychainSecretStore: SecretStore {
         return string
     }
 
-    public func set(_ value: String?, for key: SecretKey) {
+    /// Saves `value` (or removes the key when nil or empty). Returns whether the Keychain accepted it, so
+    /// Settings never says "Saved" for a key that wasn't.
+    @discardableResult
+    public func set(_ value: String?, for key: SecretKey) -> Bool {
         let base: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: key.rawValue,
         ]
-        SecItemDelete(base as CFDictionary)
+        let deleted = SecItemDelete(base as CFDictionary)
+        guard deleted == errSecSuccess || deleted == errSecItemNotFound else {
+            log.error("Keychain delete failed for \(key.rawValue, privacy: .public): \(deleted)")
+            return false
+        }
         let value = value.flatMap { $0.isEmpty ? nil : $0 }
-        Self.memo.set(service + "/" + key.rawValue, value)
-        guard let value else { return }
+        guard let value else {
+            Self.memo.set(service + "/" + key.rawValue, nil)
+            return true
+        }
         var add = base
         add[kSecValueData as String] = Data(value.utf8)
         add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        SecItemAdd(add as CFDictionary, nil)
+        let status = SecItemAdd(add as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            log.error("Keychain save failed for \(key.rawValue, privacy: .public): \(status)")
+            Self.memo.set(service + "/" + key.rawValue, nil)
+            return false
+        }
+        Self.memo.set(service + "/" + key.rawValue, value)
+        return true
     }
 }
 

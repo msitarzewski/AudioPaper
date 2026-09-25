@@ -36,6 +36,10 @@ struct AudioPaperApp: App {
             CommandGroup(after: .windowArrangement) {
                 MiniPlayerCommands(model: model)
             }
+            // HIG: the Help menu opens the app's help; ours is the website.
+            CommandGroup(replacing: .help) {
+                HelpCommands()
+            }
         }
 
         Settings {
@@ -63,6 +67,22 @@ private struct MiniPlayerCommands: View {
             .keyboardShortcut("m", modifiers: [.command, .option])
         Toggle("Float Mini Player on Top", isOn: $preferences.miniPlayerFloatsOnTop)
         Toggle("Show Mini Player on All Desktops", isOn: $preferences.miniPlayerOnAllDesktops)
+    }
+}
+
+/// The project website (GitHub Pages, built from `site/`).
+enum Website {
+    static let home = URL(string: "https://msitarzewski.github.io/AudioPaper/")!
+    static let help = home.appending(path: "help.html")
+    static let privacy = home.appending(path: "privacy.html")
+}
+
+private struct HelpCommands: View {
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        Button("AudioPaper Help") { openURL(Website.help) }
+            .keyboardShortcut("?", modifiers: .command)
     }
 }
 

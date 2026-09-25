@@ -12,6 +12,9 @@ public struct FanArtPipeline: Sendable {
     public enum Event: Sendable {
         case accepted(Artwork)
         case rejected(ArtworkCandidate, reason: String)
+        /// A source couldn't answer for a reason that says nothing about the song (offline, rate limited,
+        /// a server error). The search is incomplete and should be run again on a later play.
+        case incomplete(sourceID: String, reason: String)
     }
 
     public var sources: [any FanArtSource]
@@ -60,13 +63,15 @@ public struct FanArtPipeline: Sendable {
         }
         let configured = sources.filter(\.isConfigured)
 
-        let primary = await gatherCrediting(from: configured.filter { !$0.isFallback }, for: track).filter { !known.contains($0.imageURL) }
+        let primary = await gatherCrediting(from: configured.filter { !$0.isFallback }, for: track, continuation: continuation)
+            .filter { !known.contains($0.imageURL) }
         await process(primary, into: &accepted, continuation: continuation)
 
         // Metered fallbacks fill in only when too few images *passed* the filters (not merely were found).
         guard !Task.isCancelled, accepted.count < fallbackThreshold else { return }
         let seen = known.union(primary.map(\.imageURL))
-        let fallback = await gatherCrediting(from: configured.filter(\.isFallback), for: track).filter { !seen.contains($0.imageURL) }
+        let fallback = await gatherCrediting(from: configured.filter(\.isFallback), for: track, continuation: continuation)
+            .filter { !seen.contains($0.imageURL) }
         await process(fallback, into: &accepted, continuation: continuation)
     }
 
@@ -134,18 +139,22 @@ public struct FanArtPipeline: Sendable {
     /// Searches under the full artist credit; if that finds nothing, searches each credited artist of a
     /// collaboration ("LE SSERAFIM & j-hope") and each featured artist in the title ("feat. Ludacris"),
     /// interleaving their results.
-    private func gatherCrediting(from configured: [any FanArtSource], for track: Track) async -> [ArtworkCandidate] {
-        let full = await gather(from: configured, for: track)
+    private func gatherCrediting(
+        from configured: [any FanArtSource], for track: Track, continuation: AsyncStream<Event>.Continuation
+    ) async -> [ArtworkCandidate] {
+        let full = await gather(from: configured, for: track, continuation: continuation)
         let artists = track.fallbackArtists
         guard full.isEmpty, !artists.isEmpty else { return full }
         var lists: [[ArtworkCandidate]] = []
         for artist in artists {
-            lists.append(await gather(from: configured, for: track.crediting(artist)))
+            lists.append(await gather(from: configured, for: track.crediting(artist), continuation: continuation))
         }
         return Self.interleave(lists)
     }
 
-    private func gather(from configured: [any FanArtSource], for track: Track) async -> [ArtworkCandidate] {
+    private func gather(
+        from configured: [any FanArtSource], for track: Track, continuation: AsyncStream<Event>.Continuation
+    ) async -> [ArtworkCandidate] {
         let limit = candidatesPerSource
         let lists = await withTaskGroup(of: (Int, [ArtworkCandidate]).self) { group in
             for (index, source) in configured.enumerated() {
@@ -155,6 +164,9 @@ public struct FanArtPipeline: Sendable {
                         return (index, found.sorted { $0.matchScore > $1.matchScore })
                     } catch {
                         log.error("\(source.id, privacy: .public) search failed: \(error.localizedDescription, privacy: .public)")
+                        if HTTPError.isTransient(error) {
+                            continuation.yield(.incomplete(sourceID: source.id, reason: error.localizedDescription))
+                        }
                         return (index, [])
                     }
                 }

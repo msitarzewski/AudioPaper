@@ -22,6 +22,9 @@ public struct AppleMusicSource: NowPlayingSource {
         AsyncStream { continuation in
             let center = DistributedNotificationCenter.default()
             let observer = ObserverToken(center.addObserver(forName: Self.notification, object: nil, queue: nil) { note in
+                // Any process can post this notification name. Music always posts it while running, so one
+                // arriving while Music isn't running is someone else's, and is ignored.
+                guard Self.isMusicRunning else { return }
                 if let event = Self.event(from: note.userInfo ?? [:]) {
                     continuation.yield(event)
                 }
@@ -53,9 +56,20 @@ public struct AppleMusicSource: NowPlayingSource {
         }
     }
 
+    static var isMusicRunning: Bool {
+        !NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty
+    }
+
+    /// Longest title, artist or album kept; real ones are far shorter, and every field ends up in search
+    /// queries and on screen.
+    static let maxFieldLength = 256
+
     static func track(from info: [AnyHashable: Any]) -> Track? {
-        guard let title = info["Name"] as? String, !title.isEmpty,
-              let artist = info["Artist"] as? String, !artist.isEmpty
+        func field(_ key: String) -> String? {
+            (info[key] as? String).map { String($0.prefix(maxFieldLength)) }
+        }
+        guard let title = field("Name"), !title.isEmpty,
+              let artist = field("Artist"), !artist.isEmpty
         else { return nil }
         let persistentID: String? = switch info["PersistentID"] {
         case let number as NSNumber: String(UInt64(bitPattern: number.int64Value), radix: 16, uppercase: true)
@@ -65,8 +79,8 @@ public struct AppleMusicSource: NowPlayingSource {
         return Track(
             title: title,
             artist: artist,
-            album: info["Album"] as? String ?? "",
-            albumArtist: info["Album Artist"] as? String,
+            album: field("Album") ?? "",
+            albumArtist: field("Album Artist"),
             persistentID: persistentID,
             sourceID: "apple-music"
         )
@@ -74,7 +88,7 @@ public struct AppleMusicSource: NowPlayingSource {
 
     /// Asks Music what's playing right now. Only runs if Music is already open, so it never launches it.
     static func currentState() -> PlaybackEvent? {
-        guard !NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty else { return nil }
+        guard isMusicRunning else { return nil }
         let source = """
         tell application id "com.apple.Music"
             if player state is not playing then return {}
@@ -126,7 +140,8 @@ public struct AppleMusicArtworkProvider: AlbumArtworkProvider {
             kind: .albumCover,
             providerID: id,
             attribution: Attribution(title: track.album, creatorName: track.primaryArtist, sourceName: "Music"),
-            matchScore: 1
+            matchScore: 1,
+            isLocal: true
         )
     }
 

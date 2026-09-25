@@ -326,7 +326,9 @@ private struct AvatarImage: View {
         .task(id: url) {
             image = nil
             guard let url, let (data, _) = try? await URLSessionHTTPClient().data(for: URLRequest(url: url)) else { return }
-            image = NSImage(data: data)
+            // Decoded off the main thread as a small thumbnail, with the same format and size checks as artwork.
+            let thumbnail = await Task.detached { ImageLoading.thumbnail(from: data, maxPixelSize: 96) }.value
+            image = thumbnail.map { NSImage(cgImage: $0, size: .zero) }
         }
     }
 }

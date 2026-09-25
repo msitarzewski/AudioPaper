@@ -4,6 +4,13 @@ Every network request AudioPaper makes: host, trigger, what's sent, and how ofte
 
 All requests go through one client (`URLSessionHTTPClient`, `Packages/AudioPaperKit/Sources/AudioPaperKit/Support/HTTPClient.swift`) using a private, ephemeral session: **no cookies stored or sent, no HTTP disk cache**. Each request carries the User-Agent `AudioPaper/0.1 (https://github.com/msitarzewski/AudioPaper; macOS album-art wallpaper app)` (a contact address, as Wikimedia and MusicBrainz ask of API clients) and no Referer. Outgoing connections only; AudioPaper opens no listening sockets.
 
+Every reply is treated as untrusted, since web search results can point anywhere. So the same client enforces:
+
+- **`https` to named internet hosts only**, for every request and every redirect. Plain `http`, `file:` and other schemes, IP addresses, `localhost`, `.local` and other local-network names are refused. A search result can't make AudioPaper contact anything on your own network. Web results that link an image over `http` are fetched over `https` instead.
+- **Keys stay with their service.** If a redirect leads to a different host, the Brave key and the DeviantArt token are removed from the request first.
+- **Limits:** a response larger than 40 MB is abandoned, and each request gets 60 seconds in all.
+- **Downloaded images** must be JPEG, PNG, HEIC, WebP or TIFF, at most 16,384 px on a side and 50 megapixels. This is checked from the file header, before any decoding.
+
 ## When requests happen
 
 | Moment | Network? |
@@ -14,8 +21,10 @@ All requests go through one client (`URLSessionHTTPClient`, `Packages/AudioPaper
 | Replaying a song or album already cached | **None** (the artist's pooled images are shown, least recently seen first) |
 | A song by an artist whose pool is full (24 images) | **None** |
 | A song with nothing found in the last 7 days | **None** |
+| A song whose search was cut short (offline, rate limited, a server error, or skipped mid-search) | Searched again on its next play; it isn't remembered as having found nothing |
+| More than 60 new songs in an hour | Later ones show the album cover only and are searched on a later play |
 | Wallpaper rotation, Mini Player, widgets, Settings | **None**, except DeviantArt artist avatars (below) |
-| Clicking a credit or source link | Opens the page in your browser; AudioPaper makes no request |
+| Clicking a credit, a source link, Help or an About link | Opens the page in your browser; AudioPaper makes no request |
 
 ## Album cover (per new album)
 
@@ -94,6 +103,8 @@ When the Mini Player credits a DeviantArt artist, their avatar is fetched from D
 | Wikimedia (Wikidata, Commons) | 1 request / 0.5 s | "be reasonable"; a contact User-Agent is required |
 | Brave Search | 1 request / 1.1 s | 1 / s and 2,000 / month on the free plan |
 | Others | caching only | — |
+
+When a service answers **429 Too Many Requests** or **503**, AudioPaper sends nothing more to that host for as long as its `Retry-After` header asks (a minute if it doesn't say, at most an hour), and the song is searched again later.
 
 ## Verifying it yourself
 

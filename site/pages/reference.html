@@ -1,0 +1,167 @@
+<!--
+title: Reference
+description: Every AudioPaper setting, where its art comes from, how images are chosen and filtered, what it stores, and the tools for developers.
+-->
+<article class="doc">
+  <h1>Reference</h1>
+  <p class="intro">How AudioPaper works, with the numbers. Every figure here is a value in the <a href="https://github.com/msitarzewski/AudioPaper/tree/main/Packages/AudioPaperKit/Sources/AudioPaperKit">source code</a>, so you can check it. The <a href="privacy.html">Privacy</a> and <a href="network.html">Network</a> pages cover what is sent where.</p>
+
+  <nav class="toc" aria-label="On this page">
+    <strong>On this page</strong>
+    <ol>
+      <li><a href="#settings">Settings</a></li>
+      <li><a href="#covers">Album covers</a></li>
+      <li><a href="#identity">Identifying the artist</a></li>
+      <li><a href="#sources">Fan art sources</a></li>
+      <li><a href="#filters">The filters</a></li>
+      <li><a href="#pool">The artist’s pool</a></li>
+      <li><a href="#display">Putting it on screen</a></li>
+      <li><a href="#credits">Credits</a></li>
+      <li><a href="#storage">What’s stored, and where</a></li>
+      <li><a href="#untrusted">Untrusted replies</a></li>
+      <li><a href="#permissions">Permissions</a></li>
+      <li><a href="#developers">For developers</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="settings">Settings</h2>
+  <p>Open with <strong>Settings…</strong> in the menu, or <kbd>⌘</kbd> <kbd>,</kbd>. Settings reopens on the pane you used last.</p>
+
+  <h3>General</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Setting</th><th>Default</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>Wallpaper</td><td>Album cover, then fan art</td><td>Or <em>Album cover</em> only, which also skips every fan-art lookup.</td></tr>
+      <tr><td>Fan art framing</td><td>Automatic</td><td><em>Fill</em> the screen, <em>Fit</em> the whole image, or <em>Automatic</em>: fill, unless that would crop more than 15% of the image.</td></tr>
+      <tr><td>Change fan art every</td><td>45 seconds</td><td>From 15 seconds to 5 minutes.</td></tr>
+      <tr><td>Restore my wallpaper when music stops</td><td>Off</td><td>Puts your own wallpaper back 30 seconds after playback stops.</td></tr>
+      <tr><td>Show in menu bar</td><td>On</td><td>When off, AudioPaper appears in the Dock instead.</td></tr>
+      <tr><td>Open at login</td><td>Off</td><td>Registers AudioPaper as a login item.</td></tr>
+      <tr><td>Storage: keep up to</td><td>500 MB</td><td>250 MB, 500 MB, 1 GB or 2 GB of downloaded art. <strong>Clear Cache…</strong> empties it, keeping the images on screen.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Sources</h3>
+  <p>Switches for each player (Apple Music, for now) and each fan-art source. New sources start switched on. A source that needs credentials says so until you add them; Brave Search is marked as the fallback it is.</p>
+
+  <h3>Accounts</h3>
+  <p>Keys for fanart.tv (a project key, plus an optional personal key), TheAudioDB (optional), Brave Search and DeviantArt (client ID and secret). They’re saved to your Keychain half a second after you stop typing, and each is sent only to its own service. How to get them is on the <a href="help.html#more-art">Help page</a>.</p>
+
+  <h3>About</h3>
+  <p>Version and build, and links to the source, help, privacy and sponsorship.</p>
+
+  <h2 id="covers">Album covers</h2>
+  <p>When a new album starts, its cover is looked up from these in order; the first confident match wins, and the rest aren’t asked.</p>
+  <ol>
+    <li><strong>Apple’s iTunes Search</strong>, at up to 3000 × 3000.</li>
+    <li><strong>MusicBrainz and the Cover Art Archive</strong>, at 1200 px, when Apple doesn’t have the release.</li>
+    <li><strong>The Music app’s own artwork</strong>, read on your Mac.</li>
+  </ol>
+  <p>A match is scored on both artist and album name, with edition noise (“Deluxe Edition”, “2011 Remaster”, “- Single”) removed first, so a tribute album with the same title doesn’t win.</p>
+
+  <h2 id="identity">Identifying the artist</h2>
+  <p>Fan-art services file images under an exact artist, not a name, because names collide. So AudioPaper first asks <strong>MusicBrainz</strong> which artist recorded <em>this song</em>. That’s how ROSÉ of BLACKPINK and Rose, the French singer, stay apart. If the song search doesn’t settle it, it searches by artist name. Names are matched exactly, accents included.</p>
+  <ul>
+    <li><strong>Collaborations</strong> (“LE SSERAFIM &amp; j-hope”, “A feat. B”, “A x B”, “A with B”) are looked up as a whole first; if that finds no art, each credited artist is tried.</li>
+    <li><strong>Featured artists</strong> named in the title (“feat. Ludacris, Mystikal &amp; I-20”) are tried next, for credits like a label crew that has no art of its own.</li>
+    <li>Identities are remembered on disk. Names that couldn’t be resolved are retried after 7 days.</li>
+  </ul>
+
+  <h2 id="sources">Fan art sources</h2>
+  <p>The first four are asked together. Brave Search is asked afterwards, and only if fewer than 3 images have passed the filters.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Source</th><th>Finds</th><th>Looked up by</th><th>Key</th></tr></thead>
+    <tbody>
+      <tr><td>fanart.tv</td><td>Fan-made artist backgrounds, 1920 × 1080 and 4K</td><td>Artist ID</td><td>Needed (free)</td></tr>
+      <tr><td>TheAudioDB</td><td>Artist backgrounds, 1280 × 720</td><td>Artist ID, or the exact name if there’s no ID</td><td>Built in (the free public key)</td></tr>
+      <tr><td>Wikimedia Commons</td><td>Freely licensed photos, with photographer and licence. Originals up to 4000 px wide; a 1920 px copy of larger ones</td><td>Artist ID → Wikidata → the artist’s Commons category</td><td>None</td></tr>
+      <tr><td>DeviantArt</td><td>Fan art, with the artist’s profile</td><td>Artist and song</td><td>Your own application</td></tr>
+      <tr><td>Brave Search (fallback)</td><td>Images from the wider web</td><td>Up to three searches: “<em>artist song</em> fan art wallpaper”, “<em>artist</em> fan art wallpaper”, “<em>artist</em> press photo”, stopping once there’s enough</td><td>Your own key</td></tr>
+    </tbody>
+  </table></div>
+  <p>Each source returns at most 30 candidates. A web result is used only if its title or address names the artist as a whole phrase (“Ray Noir” doesn’t match “Blu-ray Noir”), with the same accents (“ROSÉ”, not “Rose”). A one-word name must also come with the song, the album or a word about music; a name of two or more words is specific enough on its own.</p>
+
+  <h3>When a service is down or busy</h3>
+  <p>If a service is offline, returns a server error, or answers <strong>429 Too Many Requests</strong>, AudioPaper sends it nothing more for as long as its <code>Retry-After</code> header asks: a minute if it doesn’t say, at most an hour. The song isn’t marked as searched, so it’s searched again on its next play. The same goes for a song you skip mid-search. At most 60 new songs are searched an hour.</p>
+
+  <h2 id="filters">The filters</h2>
+  <p>Every candidate is checked on your Mac, with Apple’s Vision framework, before it can be shown. Candidates are downloaded 4 at a time, and checking stops once 8 have passed.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Check</th><th>Rejects</th></tr></thead>
+    <tbody>
+      <tr><td>Size</td><td>Anything under 1280 × 720 (either way up), or narrower than 1&nbsp;:&nbsp;2 or wider than 2.6&nbsp;:&nbsp;1. Portrait images are allowed. Sources that report sizes are skipped before download.</td></tr>
+      <tr><td>Utility and aesthetics</td><td>Images Vision marks as utility (screenshots, documents, receipts), and those with an aesthetics score below −0.5.</td></tr>
+      <tr><td>Text</td><td>Images where recognised text covers more than 1.5% of the image, or that contain more than 6 words. Small incidental text, like a shirt number, is fine.</td></tr>
+      <tr><td>Scene</td><td>Images Vision classifies, with at least 60% confidence, as screens, ads and signs, print and documents, or products and packaging (mugs, CDs, framed prints on a wall). People, performers and concerts are welcome.</td></tr>
+      <tr><td>Duplicates</td><td>Copies of the album cover, of what’s on screen, and of each other (a Vision feature-print distance under 0.2). Different photos from the same shoot are kept.</td></tr>
+    </tbody>
+  </table></div>
+  <p>What passes is ranked by Vision’s aesthetics score, plus a boost equal to Vision’s confidence that the image is artwork (art, illustration, painting, graffiti).</p>
+
+  <h2 id="pool">The artist’s pool</h2>
+  <ul>
+    <li>Each <strong>song is searched once</strong>, the first time it plays. What it finds joins its artist’s pool.</li>
+    <li>A pool holds up to <strong>24 images</strong>. Once it’s full, new songs by that artist don’t search at all.</li>
+    <li>Each play shows up to <strong>8 images</strong> from the pool: the ones you’ve seen least recently first. So repeat plays look different without going back online.</li>
+    <li>When nothing is found for a song, that’s remembered for <strong>7 days</strong>.</li>
+  </ul>
+
+  <h2 id="display">Putting it on screen</h2>
+  <ul>
+    <li><strong>The cover</strong> is drawn centred over a blurred, colour-matched wash of itself, at the size of each display.</li>
+    <li><strong>Fan art</strong> fills the screen edge to edge. When filling would crop more than 15% (<em>Automatic</em>), or you chose <em>Fit</em>, the whole image is shown and its edges are feathered into a blurred extension of itself.</li>
+    <li><strong>The change</strong> is a cross-fade, drawn in a click-through window just above the desktop; then the real wallpaper is set underneath it. So the picture stays after you quit, and appears on every Space, every display and in Mission Control. It’s re-applied when you switch Spaces.</li>
+    <li><strong>Your original wallpaper</strong> is saved, per display, the first time AudioPaper changes it, and put back by <strong>Restore Original Wallpaper</strong>.</li>
+  </ul>
+
+  <h2 id="credits">Credits</h2>
+  <p>Every image keeps where it came from. The menu, the Mini Player and the widgets show:</p>
+  <ul>
+    <li>the <strong>person</strong> who made or took it, when the source says (DeviantArt artists, Commons photographers), with a link to their profile where there is one;</li>
+    <li>the <strong>licence</strong>, for Wikimedia Commons photos;</li>
+    <li>the <strong>page</strong> it came from, and the service that found it.</li>
+  </ul>
+  <p>For web results, the credit names the artist the image was matched to and the site, since wallpaper sites’ titles rarely say who is pictured.</p>
+
+  <h2 id="storage">What’s stored, and where</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>What</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Downloaded art, each artist’s pool, remembered searches and identities</td><td><code>~/Library/Containers/com.audiopaper/Data/Library/Caches/AudioPaper</code></td></tr>
+      <tr><td>Rendered wallpapers (only the current ones)</td><td>AudioPaper’s Application Support folder, in the same container</td></tr>
+      <tr><td>Settings, your original wallpaper’s location, the Mini Player’s position</td><td>AudioPaper’s preferences, in the same container</td></tr>
+      <tr><td>API keys</td><td>Your Keychain, under <code>com.audiopaper.credentials</code></td></tr>
+      <tr><td>The widgets’ snapshot: track, credits, small thumbnails</td><td><code>~/Library/Group Containers/7JQGQ7CRH8.com.audiopaper</code>, shared only with AudioPaper’s widgets</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="untrusted">Untrusted replies</h2>
+  <p>Web search results can point anywhere, so everything a service sends back is treated as untrusted:</p>
+  <ul>
+    <li>Requests go only to <code>https</code> addresses on named internet hosts, redirects included. IP addresses, <code>localhost</code>, <code>.local</code> and other local-network names are refused, so a result can’t reach anything on your network.</li>
+    <li>The Brave key and DeviantArt token are dropped if a redirect leads to another host.</li>
+    <li>Responses over 40 MB are abandoned, and each request gets 60 seconds in all.</li>
+    <li>Images must be JPEG, PNG, HEIC, WebP or TIFF, at most 16,384 px on a side and 50 megapixels, checked from the header before decoding.</li>
+    <li>Credit links open only if they’re web links (<code>https</code> or <code>http</code>); a source can’t make a credit open a file, a network share or another app.</li>
+    <li>“Now playing” notifications are acted on only while Music is running, with each field capped at 256 characters.</li>
+  </ul>
+  <p>Security reports go to the address in <a href="https://github.com/msitarzewski/AudioPaper/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+  <h2 id="permissions">Permissions</h2>
+  <p>AudioPaper runs in the App Sandbox, with the hardened runtime, and asks for only this:</p>
+  <ul>
+    <li><strong>Outgoing network connections</strong>, for the lookups. It accepts no incoming ones.</li>
+    <li><strong>Automation of Music</strong>, to read what’s playing at launch, and Music’s artwork as a last resort. It never controls playback.</li>
+    <li><strong>An App Group</strong>, shared with its own widgets.</li>
+  </ul>
+  <p>No location, contacts, camera, microphone, photos or files.</p>
+
+  <h2 id="developers">For developers</h2>
+  <p>AudioPaper is a Swift package (<code>AudioPaperKit</code>) with a thin SwiftUI app and a WidgetKit extension on top. Players, cover providers, fan-art sources and image filters are plugins, each a small Swift protocol; adding one is a single file and one line of registration. See <a href="https://github.com/msitarzewski/AudioPaper/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
+  <p>The package includes <code>apctl</code>, a command-line tool that runs the same code as the app. From <code>Packages/AudioPaperKit</code>, with keys in a <code>.env</code> file (see <code>.env.example</code>):</p>
+  <pre><code>swift run apctl cover "Radiohead" "In Rainbows"      # which provider found the cover, and the score
+swift run apctl fanart "BABYMONSTER" "DRIP" [outDir]  # every candidate, every filter verdict, the ranking
+swift run apctl labels image.jpg …                   # Vision's classification labels for images
+swift run apctl render image.jpg 3024 1964 automatic # compose a wallpaper exactly as the app would</code></pre>
+  <p>The tests run with <code>swift test</code> in the same folder.</p>
+</article>

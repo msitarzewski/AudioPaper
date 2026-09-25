@@ -12,6 +12,8 @@
 
 AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the song changes. It puts the album cover up straight away, then cross-fades in fan art and artist photos while the song plays, like a Photos-folder wallpaper slideshow. It lives in the menu bar, with a Liquid Glass Mini Player and desktop widgets when you want more. It's native, with no third-party dependencies, no accounts and no telemetry.
 
+**Website:** [msitarzewski.github.io/AudioPaper](https://msitarzewski.github.io/AudioPaper/): [help](https://msitarzewski.github.io/AudioPaper/help.html), [keyboard shortcuts](https://msitarzewski.github.io/AudioPaper/shortcuts.html) and the [full reference](https://msitarzewski.github.io/AudioPaper/reference.html).
+
 ## How it works
 
 1. **Hears the track change.** Apple Music posts a system notification on every change, so there's no polling and no special permission. On launch, AudioPaper asks Music once what's already playing.
@@ -128,6 +130,8 @@ Packages/AudioPaperKit/       Everything else, as a Swift package
     NowPlayingCoordinator     Playback events → cover → fan art → rotation
   Sources/apctl/              Developer CLI: cover, fanart, labels, render
 docs/icon/                    App icon SVG masters and the palette build (build_icons.py)
+site/                         The website (GitHub Pages): page fragments, layout, static assets
+scripts/build_site.py         Builds site/ + PRIVACY.md + NETWORK.md into _site/ (needs pandoc); CI publishes it
 scripts/install.sh            Build, install to /Applications and relaunch (needed for widgets)
 project.yml                   XcodeGen project spec (the .xcodeproj is generated)
 ```

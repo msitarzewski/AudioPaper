@@ -1,0 +1,145 @@
+<!--
+title: Help
+description: Installing AudioPaper, getting more art, the menu, the Mini Player, widgets, and what to do when something doesn't work.
+-->
+<article class="doc">
+  <h1>Help</h1>
+  <p class="intro">Everything AudioPaper does, where to find it, and what to try when it doesn’t do what you expected. You don’t need to read it in order.</p>
+
+  <nav class="toc" aria-label="On this page">
+    <strong>On this page</strong>
+    <ol>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#first-launch">The first launch</a></li>
+      <li><a href="#more-art">Getting more art</a></li>
+      <li><a href="#menu">The menu bar menu</a></li>
+      <li><a href="#mini-player">The Mini Player</a></li>
+      <li><a href="#widgets">Widgets</a></li>
+      <li><a href="#dock">The Dock icon</a></li>
+      <li><a href="#control">Pausing, slowing down, restoring</a></li>
+      <li><a href="#storage">Storage</a></li>
+      <li><a href="#troubleshooting">When something doesn’t work</a></li>
+      <li><a href="#uninstall">Removing AudioPaper</a></li>
+      <li><a href="#contact">Asking for help</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="install">Install</h2>
+  <ol>
+    <li>Download <code>AudioPaper.dmg</code> from the <a href="https://github.com/msitarzewski/AudioPaper/releases/latest">latest release</a>. It is signed with a Developer ID and notarized by Apple, so it opens without warnings.</li>
+    <li>Open it and drag <strong>AudioPaper</strong> into <strong>Applications</strong>. It must be in Applications for its widgets to show up.</li>
+    <li>Open AudioPaper from Applications. A small display-and-note icon appears in the menu bar; there’s no window to start with.</li>
+  </ol>
+  <p>You need macOS 26 or later and the Music app. If you’d rather build it yourself, the <a href="https://github.com/msitarzewski/AudioPaper#build-and-run">README</a> has the steps.</p>
+
+  <h2 id="first-launch">The first launch</h2>
+  <p>If music is already playing, macOS asks: <em>“AudioPaper” wants access to control “Music”</em>, with AudioPaper’s reason: <em>AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.</em></p>
+  <ul>
+    <li><strong>Allow</strong>, and the wallpaper changes straight away.</li>
+    <li><strong>Don’t Allow</strong>, and it changes when the next song starts instead. Track changes don’t need this permission. You can change your answer in <strong>System Settings → Privacy &amp; Security → Automation</strong>.</li>
+  </ul>
+  <p>AudioPaper uses this only to read the current track (and, as a last resort, the cover art Music already has). It never plays, pauses or skips anything.</p>
+  <p>Your own wallpaper is remembered the first time AudioPaper changes it, so <strong>Restore Original Wallpaper</strong> can put it back later.</p>
+
+  <h2 id="more-art">Getting more art</h2>
+  <p>Out of the box, AudioPaper finds covers for nearly everything, and fan art and photos from <strong>TheAudioDB</strong> and <strong>Wikimedia Commons</strong>. Well-known artists usually have plenty; newer or smaller artists may have one image or none. These optional keys find more. Add them in <strong>Settings → Accounts</strong>; they’re saved in your Keychain as you type.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Service</th><th>What it adds</th><th>How to get a key</th></tr></thead>
+    <tbody>
+      <tr><td>fanart.tv</td><td>Fan-made artist backgrounds at 1920 × 1080 and 4K. Often the best source for well-known artists.</td><td>Make a free account at <a href="https://fanart.tv">fanart.tv</a>, then create an API key from your profile. Paste it into <strong>Project API key</strong>. A <strong>Personal API key</strong> is optional; with one, new images reach you sooner.</td></tr>
+      <tr><td>Brave Search</td><td>Images from the wider web, used only when the other sources find fewer than three usable images for a song.</td><td>Sign up at the <a href="https://api-dashboard.search.brave.com/">Brave Search API dashboard</a>. The free plan allowed 2,000 searches a month as of September 2026; AudioPaper uses at most three per song, and only for songs that need it.</td></tr>
+      <tr><td>DeviantArt</td><td>Fan art, with links to each artist’s DeviantArt profile. This source hasn’t yet been tested against a live DeviantArt account.</td><td><a href="https://www.deviantart.com/developers/">Register an application</a> and paste its <strong>Client ID</strong> and <strong>Client secret</strong>.</td></tr>
+      <tr><td>TheAudioDB</td><td>Works without a key. A personal key only matters if you’re a supporter of theirs.</td><td><a href="https://www.theaudiodb.com/free_music_api">About TheAudioDB’s API</a></td></tr>
+    </tbody>
+  </table></div>
+  <p>Each song is searched once, when it first plays. Art found for an artist is kept in a pool of up to 24 images, so their other songs have something to show straight away.</p>
+
+  <h2 id="menu">The menu bar menu</h2>
+  <p>Click the icon in the menu bar. From the top:</p>
+  <ul>
+    <li><strong>The song</strong>, and the artist and album.</li>
+    <li><strong>The credit</strong> for the image on screen. Choose it to open the artist’s profile, when there is one. <strong>View Image on …</strong> (or <strong>View Album on …</strong>) opens the page the image came from.</li>
+    <li><strong>Next Image</strong>, <strong>Pause Wallpaper Changes</strong> and <strong>Restore Original Wallpaper</strong>.</li>
+    <li><strong>Show Mini Player</strong>, <strong>Settings…</strong> and <strong>Quit AudioPaper</strong>.</li>
+  </ul>
+  <p>The icon shows a pause mark while wallpaper changes are paused.</p>
+
+  <h2 id="mini-player">The Mini Player</h2>
+  <p>A small window, like Music’s MiniPlayer: the image on screen, its credit, a strip of every image in rotation, and buttons for <strong>Next Image</strong>, <strong>Pause</strong> and <strong>Restore Original Wallpaper</strong>. Click an image in the strip to show it now.</p>
+  <ul>
+    <li><strong>Open it</strong> from the menu (<kbd>⌥</kbd><kbd>⌘</kbd><kbd>M</kbd>), by clicking a widget, or by clicking AudioPaper’s Dock icon.</li>
+    <li><strong>Move it</strong> by dragging anywhere on its background.</li>
+    <li>The <strong>…</strong> button has <strong>Float on Top</strong> and <strong>Show on All Desktops</strong>. The same options are in the <strong>Window</strong> menu.</li>
+    <li>It remembers where you left it, and whether it was open when you quit.</li>
+  </ul>
+
+  <h2 id="widgets">Widgets</h2>
+  <p>Right-click the desktop, choose <strong>Edit Widgets</strong>, and search for AudioPaper.</p>
+  <ul>
+    <li><strong>Now Playing</strong> (small, medium, large): the track, the image on screen and its credit. The medium and large sizes have working <strong>Pause</strong> and <strong>Next Image</strong> buttons.</li>
+    <li><strong>Artwork</strong> (all sizes): just the image on screen, with its credit.</li>
+  </ul>
+  <p>Clicking a widget opens the Mini Player. Like all macOS widgets, they turn grey while another app’s window is in front and the widget style is set to <em>Automatic</em>; clicking the desktop brings the colour back. You can change this in <strong>System Settings → Desktop &amp; Dock → Widget style</strong>.</p>
+
+  <h2 id="dock">The Dock icon</h2>
+  <p>AudioPaper stays out of the Dock unless it needs to be there: while the Mini Player is open, or when you’ve turned off <strong>Show in menu bar</strong>, so there is always a way back in. Clicking the Dock icon opens the Mini Player; right-clicking it offers <strong>Next Image</strong>, <strong>Pause</strong> and <strong>Restore Original Wallpaper</strong>.</p>
+  <p>If you hid the menu bar icon and closed the Mini Player, open AudioPaper from Applications again to bring the Mini Player back.</p>
+
+  <h2 id="control">Pausing, slowing down, restoring</h2>
+  <ul>
+    <li><strong>Pause Wallpaper Changes</strong> keeps the current image until you resume, whatever you play.</li>
+    <li><strong>Settings → General → Change fan art every</strong> sets the rotation, from 15 seconds to 5 minutes.</li>
+    <li><strong>Settings → General → Wallpaper → Album cover</strong> shows only the cover: no fan art, and no fan-art lookups.</li>
+    <li><strong>Restore my wallpaper when music stops</strong> puts your own wallpaper back 30 seconds after playback stops.</li>
+    <li><strong>Restore Original Wallpaper</strong> puts it back now.</li>
+  </ul>
+  <p>The wallpaper AudioPaper sets is a real wallpaper, so it stays if you quit, and shows on every desktop and display.</p>
+
+  <h2 id="storage">Storage</h2>
+  <p>Downloaded art is kept so that replays cost nothing. <strong>Settings → General → Storage</strong> shows how much is in use, sets the limit (250 MB to 2 GB, 500 MB by default), and has <strong>Clear Cache…</strong>, which deletes it all except the images on screen. When the limit is reached, the images used least recently go first.</p>
+
+  <h2 id="troubleshooting">When something doesn’t work</h2>
+
+  <h3>The wallpaper doesn’t change</h3>
+  <ul>
+    <li>AudioPaper follows the <strong>Music</strong> app only. Other players aren’t supported yet.</li>
+    <li>Check the menu bar icon: if it shows a pause mark, choose <strong>Resume Wallpaper Changes</strong>.</li>
+    <li>The first song after launch needs the Automation permission (see <a href="#first-launch">The first launch</a>). The next song works without it.</li>
+  </ul>
+
+  <h3>Only the album cover, no fan art</h3>
+  <ul>
+    <li>Check <strong>Settings → General → Wallpaper</strong> is set to show fan art, and that sources are switched on in <strong>Settings → Sources</strong>.</li>
+    <li>Some artists have no art in the sources you have. Adding a <a href="#more-art">fanart.tv or Brave Search key</a> finds more.</li>
+    <li>When nothing is found for a song, AudioPaper waits a week before searching for it again, so it doesn’t ask the services over and over.</li>
+  </ul>
+
+  <h3>The art shows the wrong artist</h3>
+  <p>AudioPaper identifies artists through MusicBrainz, using the song as well as the name, so two artists with the same name aren’t mixed up. It can still get it wrong, especially for new releases MusicBrainz doesn’t know yet. Use <strong>View Image on …</strong> to see where the image came from, and please <a href="https://github.com/msitarzewski/AudioPaper/issues/new/choose">open an issue</a> with the artist and song.</p>
+
+  <h3>An image has text on it, or isn’t art</h3>
+  <p>The filters catch most text, screenshots and product photos, but stylised band logos can get past them. <strong>Next Image</strong> moves on; an issue with the image’s page helps improve the filters.</p>
+
+  <h3>The widgets aren’t in the widget gallery</h3>
+  <p>AudioPaper must be in your <strong>Applications</strong> folder, and must have been opened once from there.</p>
+
+  <h3>The widgets look grey</h3>
+  <p>That’s macOS dimming widgets while another window is in front; see <a href="#widgets">Widgets</a>.</p>
+
+  <h2 id="uninstall">Removing AudioPaper</h2>
+  <ol>
+    <li>Choose <strong>Restore Original Wallpaper</strong>, so your own wallpaper is back.</li>
+    <li>If you added keys, clear them in <strong>Settings → Accounts</strong>, which removes them from your Keychain.</li>
+    <li>If you turned on <strong>Open at login</strong>, turn it off in <strong>Settings → General</strong>.</li>
+    <li>Quit AudioPaper and drag it from Applications to the Trash.</li>
+    <li>To remove its downloaded art and settings too, delete these two folders:
+      <ul>
+        <li><code>~/Library/Containers/com.audiopaper</code></li>
+        <li><code>~/Library/Group Containers/7JQGQ7CRH8.com.audiopaper</code></li>
+      </ul>
+    </li>
+  </ol>
+
+  <h2 id="contact">Asking for help</h2>
+  <p>Questions and bug reports go to <a href="https://github.com/msitarzewski/AudioPaper/issues">GitHub issues</a>. Security or privacy problems go by email instead, as described in <a href="https://github.com/msitarzewski/AudioPaper/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+</article>
