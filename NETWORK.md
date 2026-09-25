@@ -25,6 +25,7 @@ Every reply is treated as untrusted, since web search results can point anywhere
 | More than 60 new songs in an hour | Later ones show the album cover only and are searched on a later play |
 | Wallpaper rotation, Mini Player, widgets, Settings | **None**, except DeviantArt artist avatars (below) |
 | Clicking a credit, a source link, Help or an About link | Opens the page in your browser; AudioPaper makes no request |
+| Checking for updates | The update feed (below): about once a day if you allowed automatic checks, or when you choose **Check for Updates…** |
 
 ## Album cover (per new album)
 
@@ -82,6 +83,17 @@ Candidates the sources report as too small (under 1280×720) are skipped without
 ### DeviantArt avatars
 
 When the Mini Player credits a DeviantArt artist, their avatar is fetched from DeviantArt's avatar server, through the same cookie-free session.
+
+## Checking for updates (Sparkle)
+
+AudioPaper uses [Sparkle](https://sparkle-project.org). On the second launch it asks whether to check automatically; nothing is checked until you choose.
+
+| Host | Request | When | Sends |
+|---|---|---|---|
+| `msitarzewski.github.io` | `GET /AudioPaper/appcast.xml` (the update feed) | about once a day if you allowed automatic checks; whenever you choose **Check for Updates…** | your IP address, and Sparkle's User-Agent (app name and version). **No system profile** |
+| `github.com` → GitHub's download servers | the update's `.zip` | only when you choose to install an update | — |
+
+Every update is verified against the EdDSA public key built into the app before it's installed; a feed or file that doesn't match is refused.
 
 ## Typical totals
 

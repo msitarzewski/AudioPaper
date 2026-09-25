@@ -1,6 +1,6 @@
 # Active Context
 
-**State** (2026-09-25): **v0.1.2** — app-first song changes (the app switches at once, the wallpaper follows), downloaded covers skip the debounce, the cover holds 10 s as a placeholder before fan art. Released from this commit. Next: Commons relevance, a hands-on VoiceOver session (NEXT-SESSION.md).
+**State** (2026-09-25): **v0.1.3** — Sparkle auto-update (feed `site/static/appcast.xml` on GitHub Pages; EdDSA key in the login Keychain, `generate_keys --account AudioPaper`), internet-content disclaimer (Settings → Sources, About, README, site). Everyone installs 0.1.3 by hand once; later versions update through Sparkle. Next: Commons relevance, VoiceOver session.
 
 ## User decisions (2026-09-25)
 - Follow Apple's HIG, Apple's own UI examples and per-platform icon practice, macOS only for now (`projectRules.md`).

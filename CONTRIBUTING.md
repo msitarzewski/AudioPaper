@@ -84,7 +84,7 @@ Guidelines:
 ## Code style
 
 - Swift 6 language mode with strict concurrency. Keep UI and AppKit work on `@MainActor`.
-- Apple frameworks only; no third-party packages.
+- Apple frameworks only, with one deliberate exception: Sparkle, for updates (macOS has none for apps outside the Mac App Store). Don't add others.
 - Match the surrounding code: small types, doc comments on public API and non-obvious decisions, no commented-out code.
 - File-system paths use `path(percentEncoded: false)`; `URL.path()` is percent-encoded.
 
@@ -100,7 +100,7 @@ AudioPaper follows WCAG 2.2 AA through [WCAG2ICT](https://www.w3.org/TR/wcag2ict
 
 ## Releasing (maintainer)
 
-`scripts/release.sh` builds the signed, notarized download: `build/release/AudioPaper-<version>.dmg`. It archives a Release build, exports it with the Developer ID certificate (the widget extension included), checks signatures, hardened runtime and sandbox, then notarizes and staples the app and the disk image. Bump `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml` first.
+`scripts/release.sh` builds the signed, notarized download (`build/release/AudioPaper-<version>.dmg`) and the Sparkle update (`AudioPaper-<version>.zip`, signed with the EdDSA key in the maintainer's Keychain under `generate_keys --account AudioPaper`), and adds it to the feed, `site/static/appcast.xml`. Publish the GitHub release with both files **before** pushing the feed, since the feed points at the zip. It archives a Release build, exports it with the Developer ID certificate (the widget extension included), checks signatures, hardened runtime and sandbox, then notarizes and staples the app and the disk image. Bump `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml` first.
 
 It needs `APPLE_ID`, `APPLE_PASSWORD` (app-specific) and `APPLE_TEAM_ID` in the environment, plus the fanart.tv project key the app ships with, as `FANART_PROJECT_KEY` or `FAN_ART_API_KEY` in `.env`. The key goes into the built app's Info.plist only, never into the repository. Every other build leaves it empty, so fanart.tv then needs a key in Settings → Accounts.
 

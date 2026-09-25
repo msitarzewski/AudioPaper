@@ -7,13 +7,18 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.2"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "0.1.3"
+    CURRENT_PROJECT_VERSION: "4"
     DEAD_CODE_STRIPPING: YES
     ENABLE_USER_SCRIPT_SANDBOXING: YES
 packages:
   AudioPaperKit:
     path: Packages/AudioPaperKit
+  # Sparkle auto-update (github.com/sparkle-project/Sparkle), as in Anomalous. The one third-party
+  # dependency, deliberately: macOS has no updater for apps distributed outside the Mac App Store.
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: "2.9.4"
 targets:
   AudioPaper:
     type: application
@@ -29,6 +34,8 @@ targets:
     dependencies:
       - package: AudioPaperKit
         product: AudioPaperKit
+      - package: Sparkle
+        product: Sparkle
       - target: AudioPaperWidgets
     info:
       path: App/Info.plist
@@ -50,6 +57,16 @@ targets:
         # fanart.tv project key, supplied only by scripts/release.sh (never committed). Empty in other builds,
         # which then need a key in Settings → Accounts.
         FanartTVProjectKey: $(FANART_PROJECT_KEY)
+        # ── Sparkle auto-update ──────────────────────────────────────────
+        # The feed is published with the website (site/static/appcast.xml) by scripts/release.sh.
+        SUFeedURL: $(SPARKLE_FEED_URL)
+        # Updates must be signed with the matching private key, kept in the maintainer's login Keychain
+        # (generate_keys --account AudioPaper). This public half is safe to publish.
+        SUPublicEDKey: lpSHxqLs3q81a7t2g8ZlsO67NTszfgArJdvd4kO/hbA=
+        # A sandboxed app hands installation to Sparkle's installer launcher (see the entitlements below).
+        SUEnableInstallerLauncherService: true
+        # No SUEnableAutomaticChecks: Sparkle asks on the second launch whether to check automatically,
+        # so people choose. No system profile is ever sent.
     entitlements:
       path: App/AudioPaper.entitlements
       properties:
@@ -61,6 +78,11 @@ targets:
           - com.apple.Music
         com.apple.security.application-groups:
           - $(DEVELOPMENT_TEAM).com.audiopaper
+        # Sparkle's installer launcher and its status channel, reachable from the sandbox (Sparkle's
+        # sandboxing guide). Nothing else is opened up.
+        com.apple.security.temporary-exception.mach-lookup.global-name:
+          - $(PRODUCT_BUNDLE_IDENTIFIER)-spks
+          - $(PRODUCT_BUNDLE_IDENTIFIER)-spki
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.audiopaper
@@ -71,6 +93,8 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
         FANART_PROJECT_KEY: ""
+        # Overridden only to test updates against a local feed.
+        SPARKLE_FEED_URL: https://msitarzewski.github.io/AudioPaper/appcast.xml
 
   AudioPaperWidgets:
     type: app-extension
@@ -95,6 +119,11 @@ targets:
         com.apple.security.app-sandbox: true
         com.apple.security.application-groups:
           - $(DEVELOPMENT_TEAM).com.audiopaper
+        # Sparkle's installer launcher and its status channel, reachable from the sandbox (Sparkle's
+        # sandboxing guide). Nothing else is opened up.
+        com.apple.security.temporary-exception.mach-lookup.global-name:
+          - $(PRODUCT_BUNDLE_IDENTIFIER)-spks
+          - $(PRODUCT_BUNDLE_IDENTIFIER)-spki
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.audiopaper.widgets

@@ -27,11 +27,13 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
 
   <h2 id="install">Install</h2>
   <ol>
-    <li>Download <code>AudioPaper-0.1.2.dmg</code> (or the newest version) from the <a href="https://github.com/msitarzewski/AudioPaper/releases/latest">latest release</a>. It is signed with a Developer ID and notarized by Apple, so it opens without warnings.</li>
+    <li>Download <code>AudioPaper-0.1.3.dmg</code> (or the newest version) from the <a href="https://github.com/msitarzewski/AudioPaper/releases/latest">latest release</a>. It is signed with a Developer ID and notarized by Apple, so it opens without warnings.</li>
     <li>Open it and drag <strong>AudioPaper</strong> into <strong>Applications</strong>. It must be in Applications for its widgets to show up.</li>
     <li>Open AudioPaper from Applications. A small display-and-note icon appears in the menu bar; there’s no window to start with.</li>
   </ol>
   <p>You need macOS 26 or later and the Music app. If you’d rather build it yourself, the <a href="https://github.com/msitarzewski/AudioPaper#build-and-run">README</a> has the steps.</p>
+
+  <p><strong>Updating:</strong> on its second launch AudioPaper asks whether to check for updates automatically (about once a day). Either way, <strong>Check for Updates…</strong> in its menu checks now, and installs the update when you say so. Your settings, keys and downloaded art are kept.</p>
 
   <h2 id="first-launch">The first launch</h2>
   <p>If music is already playing, macOS asks: <em>“AudioPaper” wants access to control “Music”</em>, with AudioPaper’s reason: <em>AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.</em></p>
@@ -62,7 +64,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
     <li><strong>The song</strong>, and the artist and album.</li>
     <li><strong>The credit</strong> for the image on screen. Choose it to open the artist’s profile, when there is one. <strong>View Image on …</strong> (or <strong>View Album on …</strong>) opens the page the image came from.</li>
     <li><strong>Next Image</strong>, <strong>Pause Wallpaper Changes</strong> and <strong>Restore Original Wallpaper</strong>.</li>
-    <li><strong>Show Mini Player</strong>, <strong>Settings…</strong> and <strong>Quit AudioPaper</strong>.</li>
+    <li><strong>Show Mini Player</strong>, <strong>Check for Updates…</strong>, <strong>Settings…</strong> and <strong>Quit AudioPaper</strong>.</li>
   </ul>
   <p>The icon shows a pause mark while wallpaper changes are paused.</p>
 
@@ -123,6 +125,9 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
 
   <h3>An image has text on it, or isn’t art</h3>
   <p>The filters catch most text, screenshots and product photos, but stylised band logos can get past them. <strong>Next Image</strong> moves on; an issue with the image’s page helps improve the filters.</p>
+
+  <h3>An image is wrong, mislabelled or unexpected</h3>
+  <p>AudioPaper finds images on the internet automatically. They come from other people and services, and may be mislabelled, show the wrong person, or be something you didn’t expect: the filters catch a lot, not everything. <strong>Next Image</strong> skips one; <strong>View Image on …</strong> shows where it came from. Reports help improve the matching: please <a href="https://github.com/msitarzewski/AudioPaper/issues/new/choose">open an issue</a> with the artist, song and image page.</p>
 
   <h3>The widgets aren’t in the widget gallery</h3>
   <p>AudioPaper must be in your <strong>Applications</strong> folder, and must have been opened once from there.</p>

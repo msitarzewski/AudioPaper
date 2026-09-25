@@ -104,6 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         updateDockPresence()
+        Updates.shared.start()
     }
 
     /// A menu bar utility keeps running with no windows open; closing the Mini Player must not quit it.

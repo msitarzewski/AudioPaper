@@ -11,9 +11,12 @@
 #   set -a; source ~/.config/brew-browser/signing.env; set +a   # or wherever your credentials live
 #   scripts/release.sh
 #
-# Flow: archive (Release) → export with Developer ID (app + widget extension, hardened runtime)
-#       → verify signatures and entitlements → notarize the app → staple
-#       → disk image with an Applications link → sign → notarize → staple → checksum.
+# Flow: archive (Release) → export with Developer ID (app, widget extension and Sparkle's helpers, hardened
+#       runtime) → verify signatures and entitlements → notarize the app → staple
+#       → Sparkle update zip, signed with the EdDSA key (`generate_keys --account AudioPaper`, in the login
+#         Keychain) → feed entry in site/static/appcast.xml
+#       → disk image with an Applications link → sign → notarize → staple → checksums.
+# Afterwards: publish the GitHub release with the .dmg and .zip, THEN push the feed (it points at the zip).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -35,6 +38,9 @@ VERSION="$(grep -m1 'MARKETING_VERSION:' project.yml | tr -d '" ' | cut -d: -f2)
 BUILD="$(grep -m1 'CURRENT_PROJECT_VERSION:' project.yml | tr -d '" ' | cut -d: -f2)"
 
 OUT="$ROOT/build/release"
+PACKAGES="$ROOT/build/SourcePackages"
+SPARKLE_BIN="$PACKAGES/artifacts/sparkle/Sparkle/bin"
+ZIP="$OUT/AudioPaper-$VERSION.zip"
 ARCHIVE="$OUT/AudioPaper.xcarchive"
 EXPORT="$OUT/export"
 APP="$EXPORT/AudioPaper.app"
@@ -58,7 +64,8 @@ xcodegen generate --quiet
 
 echo "==> archive (Release)"
 xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -configuration Release \
-  -destination "generic/platform=macOS" -archivePath "$ARCHIVE" -allowProvisioningUpdates -quiet \
+  -destination "generic/platform=macOS" -archivePath "$ARCHIVE" -clonedSourcePackagesDirPath "$PACKAGES" \
+  -allowProvisioningUpdates -quiet \
   FANART_PROJECT_KEY="$FANART_PROJECT_KEY" archive
 
 echo "==> export with Developer ID"
@@ -78,6 +85,13 @@ xcodebuild -exportArchive -archivePath "$ARCHIVE" -exportPath "$EXPORT" \
 
 echo "==> verify"
 codesign --verify --deep --strict --verbose=2 "$APP"
+SPARKLE_FW="$APP/Contents/Frameworks/Sparkle.framework"
+for helper in "$SPARKLE_FW" "$SPARKLE_FW/Versions/B/Autoupdate" "$SPARKLE_FW/Versions/B/Updater.app" \
+  "$SPARKLE_FW/Versions/B/XPCServices/Installer.xpc" "$SPARKLE_FW/Versions/B/XPCServices/Downloader.xpc"; do
+  # Captured first: with pipefail, `grep -q` closing the pipe early would read as a failure.
+  info="$(codesign -dvv "$helper" 2>&1)"
+  grep -q "Authority=Developer ID Application" <<<"$info" || { echo "$helper: not Developer ID signed"; exit 1; }
+done
 for bundle in "$APP" "$APP/Contents/PlugIns/AudioPaperWidgets.appex"; do
   info="$(codesign -dvv "$bundle" 2>&1)"
   grep -q "Authority=Developer ID Application" <<<"$info" || { echo "$bundle: not Developer ID signed"; exit 1; }
@@ -96,6 +110,13 @@ notarize "$WORK/AudioPaper.zip"
 xcrun stapler staple "$APP"
 spctl --assess --type execute --verbose=2 "$APP"
 
+echo "==> Sparkle update: zip, EdDSA signature, feed entry"
+[ -x "$SPARKLE_BIN/sign_update" ] || { echo "Sparkle tools missing at $SPARKLE_BIN"; exit 1; }
+ditto -c -k --keepParent "$APP" "$ZIP"
+SIGNATURE="$("$SPARKLE_BIN/sign_update" --account AudioPaper -p "$ZIP")"
+[ -n "$SIGNATURE" ] || { echo "sign_update produced no signature"; exit 1; }
+python3 "$ROOT/scripts/appcast.py" "$VERSION" "$BUILD" "$ZIP" "$SIGNATURE" ${RELEASE_NOTES_HTML:+"$RELEASE_NOTES_HTML"}
+
 echo "==> disk image"
 mkdir -p "$WORK/dmg"
 ditto "$APP" "$WORK/dmg/AudioPaper.app"
@@ -107,7 +128,8 @@ notarize "$DMG"
 xcrun stapler staple "$DMG"
 spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
 
-(cd "$OUT" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256")
+(cd "$OUT" && shasum -a 256 "$(basename "$DMG")" "$(basename "$ZIP")" > "AudioPaper-$VERSION.sha256")
 echo
-echo "==> done: $DMG"
-cat "$DMG.sha256"
+echo "==> done: $DMG and $ZIP; site/static/appcast.xml updated"
+cat "$OUT/AudioPaper-$VERSION.sha256"
+echo "Next: publish the GitHub release v$VERSION with both files, then commit and push the feed."

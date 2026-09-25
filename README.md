@@ -38,7 +38,7 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 
 ## Where it lives
 
-- **Menu bar:** a standard macOS menu, per Apple's guidelines. It shows the track, credits the art (with a link to the artist's profile and the page it came from), and has Next Image, Pause, Restore Original Wallpaper, Show Mini Player (⌥⌘M), Settings… and Quit. You can hide the menu bar icon in Settings.
+- **Menu bar:** a standard macOS menu, per Apple's guidelines. It shows the track, credits the art (with a link to the artist's profile and the page it came from), and has Next Image, Pause, Restore Original Wallpaper, Show Mini Player (⌥⌘M), Check for Updates…, Settings… and Quit. You can hide the menu bar icon in Settings.
 - **Mini Player:** a small window modelled on Music's MiniPlayer, with the artwork under the window controls and a Liquid Glass background that takes on the colours of your wallpaper. It shows the credit, a strip of every image in rotation (the one on screen stays highlighted and in view), and the controls. From its **…** button it can *Float on Top* and *Show on All Desktops*. It reopens at launch if you left it open, in the same spot.
 - **Widgets:** *Now Playing* (small, medium, large), with working Pause and Next Image buttons on medium and large, and *Artwork* (every size), which shows the current wallpaper image with its credit. Clicking a widget opens the Mini Player. Like every macOS widget, they turn grayscale while the desktop isn't focused (with the *Automatic* widget style). Add them with **Edit Widgets** on the desktop (AudioPaper must be installed in `/Applications` for them to appear).
 - **Dock:** AudioPaper stays out of the Dock unless the Mini Player is open or the menu bar icon is hidden, so there's always a way back in. Clicking the Dock icon opens the Mini Player, and right-clicking it shows the wallpaper actions.
@@ -59,6 +59,10 @@ Audited on 2026-09-25 through the macOS accessibility API, plus Lighthouse on ev
 - macOS 26 (Tahoe) or later
 - Apple Music (more players are planned; see [Roadmap](#roadmap))
 - Fan art works out of the box: the downloadable app includes a fanart.tv project key, and TheAudioDB and Wikimedia Commons need none. For artists those don't cover, add a [Brave Search API](https://api-dashboard.search.brave.com/) key (billed by usage, so it's always your own) and/or a [DeviantArt application](https://www.deviantart.com/developers/) (client ID + secret) in Settings → Accounts. Builds from source need their own [fanart.tv](https://fanart.tv) project key there too.
+
+## Updates
+
+AudioPaper updates itself with [Sparkle](https://sparkle-project.org). On the second launch it asks whether to check automatically (about once a day); **Check for Updates…** in the menu checks now. Updates are verified with an EdDSA signature before they're installed. Sparkle is AudioPaper's one third-party dependency, chosen because macOS has no updater for apps outside the Mac App Store.
 
 ## Build and run
 
@@ -123,6 +127,8 @@ AudioPaper uses these services. Each image shown in the app credits its source a
 | [Brave Search API](https://brave.com/search/api/) | Fan art and artist photos when the sources above come up short | Your own key (the free tier is 2,000 queries/month; AudioPaper caches results and spaces requests to stay within it) |
 
 Fan art belongs to the people who made it. AudioPaper shows it on your own desktop with credit, and never saves it anywhere else or shares it.
+
+**Images come from the internet, found automatically.** They come from other people and services, and may be mislabelled, show the wrong person, or be unexpected; the filters catch a lot, not everything. **Next Image** skips one, and reports help improve the matching.
 
 ## Architecture
 

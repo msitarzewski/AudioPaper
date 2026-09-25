@@ -76,7 +76,8 @@ final class RecordingDisplay: WallpaperDisplay {
         source.send(.playing(.sample("A", album: "First")))
         source.send(.playing(.sample("B", album: "Second")))
         source.send(.playing(.sample("C", album: "Third")))
-        await waitUntil { coordinator.showing != nil }
+        // Wait for the desktop, not just the app: `showing` changes before the wallpaper is rendered.
+        await waitUntil { display.shown.count >= 1 }
         try? await Task.sleep(for: .milliseconds(150))
         #expect(display.shown.count == 1)
         #expect(coordinator.showing?.candidate.attribution.title == "Third")

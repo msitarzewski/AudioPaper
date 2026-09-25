@@ -20,6 +20,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
       <li><a href="#storage">What’s stored, and where</a></li>
       <li><a href="#untrusted">Untrusted replies</a></li>
       <li><a href="#accessibility">Accessibility</a></li>
+      <li><a href="#updates">Updates</a></li>
       <li><a href="#permissions">Permissions</a></li>
       <li><a href="#developers">For developers</a></li>
     </ol>
@@ -158,6 +159,9 @@ description: Every AudioPaper setting, where its art comes from, how images are 
     <li><strong>Transparency and contrast:</strong> the Liquid Glass surfaces are the system’s own, so they follow Reduce Transparency and Increase Contrast.</li>
   </ul>
   <p>These were checked with the macOS accessibility API and, for this site, automated audits. They haven’t yet been tested by a VoiceOver user; if something is hard to use, please <a href="https://github.com/msitarzewski/AudioPaper/issues/new/choose">open an issue</a>.</p>
+
+  <h2 id="updates">Updates</h2>
+  <p>AudioPaper updates itself with <a href="https://sparkle-project.org">Sparkle</a>. On the second launch it asks whether to check automatically; if you agree, it reads the update feed about once a day. <strong>Check for Updates…</strong>, in the menu bar menu and the AudioPaper menu, checks now. Every update is verified against the EdDSA public key built into the app before it’s installed. No system profile is sent. Your settings, keys and downloaded art are kept.</p>
 
   <h2 id="permissions">Permissions</h2>
   <p>AudioPaper runs in the App Sandbox, with the hardened runtime, and asks for only this:</p>

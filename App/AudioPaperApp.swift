@@ -40,6 +40,10 @@ struct AudioPaperApp: App {
             CommandGroup(replacing: .help) {
                 HelpCommands()
             }
+            // Where macOS apps put it: the app menu, after About.
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") { Updates.shared.checkForUpdates() }
+            }
         }
 
         Settings {

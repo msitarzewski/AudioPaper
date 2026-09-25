@@ -156,8 +156,12 @@ private struct SourceSettings: View {
             } header: {
                 Text("Fan art")
             } footer: {
-                Text("Images with text, screenshots, and merchandise photos are filtered out on your Mac using Vision.")
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Images with text, screenshots, and merchandise photos are filtered out on your Mac using Vision.")
+                    // Said where the sources are chosen: what comes back is other people's content, found automatically.
+                    Text("Images are found on the internet automatically. They come from other people and services, and may be mislabelled, show the wrong person, or be unexpected. Next Image skips one.")
+                }
+                .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
@@ -367,6 +371,12 @@ private struct AboutSettings: View {
             }
             .font(.callout)
             .padding(.top, 2)
+
+            Text("Artwork is found on the internet automatically and belongs to the people who made it. It may be mislabelled or unexpected.")
+                .font(.caption).foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: 360)
 
             Text("MIT · © 2026 Michael Sitarzewski")
                 .font(.caption2).foregroundStyle(.tertiary)

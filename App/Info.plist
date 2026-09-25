@@ -43,5 +43,11 @@
 	<string>AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>$(SPARKLE_FEED_URL)</string>
+	<key>SUPublicEDKey</key>
+	<string>lpSHxqLs3q81a7t2g8ZlsO67NTszfgArJdvd4kO/hbA=</string>
 </dict>
 </plist>

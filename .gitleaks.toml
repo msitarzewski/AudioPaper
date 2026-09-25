@@ -11,3 +11,11 @@ description = "AGENTS.md prose about context token limits"
 paths = ['''^AGENTS\.md$''']
 regexTarget = "match"
 regexes = ['''Token limit approaching''']
+
+# Sparkle's EdDSA *public* key: published on purpose, so the app can verify updates. It can't sign
+# anything; the private half lives only in the maintainer's Keychain. Allowlisted by exact value.
+[[allowlists]]
+description = "Sparkle public update-verification key"
+paths = ['''^project\.yml$''']
+regexTarget = "match"
+regexes = ['''SUPublicEDKey: lpSHxqLs3q81a7t2g8ZlsO67NTszfgArJdvd4kO/hbA=''']

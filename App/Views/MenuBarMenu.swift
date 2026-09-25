@@ -20,6 +20,7 @@ struct MenuBarMenu: View {
         }
         .keyboardShortcut("m", modifiers: [.command, .option])
         Divider()
+        Button("Check for Updates…") { Updates.shared.checkForUpdates() }
         Button("Settings…") { SettingsWindow.show(openSettings) }
             .keyboardShortcut(",", modifiers: .command)
         Button("Quit AudioPaper") {

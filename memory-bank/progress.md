@@ -30,6 +30,7 @@
 - Settings opens in front from the menu (`SettingsWindow.show`).
 - Site: Credits page; BABYMETAL and BLACKPINK Mini Player screenshots (only covers + Commons photos), screenshots under CC BY-SA 4.0.
 - **v0.1.1 released** (version 0.1.1, build 2; pipeline version 6).
+- **v0.1.3**: Sparkle auto-update (verified sandboxed install end to end), internet-content disclaimer, CI timing fix.
 - **v0.1.2**: song changes show the new cover in the app at once and on the desktop right after; downloaded covers skip the debounce; the cover holds 10 s before fan art (was often skipped).
 - 108 tests.
 

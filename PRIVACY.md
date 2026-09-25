@@ -21,6 +21,7 @@ AudioPaper changes your wallpaper to match the music you're playing. To do that,
 | **Wikimedia** (Wikidata, Commons) | Which artist (by ID) | Freely licensed artist photos |
 | **DeviantArt** (only with your credentials) | Each new song (artist + title) | Fan art |
 | **Brave Search** (only with your key, and only as a fallback) | Each new song it's used for ("artist song fan art wallpaper") | Fan art when the sources above find too little |
+| **GitHub** (the update feed and downloads) | That a copy of AudioPaper checked for updates, and its version, from your IP address: about once a day if you allowed automatic checks, otherwise only when you choose **Check for Updates…** | To offer updates. No system profile is sent |
 | **Websites Brave points to** | Your IP address, when one of their images is downloaded | They host the image; they don't learn what you're listening to |
 
 **In practice, MusicBrainz sees the most:** roughly a list of the new songs you play, because that's how AudioPaper tells artists with the same name apart (ROSÉ of BLACKPINK is not Rose, the French singer). Apple sees new albums. The others see artists, or, if you've enabled them, song searches. Each song is searched only once, ever.
