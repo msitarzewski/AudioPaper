@@ -2,10 +2,10 @@
 
 - **Platform**: macOS 26.0+, Swift 6 language mode, built with Xcode 27 / Swift 6.4.
 - **Project**: XcodeGen (`project.yml`) generates `AudioPaper.xcodeproj` (git-ignored). Run `xcodegen generate` after adding/removing App files.
-- **Layout**: `Packages/AudioPaperKit` (SwiftPM library + `apctl` dev CLI + tests) and `App/` (SwiftUI menu bar app).
-- **Distribution**: App Sandbox + Developer ID (not Mac App Store). Bundle ID `com.audiopaper`, team `7JQGQ7CRH8` (same team as GlassPowerTools). Entitlements: `network.client`, `temporary-exception.apple-events` → `com.apple.Music`.
+- **Layout**: `Packages/AudioPaperKit` (SwiftPM library + `apctl` dev CLI + tests), `App/` (SwiftUI app: menu bar menu, Mini Player, Settings; `AppIcon.icon`; `Assets.xcassets` with the menu bar template icons), `Widgets/` (WidgetKit extension, bundle `com.audiopaper.widgets`), `docs/icon/` (icon masters + palette build), `scripts/install.sh`.
+- **Distribution**: App Sandbox + Developer ID (not Mac App Store). Bundle ID `com.audiopaper`, team `7JQGQ7CRH8` (same team as GlassPowerTools). Entitlements: `network.client`, `automation.apple-events` (required under the hardened runtime, or the launch-time Music query silently fails), `temporary-exception.apple-events` → `com.apple.Music`, `application-groups` → `$(DEVELOPMENT_TEAM).com.audiopaper` (app and widget; name also in the `AudioPaperAppGroup` Info.plist key). Version comes from `MARKETING_VERSION` (0.1.0).
 - **Repo**: public at github.com/msitarzewski/AudioPaper (MIT). CI (`.github/workflows/ci.yml`) runs `swift test` and an unsigned app build on `macos-26`.
-- **Icon**: `App/AppIcon.icon` (Icon Composer, SVG layers), matching the house style: neutral light/graphite background, warm-gray display, red accent sleeve, white glass glyph. Preview with Icon Composer's `ictool` (`Xcode-beta.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool`).
+- **Icon**: a camera with a white eighth note on the lens glass. Masters are white SVG masks in `docs/icon/Sources/` (Note, Lens, Glass, Shutter, Body); `python3 docs/icon/build_icons.py [--ship <palette>]` builds one `.icon` per palette (red, cobalt, emerald, violet, amber) with vector linear-gradient fills per appearance, renders every appearance with Icon Composer's `ictool` (`Xcode-beta.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool`), and writes `palettes/board.png`. Red is shipped as `App/AppIcon.icon`. Icon Composer allows at most 4 groups, and maps an SVG viewBox onto the icon grid, so layers carry a 1.22 scale. Menu bar icons are template SVGs (20×16 pt, viewBox cropped to the drawing).
 - **External services**
   - iTunes Search API (no key) — album covers, `100x100bb` → `3000x3000bb`. Misses some catalog (older NIN, small indie releases).
   - MusicBrainz + Cover Art Archive (no key, 1 req/s etiquette, User-Agent required).
@@ -13,16 +13,19 @@
   - fanart.tv — `webservice.fanart.tv/v3/music/{mbid}?api_key=…&client_key=…`; `artist4kbackground` + `artistbackground`, sorted by likes. Project key in Keychain `FAN_ART_API_KEY`, optional personal `FAN_ART_CLIENT_KEY`. Site is behind Cloudflare (curl gets 403); the API is fine.
   - TheAudioDB — artist fan art (1280×720, "curated"). Free public key `123`, 30 req/min (`TheAudioDBSource.limiter`), optional personal key. Terms: credit + link TheAudioDB; free key not allowed for App Store apps.
   - DeviantArt API — OAuth2 client credentials (`/oauth2/token`, `/browse/popular`, `/browse/tags`). **Not yet verified live**: no credentials yet.
+  - MusicBrainz is also the identity service: recording search (title + artist) → artist MBID, used by fanart.tv and TheAudioDB (`artist-mb.php`).
 - **Credentials**: Keychain service `com.audiopaper.credentials` (accounts `BRAVE_API_KEY`, `DEVIANTART_CLIENT_ID`, `DEVIANTART_CLIENT_SECRET`, `THEAUDIODB_API_KEY`, `FAN_ART_API_KEY`, `FAN_ART_CLIENT_KEY`); fields auto-save, entered in Settings → Accounts. `apctl` reads `.env` (git-ignored).
 - **Commands**
   - Tests: `cd Packages/AudioPaperKit && swift test`
-  - Filter spike: `swift run apctl fanart "<artist>" "<song>" [outDir]`, `apctl cover`, `apctl labels <files>`
+  - Pipeline from the terminal: `swift run apctl fanart "<artist>" "<song>" [outDir]`, `apctl cover`, `apctl labels <files>`, `apctl render <image> <w> <h> [framing]`
   - App: `xcodegen generate && xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath build/DerivedData build`
-- **Install**: `scripts/install.sh [Debug|Release]` builds, installs to `/Applications`, re-registers with Launch Services and relaunches. Needed for widgets: the gallery only lists extensions of apps in an Applications folder (a DerivedData build registers with chronod but never appears).
+- **Install**: `scripts/install.sh [Debug|Release]` builds, installs to `/Applications`, re-registers with Launch Services, stops the running widget extension (macOS keeps it alive across app updates, so new widget code otherwise never runs) and relaunches. Needed for widgets: the gallery only lists extensions of apps in an Applications folder (a DerivedData build registers with chronod but never appears).
 - **Gotchas**
   - XcodeGen writes a literal "1.0" version unless Info.plist properties set `CFBundleShortVersionString: $(MARKETING_VERSION)` / `CFBundleVersion: $(CURRENT_PROJECT_VERSION)` (both targets do).
   - Keychain reads can block on an access prompt after the signing identity changes; keep them off the main thread (the coordinator checks `isConfigured` in a detached task).
   - zsh has a `log` builtin — use `/usr/bin/log show/stream`.
+  - Team-signed sandboxed apps' containers and App Group are protected from other processes (a shell can't read their prefs or files); verify behaviour through the app instead.
+  - UI verification: capture only AudioPaper's own windows (`screencapture -o -l <windowID>`, IDs from `CGWindowListCopyWindowInfo`), never the user's screen. Glass can't be judged from a window-only capture (nothing behind it); ask the user.
   - `URL.path()` is percent-encoded; use `path(percentEncoded: false)` for file-system paths.
   - `System Events` desktop picture is stale; query `NSWorkspace.desktopImageURL(for:)`.
   - macOS ignores `setDesktopImageURL` with an unchanged URL — composer writes new file names each time.

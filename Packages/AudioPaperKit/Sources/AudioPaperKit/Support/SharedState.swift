@@ -103,6 +103,13 @@ public enum SharedStore {
     }
 }
 
+/// Where a click on a widget takes people (HIG: open the app to the related content). The app registers
+/// the `audiopaper` URL scheme and opens the Mini Player for it.
+public enum WidgetLink {
+    public static let scheme = "audiopaper"
+    public static let miniPlayer = URL(string: "audiopaper://mini-player")!
+}
+
 /// Commands from widget buttons to the app. Widget intents run in the extension's process, so they
 /// signal the app with a Darwin notification (no payload), which sandboxed processes may post.
 public enum WidgetCommand: String, CaseIterable, Sendable {

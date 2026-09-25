@@ -36,6 +36,11 @@ targets:
         CFBundleDisplayName: AudioPaper
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # Widget clicks open the Mini Player through this scheme (WidgetLink).
+        CFBundleURLTypes:
+          - CFBundleURLName: com.audiopaper
+            CFBundleURLSchemes:
+              - audiopaper
         # Shared with the widget extension; must match the application-groups entitlement.
         AudioPaperAppGroup: $(DEVELOPMENT_TEAM).com.audiopaper
         LSApplicationCategoryType: public.app-category.music

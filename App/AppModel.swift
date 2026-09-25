@@ -105,6 +105,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         false
     }
 
+    /// Widget clicks arrive as `audiopaper://` links and open the Mini Player.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        if urls.contains(where: { $0.scheme == WidgetLink.scheme }) {
+            AppModel.shared.showMiniPlayer()
+        }
+    }
+
     /// Clicking the Dock icon (or launching again from Finder) opens the Mini Player, like Music.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
         if !hasVisibleWindows {

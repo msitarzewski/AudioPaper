@@ -1,16 +1,18 @@
 # Active Context
 
-**State**: DOCS complete for v0.1; published to GitHub (public, MIT) on `main`.
+**State**: v0.1 feature-complete and public on `main` (github.com/msitarzewski/AudioPaper, MIT, CI green). Installed locally in `/Applications` via `scripts/install.sh`.
 
 ## User decisions (2026-09-25)
-- Fan-art sources: TheAudioDB (free key), DeviantArt and Brave. Keep all artist metadata so users can open profiles and source pages.
-- Photos are welcome (band and press photos, not only drawn art).
-- Fan art: album cover first, then cross-fade rotation like a Photos-folder wallpaper. Automatic framing (fit when fill would crop >15%).
-- No DuckDuckGo (no official image API).
-- fanart.tv integrated (`FanartTVSource`); the user's project key is `FAN_ART_API_KEY` in `.env` / Keychain. It is NOT embedded in the app or repo. Coverage: strong for established artists (NIN, Radiohead, Troye Sivan), none for newer ones (Frost Children, 2hollis, Sleepover); Brave fills those.
-- Public repo on the user's GitHub with README, CONTRIBUTING, SECURITY, FUNDING (sponsors), CI, issue templates.
-
-- Menu bar is a native menu; the rich view is the Mini Player window; widgets (Now Playing, Artwork); Dock only when needed; red gradient camera icon; "Show in menu bar" + Settings restores last pane. All approved by the user.
+- Follow Apple's HIG, Apple's own UI examples and per-platform icon practice, macOS only for now (`projectRules.md`).
+- Surfaces: native menu bar menu; the rich view lives in a Music-style Mini Player window (Liquid Glass, artwork under the traffic lights, remembers open state and position); WidgetKit widgets (Now Playing, Artwork); Dock icon only while needed.
+- Fan-art sources: fanart.tv (user's project key in `.env`/Keychain as `FAN_ART_API_KEY`, never in the repo), TheAudioDB (free key), DeviantArt, and Brave as a metered fallback. Keep all artist metadata so people can open profiles and source pages.
+- Photos are welcome (band and press photos, not only drawn art); small incidental text is fine, prominent text is not.
+- Album cover first, then a cross-fade rotation like a Photos-folder wallpaper. Automatic framing (fit when fill would crop >15%).
+- App icon: camera with a music note, vector gradients, red palette shipped (cobalt, emerald, violet, amber built as alternates).
+- Cache: re-searches reuse downloaded images; people control the size limit and can clear it in Settings.
+- No DuckDuckGo (no official image API). No generative outpainting (no public Apple API).
+- Widgets follow the system widget style: grayscale while the desktop isn't focused (confirmed by the user), full colour otherwise. A click opens the Mini Player.
+- Commits and pushes only when the user asks (their global rule).
 
 ## Open items
 - DeviantArt credentials needed to verify that provider live.

@@ -15,3 +15,10 @@
 ### 2026-09-25: HIG pass — menu, Mini Player, widgets, Dock, icons
 - Menu bar extra became a native menu; the popover design moved to a Music-style Mini Player window; WidgetKit extension with Now Playing and Artwork widgets over an App Group snapshot; Dock icon only while needed; camera app icon (vector gradients, five palettes, red shipped) and template menu bar icon.
 - Fixes on the way: popover layout overflow, hardened-runtime Apple Events entitlement, ROSÉ/Rose identity (MusicBrainz recording lookup + MBID-keyed art), app quitting with no windows open.
+
+### 2026-09-25: Mini Player polish, widgets install, cache controls, more fan art
+- Mini Player: real Liquid Glass, exact sizing, remembered open state and position, glass "…" button, strip follows the current image.
+- Widgets appear once installed to `/Applications` (`scripts/install.sh`, which also stops the stale widget extension); stronger scrim on the small widget; desaturated artwork in the accented style; clicks open the Mini Player; real version numbers (0.1.0).
+- Fan-art pipeline: Brave fallback gated on images that pass, duplicate threshold 0.2, incidental text allowed, versioned cache keys.
+- Settings → Storage: live cache size, limit, Clear Cache…; LRU pruning; panes size to content without extra padding.
+- Docs: README and memory bank brought up to date.

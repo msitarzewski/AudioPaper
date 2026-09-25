@@ -83,7 +83,10 @@ struct NowPlayingWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "NowPlaying", provider: Provider()) { entry in
             NowPlayingView(entry: entry)
+                .widgetURL(WidgetLink.miniPlayer)
         }
+        // The small size's artwork is its background; it must survive the system's background removal.
+        .containerBackgroundRemovable(false)
         .configurationDisplayName("Now Playing")
         .description("The song that's playing and the art on your desktop, with slideshow controls.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
@@ -173,7 +176,9 @@ struct ArtworkWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "Artwork", provider: Provider()) { entry in
             ArtworkWidgetView(entry: entry)
+                .widgetURL(WidgetLink.miniPlayer)
         }
+        .containerBackgroundRemovable(false)
         .configurationDisplayName("Artwork")
         .description("The image on your desktop right now, with credit to the artist who made it.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])
@@ -269,7 +274,10 @@ struct ArtworkTile: View {
             .fill(.quaternary)
             .overlay {
                 if let image {
-                    Image(nsImage: image).resizable().scaledToFill()
+                    Image(nsImage: image)
+                        .resizable()
+                        .widgetAccentedRenderingMode(.desaturated)
+                        .scaledToFill()
                 } else {
                     Image(systemName: "music.note").font(.title2).foregroundStyle(.tertiary)
                 }
@@ -283,13 +291,21 @@ struct ArtworkFill: View {
 
     var body: some View {
         if let image {
-            Image(nsImage: image).resizable().scaledToFill()
+            Image(nsImage: image)
+                .resizable()
+                .widgetAccentedRenderingMode(.desaturated)
+                .scaledToFill()
         } else {
             Rectangle().fill(.fill.tertiary)
                 .overlay { Image(systemName: "music.note").font(.largeTitle).foregroundStyle(.tertiary) }
         }
     }
 }
+
+// Photos in widgets: when macOS draws desktop widgets in its accented (monochrome) style — the desktop
+// isn't focused, or the person chose Monochrome — images are tinted like glyphs by default and turn into
+// flat tiles. `.desaturated` keeps the artwork visible in grayscale, like Apple's Photos widget, without
+// overriding the person's widget-style setting.
 
 /// Bottom gradient that keeps white text legible over any artwork.
 struct Scrim: View {

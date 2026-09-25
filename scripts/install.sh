@@ -32,5 +32,8 @@ ditto "$BUILT" "$TARGET"
 "$LSREGISTER" -u "$BUILT" 2>/dev/null || true
 "$LSREGISTER" -f -R "$TARGET"
 
+# macOS keeps a widget extension running across app updates; stop it so the new build's widgets load.
+pkill -x AudioPaperWidgets 2>/dev/null || true
+
 open "$TARGET"
 echo "Installed $CONFIGURATION build to $TARGET and relaunched."
