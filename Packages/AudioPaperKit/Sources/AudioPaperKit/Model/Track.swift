@@ -55,6 +55,23 @@ public struct Track: Hashable, Sendable, Codable {
         return parts.count > 1 ? parts : []
     }
 
+    /// Featured artists named in the title — "Move Bitch (feat. Ludacris, Mystikal & I-20)" — which Music
+    /// leaves out of the artist field. Used when the credited artist has no art of their own.
+    public var featuredArtists: [String] {
+        guard let match = title.firstMatch(of: /[\(\[]\s*(?i:feat\.?|ft\.?|featuring|with)\s+([^\)\]]+)[\)\]]/) else { return [] }
+        return String(match.output.1)
+            .split(separator: /\s*[,&]\s*|\s+(?i:and)\s+/)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+    }
+
+    /// Artists to try, in order, when the full credit finds no art: the collaboration's credited artists,
+    /// then the featured artists from the title.
+    public var fallbackArtists: [String] {
+        var seen = Set([MusicBrainz.identityKey(artist)])
+        return (creditedArtists + featuredArtists).filter { seen.insert(MusicBrainz.identityKey($0)).inserted }
+    }
+
     /// This track credited to one artist of a collaboration, for per-artist lookups.
     public func crediting(_ artist: String) -> Track {
         var track = self

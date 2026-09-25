@@ -19,6 +19,9 @@ struct SettingsView: View {
             Tab("Accounts", systemImage: "key", value: "accounts") {
                 AccountSettings()
             }
+            Tab("About", systemImage: "info.circle", value: "about") {
+                AboutSettings()
+            }
         }
         .frame(width: 480)
     }
@@ -295,5 +298,52 @@ private struct CredentialFooter: View {
         }
         .font(.callout)
         .animation(.default, value: isConfigured)
+    }
+}
+
+/// App identity, links and license — the same layout as the family's other apps (Anomalous).
+private struct AboutSettings: View {
+    private static let repository = URL(string: "https://github.com/msitarzewski/AudioPaper")!
+
+    private var version: String {
+        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
+        return "Version \(short) (\(build))"
+    }
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable().scaledToFit()
+                .frame(width: 72, height: 72)
+                .accessibilityHidden(true)
+            Text("AudioPaper").font(.title2.weight(.semibold))
+            Text(version).font(.caption).foregroundStyle(.secondary)
+            Text("Your desktop, set to the music you’re playing — album covers, fan art and artist photos, all credited.")
+                .font(.callout).foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineSpacing(5)
+                .fixedSize(horizontal: false, vertical: true)
+                // Wraps to a couple of balanced lines instead of running the full width.
+                .frame(maxWidth: 360)
+
+            HStack(spacing: 14) {
+                Link("GitHub", destination: Self.repository)
+                Text("·").foregroundStyle(.tertiary)
+                Link("Help", destination: Self.repository.appending(path: "blob/main/README.md"))
+                Text("·").foregroundStyle(.tertiary)
+                Link("Privacy", destination: Self.repository.appending(path: "blob/main/PRIVACY.md"))
+                Text("·").foregroundStyle(.tertiary)
+                Link("♥ Sponsor", destination: URL(string: "https://github.com/sponsors/msitarzewski")!)
+            }
+            .font(.callout)
+            .padding(.top, 2)
+
+            Text("MIT · © 2026 Michael Sitarzewski")
+                .font(.caption2).foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 28)
+        .padding(.horizontal)
     }
 }

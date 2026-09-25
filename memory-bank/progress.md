@@ -15,7 +15,11 @@
 - Privacy tightening: ephemeral network session (no cookies, no HTTP cache), avatars through it, artist IDs persisted on disk; `PRIVACY.md` and `NETWORK.md` published.
 - Fan-art size rules: single 1280×720 floor, portrait allowed; Brave credits show the matched artist.
 - Per-artist image pool with least-recently-seen rotation; Wikimedia Commons source with photographer/license credits; Brave phrase-based relevance and a "press photo" follow-up query (Ray Noir 0 → 2); contact User-Agent; Commons tracking parameters stripped.
-- 77 tests passing. Verified live: sandboxed wallpaper setting, Music notifications, album + fan-art flow, both displays, Mini Player glass and position, widgets in the gallery.
+- Featured artists in titles fill in when the credited artist has no art.
+- 80 tests passing. Verified live: sandboxed wallpaper setting, Music notifications, album + fan-art flow, both displays, Mini Player glass and position, widgets in the gallery.
+
+- Settings → About (mirrors Anomalous).
 
 ## Next
+- **GitHub Pages website** and a **notarized release** — plan in `NEXT-SESSION.md`.
 - Verify DeviantArt with real credentials; Spotify source plugin; tune filters with more genres; decide on shipping the fanart.tv project key for release builds.

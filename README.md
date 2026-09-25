@@ -20,7 +20,7 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 
    Each artist builds a pool of up to 24 images as you play their songs (each song is searched once), and every play shows the ones you've seen least recently, so favourites stay fresh without extra network use.
 
-   Artists are identified through MusicBrainz using the song itself, so namesakes aren't confused (ROSÉ of BLACKPINK is not Rose, the French singer), and art is fetched by that ID rather than by name. Collaborations ("LE SSERAFIM & j-hope", "feat.") get art of each credited artist.
+   Artists are identified through MusicBrainz using the song itself, so namesakes aren't confused (ROSÉ of BLACKPINK is not Rose, the French singer), and art is fetched by that ID rather than by name. Collaborations ("LE SSERAFIM & j-hope") get art of each credited artist, and when the credited artist has no art of their own (a label crew like Disturbing tha Peace), the featured artists in the title ("feat. Ludacris, Mystikal & I-20") fill in.
 
    Results are filtered on your Mac with Apple's Vision framework (after skipping anything smaller than 1280×720):
    - rejects screenshots and documents (Vision's "utility" image check)

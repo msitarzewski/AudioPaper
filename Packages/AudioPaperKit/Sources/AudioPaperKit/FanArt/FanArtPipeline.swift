@@ -131,11 +131,12 @@ public struct FanArtPipeline: Sendable {
     }
 
     /// Round-robins sources (each already ordered by relevance) so no single source dominates.
-    /// Searches under the full artist credit; if that finds nothing and the credit is a collaboration
-    /// ("LE SSERAFIM & j-hope"), searches each credited artist and interleaves their results.
+    /// Searches under the full artist credit; if that finds nothing, searches each credited artist of a
+    /// collaboration ("LE SSERAFIM & j-hope") and each featured artist in the title ("feat. Ludacris"),
+    /// interleaving their results.
     private func gatherCrediting(from configured: [any FanArtSource], for track: Track) async -> [ArtworkCandidate] {
         let full = await gather(from: configured, for: track)
-        let artists = track.creditedArtists
+        let artists = track.fallbackArtists
         guard full.isEmpty, !artists.isEmpty else { return full }
         var lists: [[ArtworkCandidate]] = []
         for artist in artists {

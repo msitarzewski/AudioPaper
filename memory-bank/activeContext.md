@@ -1,6 +1,6 @@
 # Active Context
 
-**State**: v0.1 feature-complete and public on `main` (github.com/msitarzewski/AudioPaper, MIT, CI green). Installed locally in `/Applications` via `scripts/install.sh`.
+**State**: v0.1 feature-complete and public on `main` (github.com/msitarzewski/AudioPaper, MIT, CI green). Installed locally in `/Applications` via `scripts/install.sh`. **Next session: see `NEXT-SESSION.md`** — GitHub Pages website (framed with BEDROCK), then a notarized release.
 
 ## User decisions (2026-09-25)
 - Follow Apple's HIG, Apple's own UI examples and per-platform icon practice, macOS only for now (`projectRules.md`).
@@ -16,6 +16,9 @@
 - No DuckDuckGo (no official image API). No generative outpainting (no public Apple API).
 - Widgets follow the system widget style: grayscale while the desktop isn't focused (confirmed by the user), full colour otherwise. A click opens the Mini Player.
 - Commits and pushes only when the user asks (their global rule).
+
+- Settings has an About pane mirroring Anomalous's.
+- Featured artists in song titles ("feat. …") fill in when the credited artist has no art.
 
 ## Open items
 - DeviantArt credentials needed to verify that provider live.

@@ -26,6 +26,12 @@
 ### 2026-09-25: Collaboration credits
 - "LE SSERAFIM & j-hope" found no fan art (no artist by that combined name). The pipeline now falls back to each credited artist when the full credit finds nothing; MusicBrainz recording matches accept any credited artist; pipeline version 3 re-searches cached songs. SPAGHETTI: 0 → 8 images (both artists).
 
+### 2026-09-25: About pane
+- Settings → About, mirroring Anomalous's About (same layout; links GitHub · Help (README) · Privacy (PRIVACY.md) · ♥ Sponsor, since AudioPaper has no website).
+
+### 2026-09-25: Featured artists
+- "Move Bitch (feat. Ludacris, Mystikal & I-20)" by Disturbing tha Peace (a label crew) found no art; the credit fallback now also tries featured artists parsed from the title. 0 → 8 curated images.
+
 ### 2026-09-25: Artist pool, Wikimedia Commons, smarter web search
 - Per-artist pool (≤24, each song searched once, least-recently-seen rotation); Commons via MusicBrainz → Wikidata → category with "Photo by … · license" credits (Kim Petras: 7 Commons photos, no Brave needed); Brave relevance now matches the artist as a phrase ("Blu-ray Noir" ≠ "Ray Noir") with a "press photo" follow-up query; Brave relabelled as web-search fallback. Bugs caught on the way: Wikidata values aren't all strings (trimmed fixture hid it), Commons renditions only at standard widths, Swift Regex lacks look-behind. Docs: README, PRIVACY, NETWORK.
 

@@ -1,4 +1,5 @@
 # Memory Bank TOC
+- [NEXT-SESSION.md](NEXT-SESSION.md) — **start here**: the next tasks (website, notarized release)
 - [projectbrief.md](projectbrief.md) — vision, goals, surfaces
 - [projectRules.md](projectRules.md) — standing rules: Apple HIG, UI verification without capturing the user's screen, secret scanning
 - [techContext.md](techContext.md) — stack, targets, entitlements, services, icon build, commands, gotchas

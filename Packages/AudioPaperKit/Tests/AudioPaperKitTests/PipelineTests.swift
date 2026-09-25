@@ -147,6 +147,15 @@ func fanArtCandidate(_ name: String, width: Int? = 1920, height: Int? = 1080) ->
         #expect(Set(names) == ["ls1", "ls2", "jh1"])
     }
 
+    @Test func featuredArtistsFillInForACollectiveWithNoArt() async {
+        let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: StubHTTP { _ in Fixture.png(width: 1920, height: 1080) })
+        let source = ArtistKeyedFanArt(art: ["Ludacris": [fanArtCandidate("luda")], "Mystikal": [fanArtCandidate("myst")]])
+        var pipeline = FanArtPipeline(sources: [source], filters: [], cache: cache)
+        pipeline.duplicateDistance = -1
+        let track = Track.sample("Move Bitch (feat. Ludacris, Mystikal & I-20)", artist: "Disturbing tha Peace", album: "Golden Grain")
+        #expect(Set(await acceptedNames(pipeline, track)) == ["luda", "myst"])
+    }
+
     @Test func fullCreditIsUsedWhenItFindsArt() async {
         let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: StubHTTP { _ in Fixture.png(width: 1920, height: 1080) })
         let source = ArtistKeyedFanArt(art: [

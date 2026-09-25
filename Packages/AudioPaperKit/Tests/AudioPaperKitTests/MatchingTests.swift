@@ -71,6 +71,23 @@ import Testing
         #expect(Track.sample(artist: name).creditedArtists.isEmpty)
     }
 
+    @Test(arguments: [
+        ("Move Bitch (feat. Ludacris, Mystikal & I-20)", ["Ludacris", "Mystikal", "I-20"]),
+        ("Stay [ft. Justin Bieber]", ["Justin Bieber"]),
+        ("(Rock) Superstar [feat. Chino Moreno & Everlast]", ["Chino Moreno", "Everlast"]),
+        ("Numb/Encore (with JAY-Z)", ["JAY-Z"]),
+        ("Closer", []),
+        ("With or Without You", []),
+    ])
+    func featuredArtistsComeFromTheTitle(title: String, expected: [String]) {
+        #expect(Track.sample(title, artist: "Someone").featuredArtists == expected)
+    }
+
+    @Test func fallbackTriesCreditedThenFeaturedArtistsOnce() {
+        let track = Track.sample("SPAGHETTI (feat. j-hope)", artist: "LE SSERAFIM & j-hope")
+        #expect(track.fallbackArtists == ["LE SSERAFIM", "j-hope"], "j-hope appears in both, tried once")
+    }
+
     @Test func creditingKeepsTheSongButNotTheAlbumArtist() {
         let track = Track(title: "SPAGHETTI", artist: "LE SSERAFIM & j-hope", album: "SPAGHETTI", albumArtist: "LE SSERAFIM & j-hope", sourceID: "t")
         let solo = track.crediting("j-hope")

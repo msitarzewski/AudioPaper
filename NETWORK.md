@@ -42,7 +42,7 @@ Needed by fanart.tv, TheAudioDB and Wikimedia Commons, which are keyed by exact 
 | `musicbrainz.org` | `GET /ws/2/artist/{MBID}?inc=url-rels` — the artist's Wikidata link, for Commons | artist ID |
 | `www.wikidata.org` | `GET /wiki/Special:EntityData/{QID}.json` — the artist's Commons category | Wikidata ID |
 
-**1–2 requests per artist, once.** Results are remembered on disk (unresolved names for 7 days), so an artist you've played before costs nothing, even after a relaunch. A collaboration credit ("A & B") is looked up as a whole first, and per artist only if that finds nothing.
+**1–2 requests per artist, once.** Results are remembered on disk (unresolved names for 7 days), so an artist you've played before costs nothing, even after a relaunch. A collaboration credit ("A & B") is looked up as a whole first; only if that finds nothing are its individual artists, then any featured artists in the title ("feat. …"), looked up too.
 
 ## Fan art (per new song)
 
