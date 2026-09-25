@@ -88,6 +88,16 @@ Guidelines:
 - Match the surrounding code: small types, doc comments on public API and non-obvious decisions, no commented-out code.
 - File-system paths use `path(percentEncoded: false)`; `URL.path()` is percent-encoded.
 
+## Accessibility
+
+AudioPaper follows WCAG 2.2 AA through [WCAG2ICT](https://www.w3.org/TR/wcag2ict-22/), plus Apple's accessibility guidelines. For any UI change:
+
+- Every button, link, image and field has a spoken name that makes sense out of context (use `Label` for icon-only buttons; `.accessibilityLabel` where the visible text isn't enough; hide decorative images).
+- Nothing relies on colour alone; nothing moves when Reduce Motion is on (cross-fades are fine); anything that changes on its own can be paused.
+- Menus open at their control, not the pointer, so they work from the keyboard.
+- Check it through the accessibility API (`AXUIElementCopyAttributeValue` for `AXDescription`, `AXTitle` and `AXTitleUIElement`), or with Accessibility Inspector. **Not** System Events, which doesn't expose SwiftUI's labels and reports them as missing.
+- Website changes: run Lighthouse's accessibility audit in light and dark mode.
+
 ## Releasing (maintainer)
 
 `scripts/release.sh` builds the signed, notarized download: `build/release/AudioPaper-<version>.dmg`. It archives a Release build, exports it with the Developer ID certificate (the widget extension included), checks signatures, hardened runtime and sandbox, then notarizes and staples the app and the disk image. Bump `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml` first.

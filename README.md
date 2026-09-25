@@ -43,6 +43,17 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 - **Widgets:** *Now Playing* (small, medium, large), with working Pause and Next Image buttons on medium and large, and *Artwork* (every size), which shows the current wallpaper image with its credit. Clicking a widget opens the Mini Player. Like every macOS widget, they turn grayscale while the desktop isn't focused (with the *Automatic* widget style). Add them with **Edit Widgets** on the desktop (AudioPaper must be installed in `/Applications` for them to appear).
 - **Dock:** AudioPaper stays out of the Dock unless the Mini Player is open or the menu bar icon is hidden, so there's always a way back in. Clicking the Dock icon opens the Mini Player, and right-clicking it shows the wallpaper actions.
 
+## Accessibility
+
+AudioPaper aims for WCAG 2.2 AA as W3C's [WCAG2ICT](https://www.w3.org/TR/wcag2ict-22/) applies it to desktop software (the basis of EN 301 549 and Section 508), and for Apple's accessibility guidelines for macOS. The website aims for WCAG 2.2 AA directly.
+
+- **VoiceOver:** every control, image and link has a spoken name. The artwork says what's on the desktop ("Photo by …, from Wikimedia Commons"), Settings fields name their service ("fanart.tv personal API key"), and the rotation slider speaks its value ("45 seconds"). Widget artwork is described too.
+- **Keyboard:** standard controls throughout, reachable with Full Keyboard Access; the Mini Player's "…" menu opens under its button however it's pressed.
+- **Motion:** the wallpaper cross-fades and never moves; with Reduce Motion, the image strip jumps instead of scrolling; **Pause Wallpaper Changes** stops the rotation.
+- **Transparency and contrast:** Liquid Glass is the system's own, so it follows Reduce Transparency and Increase Contrast.
+
+Audited on 2026-09-25 through the macOS accessibility API, plus Lighthouse on every page of the site in light and dark mode (all 100). Not yet tested in a human VoiceOver session; reports are welcome as issues.
+
 ## Requirements
 
 - macOS 26 (Tahoe) or later
@@ -146,6 +157,8 @@ The interface follows Apple's Human Interface Guidelines for macOS: a menu (not 
 - More art sources: Deezer
 - A paid TheAudioDB key would be needed before any Mac App Store release (their free key excludes app stores)
 - Smarter logo detection (stylized band logos can slip past text recognition)
+- Commons relevance: categories also hold photos *related to* an artist (a fan in the band's cap, a show's speaker stacks); prefer files that name the artist
+- A hands-on VoiceOver and Full Keyboard Access session
 
 ## Support
 

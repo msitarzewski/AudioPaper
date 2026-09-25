@@ -1,6 +1,6 @@
 # Active Context
 
-**State** (2026-09-25): **v0.1.0 released** — notarized DMG from `scripts/release.sh` (Developer ID, widget extension included, fanart.tv project key injected at build time from `.env`, never committed; `LayeredSecretStore` falls back to it). Website live at https://msitarzewski.github.io/AudioPaper/ (Pages via Actions). Security hardening shipped in 4329c39. Next: screenshots for the site — user asked whether to automate with pop/K-pop; pending their choice on what may appear (recommendation: album covers + Wikimedia Commons photos with credits visible; no fanart.tv/DeviantArt fan art; capture only AudioPaper windows or the rendered wallpaper file, never the screen).
+**State** (2026-09-25): **0.1.1 built** (notarized DMG in `build/release/`), awaiting the user's go-ahead to commit, push, tag `v0.1.1` and publish. 0.1.1 = site screenshots + Credits page, MusicBrainz 503 handling, Commons subcategories (pipeline version 6, so pools rebuild), accessibility audit and fixes, camera glyph for photos, Settings opens in front. Website live (redeploys on push). Next after release: Commons relevance (see NEXT-SESSION.md).
 
 ## User decisions (2026-09-25)
 - Follow Apple's HIG, Apple's own UI examples and per-platform icon practice, macOS only for now (`projectRules.md`).

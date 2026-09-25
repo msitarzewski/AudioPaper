@@ -20,9 +20,11 @@ OUT = ROOT / "_site"
 REPO = "https://github.com/msitarzewski/AudioPaper"
 BASE_URL = "https://msitarzewski.github.io/AudioPaper/"
 
-# (output file, nav label or None). Order is the nav order.
+# (output file, nav label or None). Order is the nav order; pages without a label are linked from the
+# footer instead, and every entry goes in the sitemap.
 NAV = [("index.html", "Home"), ("help.html", "Help"), ("shortcuts.html", "Shortcuts"),
-       ("reference.html", "Reference"), ("privacy.html", "Privacy"), ("network.html", "Network")]
+       ("reference.html", "Reference"), ("privacy.html", "Privacy"), ("network.html", "Network"),
+       ("credits.html", None)]
 
 # Markdown documents rendered into pages: source → (output, description).
 MARKDOWN = {
@@ -75,7 +77,7 @@ def render_markdown(source):
 def page(layout, name, title, description, content):
     nav = "\n".join(
         f'<a href="{href}"{" aria-current=\"page\"" if href == name else ""}>{label}</a>'
-        for href, label in NAV
+        for href, label in NAV if label
     )
     full_title = "AudioPaper" if name == "index.html" else f"{title} — AudioPaper"
     return (layout

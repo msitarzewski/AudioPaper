@@ -20,13 +20,14 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
       <li><a href="#storage">Storage</a></li>
       <li><a href="#troubleshooting">When something doesn’t work</a></li>
       <li><a href="#uninstall">Removing AudioPaper</a></li>
+      <li><a href="#accessibility">VoiceOver and the keyboard</a></li>
       <li><a href="#contact">Asking for help</a></li>
     </ol>
   </nav>
 
   <h2 id="install">Install</h2>
   <ol>
-    <li>Download <code>AudioPaper-0.1.0.dmg</code> (or the newest version) from the <a href="https://github.com/msitarzewski/AudioPaper/releases/latest">latest release</a>. It is signed with a Developer ID and notarized by Apple, so it opens without warnings.</li>
+    <li>Download <code>AudioPaper-0.1.1.dmg</code> (or the newest version) from the <a href="https://github.com/msitarzewski/AudioPaper/releases/latest">latest release</a>. It is signed with a Developer ID and notarized by Apple, so it opens without warnings.</li>
     <li>Open it and drag <strong>AudioPaper</strong> into <strong>Applications</strong>. It must be in Applications for its widgets to show up.</li>
     <li>Open AudioPaper from Applications. A small display-and-note icon appears in the menu bar; there’s no window to start with.</li>
   </ol>
@@ -55,6 +56,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
   <p>Each song is searched once, when it first plays. Art found for an artist is kept in a pool of up to 24 images, so their other songs have something to show straight away.</p>
 
   <h2 id="menu">The menu bar menu</h2>
+  <figure class="shot"><img src="shots/menu.webp" width="532" height="385" loading="lazy" alt="AudioPaper's menu: the song and artist, Next Image, Pause Wallpaper Changes, Restore Original Wallpaper, Show Mini Player (Option-Command-M), Settings (Command-comma) and Quit AudioPaper (Command-Q)."></figure>
   <p>Click the icon in the menu bar. From the top:</p>
   <ul>
     <li><strong>The song</strong>, and the artist and album.</li>
@@ -65,6 +67,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
   <p>The icon shows a pause mark while wallpaper changes are paused.</p>
 
   <h2 id="mini-player">The Mini Player</h2>
+  <figure class="shot"><img src="shots/mini-babymetal.webp" width="385" height="438" loading="lazy" alt="The Mini Player during BABYMETAL's Gimme Chocolate!!: the concert photo on the desktop with its credit, a strip of five photos, and the Pause, Next Image, Restore and More buttons."><figcaption>Photos: <a href="credits.html#babymetal">credits</a></figcaption></figure>
   <p>A small window, like Music’s MiniPlayer: the image on screen, its credit, a strip of every image in rotation, and buttons for <strong>Next Image</strong>, <strong>Pause</strong> and <strong>Restore Original Wallpaper</strong>. Click an image in the strip to show it now.</p>
   <ul>
     <li><strong>Open it</strong> from the menu (<kbd>⌥</kbd><kbd>⌘</kbd><kbd>M</kbd>), by clicking a widget, or by clicking AudioPaper’s Dock icon.</li>
@@ -86,6 +89,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
   <p>If you hid the menu bar icon and closed the Mini Player, open AudioPaper from Applications again to bring the Mini Player back.</p>
 
   <h2 id="control">Pausing, slowing down, restoring</h2>
+  <figure class="shot"><img src="shots/settings-general.webp" width="592" height="692" loading="lazy" alt="Settings, General pane: Wallpaper set to Album cover, then fan art; Fan art framing Automatic; Change fan art every 45 seconds; switches for restoring the wallpaper when music stops, showing in the menu bar and opening at login; and the Storage section with the artwork cache size, a Keep up to menu and Clear Cache."><figcaption>Settings → General</figcaption></figure>
   <ul>
     <li><strong>Pause Wallpaper Changes</strong> keeps the current image until you resume, whatever you play.</li>
     <li><strong>Settings → General → Change fan art every</strong> sets the rotation, from 15 seconds to 5 minutes.</li>
@@ -139,6 +143,11 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
       </ul>
     </li>
   </ol>
+
+  <h2 id="accessibility">VoiceOver and the keyboard</h2>
+  <p>Everything in AudioPaper has a name VoiceOver reads out. In the Mini Player, the artwork tells you the song and what’s on your desktop, for example “Photo by Justin Higuchi, from Wikimedia Commons”, and each image in the strip says what it is and where it came from. The menu bar menu and Settings are standard macOS controls.</p>
+  <p>Keyboard shortcuts are listed on the <a href="shortcuts.html">Keyboard shortcuts</a> page. If the rotating wallpaper is distracting, <strong>Pause Wallpaper Changes</strong> stops it, and with Reduce Motion on, the Mini Player’s image strip jumps instead of scrolling. More detail is in the <a href="reference.html#accessibility">Reference</a>.</p>
+  <p>If something is hard to use with VoiceOver or the keyboard, please <a href="https://github.com/msitarzewski/AudioPaper/issues/new/choose">tell us</a>.</p>
 
   <h2 id="contact">Asking for help</h2>
   <p>Questions and bug reports go to <a href="https://github.com/msitarzewski/AudioPaper/issues">GitHub issues</a>. Security or privacy problems go by email instead, as described in <a href="https://github.com/msitarzewski/AudioPaper/blob/main/SECURITY.md">SECURITY.md</a>.</p>

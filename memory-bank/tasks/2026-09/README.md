@@ -43,3 +43,27 @@
 
 ### 2026-09-25: Display icon
 - Replaced the camera with GlassPowerTools' display (same bezel/screen geometry) and the Heroicons solid musical note on a red screen, 112% scale; menu bar template icons redrawn to match; `build_icons.py` builds multiple designs (`--ship <design> <palette>`); Heroicons MIT notice in `THIRD-PARTY-NOTICES.md`.
+
+### 2026-09-25: Website (GitHub Pages)
+- Landing, Help, Keyboard shortcuts, Reference; Privacy and Network rendered from the repo files with pandoc (`scripts/build_site.py`, `.github/workflows/pages.yml`). Copy judged against BEDROCK: facts only, what leaves the Mac, whose art it is, costs, how to leave, who benefits, decision handed back. Help menu (⌘?) and About open the site.
+
+### 2026-09-25: Security hardening
+- Review of every untrusted input (API JSON, arbitrary image hosts, redirects, Music notifications, widget commands, the URL scheme). Fixed: https + named hosts only, credential stripping on redirects, response caps and time limits, Retry-After, web-only credit links, explicit local artwork, pre-decode image caps, no recording of failed searches, Lucene escaping, spoof limits, Keychain save errors, apctl redaction. 25 new tests (`UntrustedInputTests`).
+
+### 2026-09-25: v0.1.0 release
+- `scripts/release.sh`: archive → Developer ID export (widget included) → verify signatures, hardened runtime, sandbox, key and version → notarize and staple app and DMG. fanart.tv project key injected at build time only. Published with checksum; Gatekeeper accepts the download.
+
+### 2026-09-25: Screenshots, Commons subcategories, MusicBrainz 503s
+- Site screenshots of AudioPaper's own windows and renders of credited Commons photos (no fan art on the site). Commons walks artist-named subcategories. MusicBrainz's momentary 503s are waited out once.
+
+### 2026-09-25: Accessibility audit
+- Standard: WCAG2ICT (WCAG 2.2 AA for software) + Apple HIG; site WCAG 2.2 AA. Audited through the AX API (System Events gave a false "unlabelled" result) and Lighthouse. Fixed: artwork description, photo vs fan-art names, link names, decorative avatars, service-specific field names, slider value, Reduce Motion, keyboard-anchored menu, widget image descriptions, camera glyph for photos; site in-text link underlines and light-mode contrast. Documented in README, CONTRIBUTING, Help and Reference.
+
+### 2026-09-25: Settings opens in front
+- Menu bar **Settings…** used `SettingsLink`, which opened the window behind the frontmost app (AudioPaper usually has no Dock icon). Both Settings items now call `SettingsWindow.show` (`App/AudioPaperApp.swift`): `NSApp.activate(ignoringOtherApps: true)` (the cooperative `activate()` was declined from the menu bar extra), `openSettings()`, then `makeKeyAndOrderFront` on the `com_apple_SwiftUI_Settings_window`. Verified with Finder frontmost.
+
+### 2026-09-25: 0.1.1
+- Version 0.1.1 (build 2); `FanArtPipeline.version` 6 so artist pools are re-searched and pick up Commons subcategory photos. Contents: MusicBrainz 503 handling, Commons subcategories, accessibility fixes, camera glyph for photos, Settings in front, site Credits page and screenshots. Notarized DMG built with `scripts/release.sh`.
+
+### 2026-09-25: One signature for local and release builds
+- The user was asked for the login password twice after installing 0.1.1: the legacy login keychain ties each item (one per saved key) to the app's designated requirement, and Debug builds were signed with Apple Development while releases use Developer ID. `scripts/install.sh` now signs local builds with the Developer ID (manual style) when available; verified identical designated requirements. Users updating between releases never saw this (same Developer ID).

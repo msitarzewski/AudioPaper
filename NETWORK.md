@@ -61,7 +61,7 @@ The primary sources are asked in parallel. Brave is asked afterwards, only if fe
 |---|---|---|---|
 | `webservice.fanart.tv` | `GET /v3/music/{artist MBID}?api_key=…[&client_key=…]` | artist ID; AudioPaper's project key (or yours, if you set one) and your optional personal key | 1 per artist (remembered until quit) |
 | `www.theaudiodb.com` | `GET /api/v1/json/{key}/artist-mb.php?i={MBID}` (or `search.php?s={artist}` without an ID); spaced 2.1 s | artist ID or name, the key (free public key `123`, or yours) | 1 per artist (remembered until quit) |
-| `commons.wikimedia.org` | `GET /w/api.php?action=query&generator=categorymembers&gcmtitle=Category:{artist}` (files with size, photographer, license); spaced 0.5 s | the artist's Commons category | 1 per artist (remembered until quit) |
+| `commons.wikimedia.org` | `GET /w/api.php?action=query&generator=categorymembers&gcmtitle=Category:{artist}` (files with size, photographer, license); if too few are wallpaper-sized, `list=categorymembers&cmtype=subcat` and the files of subcategories named after the artist ("… by year" → "… in 2025", newest first); spaced 0.5 s | the artist's Commons category and those subcategory names | 1–7 per artist (remembered until quit) |
 | `www.deviantart.com` | `POST /oauth2/token` (client credentials), then `GET /api/v1/oauth2/browse/popular?q={artist song}` and `browse/tags?tag={artist}` | artist + song; your client ID/secret to the token endpoint only | 2 (+1 token about hourly). Only with your credentials |
 | `api.search.brave.com` | `GET /res/v1/images/search?q=…&count=50&safesearch=strict` with header `X-Subscription-Token` | `"{artist} {song} fan art wallpaper"`, then `"{artist} fan art wallpaper"`, then `"{artist} press photo"` — each only while relevant results are still short; spaced 1.1 s | 0–3. Only with your key, only as a fallback |
 
@@ -89,7 +89,7 @@ When the Mini Player credits a DeviantArt artist, their avatar is fetched from D
 |---|---|
 | Replaying something you've heard | **0** |
 | New song by an artist you've played this session | fanart.tv, TheAudioDB and Commons answered from memory; downloads only for images not yet pooled (often 0) |
-| New song by a new artist, curated sources only (default) | ~2 identity + 2 for Commons (Wikidata link + category) + 3 art APIs + ~4–10 images |
+| New song by a new artist, curated sources only (default) | ~2 identity + 2–8 for Commons (Wikidata link, category, and up to 6 subcategory requests) + 3 art APIs + ~4–10 images |
 | Same, plus Brave as fallback | + up to 3 searches + images from third-party sites |
 | Artist's pool full (24 images) | **0** |
 | New album | + 2 (Apple search + cover) |

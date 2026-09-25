@@ -85,7 +85,12 @@ public struct WikimediaCommonsSource: FanArtSource {
         if let mbid = try await MusicBrainz.artistID(for: track, http: http),
            let qid = try await MusicBrainz.wikidataID(forArtist: mbid, http: http),
            let category = try await commonsCategory(of: qid) {
-            found = try await files(in: category, artist: track.artist, limit: limit)
+            // Only images big enough for a wallpaper count toward the limit (Commons reports sizes up front),
+            // so a category full of thumbnails and portraits doesn't use up the search.
+            found = try await files(in: category, artist: track.artist, limit: limit).filter(Self.isWallpaperSized)
+            if found.count < limit {
+                found += try await filesInSubcategories(of: category, artist: track.artist, limit: limit - found.count)
+            }
         }
         await Self.memo.set(artistKey, found)
         return found
@@ -112,6 +117,74 @@ public struct WikimediaCommonsSource: FanArtSource {
             "iiextmetadatafilter": "Artist|LicenseShortName",
         ])
         return Self.candidates(from: try await http.json(CategoryResponse.self, from: URLRequest(url: url)), artist: artist)
+    }
+
+    struct SubcategoryResponse: Decodable {
+        struct Query: Decodable {
+            struct Member: Decodable { var title: String }
+            var categorymembers: [Member]
+        }
+        var query: Query?
+    }
+
+    /// Many artists' photos are filed a level or two down — "Aespa (musical group)" → "Aespa by year" →
+    /// "Aespa in 2025". Only subcategories named after the artist's own category are followed, so other
+    /// people filed under it ("Chris Greatti (songwriter)" under Poppy) aren't; logos and media are skipped.
+    /// Newest first, and at most `maxSubcategoryRequests` requests per artist.
+    static let maxSubcategoryRequests = 6
+
+    private func filesInSubcategories(of category: String, artist: String, limit: Int) async throws -> [ArtworkCandidate] {
+        var queue = try await subcategories(of: category, root: category)
+        var requests = 1
+        var found: [ArtworkCandidate] = []
+        var seen = Set<URL>()
+        while let next = queue.first, found.count < limit, requests < Self.maxSubcategoryRequests {
+            queue.removeFirst()
+            requests += 1
+            if Self.isGrouping(next) {
+                queue = try await subcategories(of: next, root: category) + queue
+            } else {
+                for candidate in try await files(in: next, artist: artist, limit: 50)
+                where Self.isWallpaperSized(candidate) && found.count < limit && seen.insert(candidate.imageURL).inserted {
+                    found.append(candidate)
+                }
+            }
+        }
+        return found
+    }
+
+    private func subcategories(of category: String, root: String) async throws -> [String] {
+        try await Self.limiter.wait()
+        let url = URL.api("https://commons.wikimedia.org/w/api.php", [
+            "action": "query", "format": "json", "formatversion": "2",
+            "list": "categorymembers", "cmtitle": "Category:\(category)", "cmtype": "subcat", "cmlimit": "50",
+        ])
+        let response = try await http.json(SubcategoryResponse.self, from: URLRequest(url: url))
+        return Self.relevantSubcategories(response.query?.categorymembers.map(\.title) ?? [], of: root)
+    }
+
+    /// Subcategories worth searching, newest first: named after the artist's own category `root` (minus any
+    /// "(musical group)"-style qualifier), and not logos, sounds or video.
+    static func relevantSubcategories(_ titles: [String], of root: String) -> [String] {
+        let base = root.replacing(/\s*\([^)]*\)\s*$/, with: "").lowercased()
+        // "Members of …" leads to categories named after each member, which wouldn't be followed anyway.
+        let skipped = ["logo", "audio", "sound", "video", "signature", "album cover", "discograph", "members of"]
+        return titles
+            .map { $0.hasPrefix("Category:") ? String($0.dropFirst(9)) : $0 }
+            .filter { name in
+                let lower = name.lowercased()
+                return lower != root.lowercased() && lower.contains(base) && !skipped.contains { lower.contains($0) }
+            }
+            .sorted { $0.localizedStandardCompare($1) == .orderedDescending }
+    }
+
+    /// "Aespa by year": a category of categories, listed rather than searched for files.
+    static func isGrouping(_ category: String) -> Bool {
+        category.lowercased().contains(" by ")
+    }
+
+    static func isWallpaperSized(_ candidate: ArtworkCandidate) -> Bool {
+        SizeFilter().accepts(width: candidate.width, height: candidate.height)
     }
 
     static func candidates(from response: CategoryResponse, artist: String) -> [ArtworkCandidate] {

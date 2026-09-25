@@ -242,10 +242,23 @@ final class StubProtocol: URLProtocol, @unchecked Sendable {
         #expect(StubProtocol.requests(to: limited).count == 1, "later calls wait out the Retry-After locally")
     }
 
+    @Test func aMomentaryLimitIsWaitedOutOnce() async throws {
+        let busy = host("busy")
+        StubProtocol.route(busy, .respond(status: 503, headers: ["Retry-After": "1"]))
+        let client = StubProtocol.client()
+        let url = URL(string: "https://\(busy)/api")!
+        let clock = ContinuousClock.now
+        await #expect(throws: HTTPError.self) { try await client.data(for: URLRequest(url: url)) }
+        #expect(StubProtocol.requests(to: busy).count == 2, "one retry after the short wait, then the host is paused")
+        #expect(ContinuousClock.now - clock >= .seconds(1))
+    }
+
     @Test func retryAfterIsParsedAndBounded() {
         let now = Date(timeIntervalSince1970: 1_000_000)
         #expect(HostBackoff.delay(retryAfter: "30", now: now) == 30)
-        #expect(HostBackoff.delay(retryAfter: nil, now: now) == 60)
+        #expect(HostBackoff.delay(retryAfter: nil, now: now) == 10)
+        #expect(HostBackoff.delay(retryAfter: nil, rateLimitReset: "1000002", now: now) == 2, "MusicBrainz's reset time")
+        #expect(HostBackoff.delay(retryAfter: "30", rateLimitReset: "1000002", now: now) == 30, "Retry-After wins")
         #expect(HostBackoff.delay(retryAfter: "999999", now: now) == 3600, "capped at an hour")
         #expect(HostBackoff.delay(retryAfter: "-5", now: now) == 1)
         // `now` is Mon, 12 Jan 1970 13:46:40 GMT.

@@ -38,7 +38,7 @@
     --border-strong:  rgba(0, 0, 0, 0.16);
     --text:           oklch(20% 0.006 30);
     --text-muted:     oklch(44% 0.01 30);
-    --text-dim:       oklch(58% 0.01 30);
+    --text-dim:       oklch(50% 0.01 30);  /* ≥ 4.5:1 on the light background (WCAG 1.4.3) */
   }
 }
 
@@ -59,6 +59,15 @@ img { max-width: 100%; height: auto; }
 
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Links inside running text are underlined, so they don't rely on colour alone (WCAG 1.4.1). */
+p a, li a, td a, figcaption a, .caption a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--link) 55%, transparent);
+}
+p a:hover, li a:hover, td a:hover, figcaption a:hover { text-decoration-color: currentColor; }
+.toc a { text-decoration: none; }
 a:focus-visible, button:focus-visible {
   outline: 2px solid var(--link);
   outline-offset: 2px;
@@ -252,76 +261,34 @@ strong { color: var(--text); font-weight: 600; }
   backdrop-filter: blur(10px);
   z-index: 3;
 }
-.scene { position: absolute; inset: 0; }
+.desktop.real { background: #000; }
+.desktop.real img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-/* Scene 1 — the album cover, centred over a blurred wash of itself. */
-.scene.cover {
-  background:
-    radial-gradient(circle at 30% 35%, #ff7a3d 0, transparent 45%),
-    radial-gradient(circle at 70% 70%, #6d1ea8 0, transparent 50%),
-    #3a0f33;
+.gallery {
   display: grid;
-  place-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin: 0 0 28px;
 }
-.scene.cover::before {
-  content: "";
-  position: absolute;
-  inset: -10%;
-  background: inherit;
-  filter: blur(40px) saturate(1.3);
+.gallery figure { margin: 0; }
+.gallery img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
 }
-.album {
-  position: relative;
-  width: 34%;
-  aspect-ratio: 1;
-  border-radius: 3px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  background:
-    radial-gradient(circle at 50% 42%, #ffd2a8 0 11%, transparent 11.5%),
-    linear-gradient(180deg, #ff8a3d 0%, #e5405a 48%, #6d1ea8 49%, #2a0c3f 100%);
+.gallery figcaption, .caption { font-size: 14px; color: var(--text-dim); margin-top: 10px; }
+.gallery figcaption strong { color: var(--text-muted); }
+.minis {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
+.minis img { width: min(300px, 100%); height: auto; }
+.caption { text-align: center; max-width: 640px; margin: 8px auto 0; }
 
-/* Scene 2 — fan art, full-bleed. An abstract stand-in: no one's real work is used here. */
-.scene.art {
-  background:
-    radial-gradient(ellipse 60% 40% at 72% 30%, rgba(255, 220, 170, 0.9), transparent 60%),
-    linear-gradient(170deg, #0f2a4a 0%, #28507a 40%, #e07b52 72%, #2b1a2e 100%);
-}
-.scene.art::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 38%;
-  background:
-    radial-gradient(ellipse 40% 90% at 20% 100%, #120c18 60%, transparent 61%),
-    radial-gradient(ellipse 55% 80% at 78% 100%, #1b1224 60%, transparent 61%);
-}
-.credit {
-  position: absolute;
-  right: 3%;
-  bottom: 4%;
-  z-index: 2;
-  font-size: clamp(10px, 1.5vw, 13px);
-  color: #fff;
-  background: rgba(20, 16, 18, 0.45);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 5px 11px;
-  border-radius: 999px;
-}
-
-.scene.art, .credit { animation: crossfade 12s ease-in-out infinite; }
-@keyframes crossfade {
-  0%, 30%   { opacity: 0; }
-  45%, 85%  { opacity: 1; }
-  100%      { opacity: 0; }
-}
-/* Without motion, show the moment the art has faded in — the cover's wash still visible around it. */
-@media (prefers-reduced-motion: reduce) {
-  .scene.art, .credit { animation: none; opacity: 1; }
-  .scene.art { opacity: 0.88; }
-}
 .demo figcaption {
   font-size: 14px;
   color: var(--text-dim);

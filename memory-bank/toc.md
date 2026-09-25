@@ -1,7 +1,7 @@
 # Memory Bank TOC
-- [NEXT-SESSION.md](NEXT-SESSION.md) — **start here**: the next tasks (website, notarized release)
+- [NEXT-SESSION.md](NEXT-SESSION.md) — **start here**: current state and next steps (0.1.1)
 - [projectbrief.md](projectbrief.md) — vision, goals, surfaces
-- [projectRules.md](projectRules.md) — standing rules: Apple HIG, UI verification without capturing the user's screen, secret scanning
+- [projectRules.md](projectRules.md) — standing rules: Apple HIG, UI verification without capturing the user's screen, secret scanning, accessibility (WCAG2ICT, AX-API audits)
 - [techContext.md](techContext.md) — stack, targets, entitlements, services, icon build, commands, gotchas
 - [systemPatterns.md](systemPatterns.md) — plugins, fan-art pipeline, artist identity, cache, wallpaper, app surfaces, widgets
 - [activeContext.md](activeContext.md) — current state, user decisions, open items

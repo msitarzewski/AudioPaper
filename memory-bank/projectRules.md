@@ -20,3 +20,9 @@
 **Context**: The repo is public; `.env` holds real Brave and fanart.tv keys.
 **Pattern**: Before every commit, scan exactly the staged tree.
 **Implementation**: `git archive $(git write-tree) | tar -x -C <tmp>`, then `gitleaks dir --config .gitleaks.toml <tmp>` and a literal grep for each `.env` value. Fixtures are checked for keys when recorded.
+
+### Accessibility: WCAG2ICT + Apple HIG, verified through the AX API
+**Context**: 2026-09-25 — the user asked for an accessibility pass ("We need to examine and fix issues there"). The website targets WCAG 2.2 AA directly.
+**Pattern**: Every control, image and link has a spoken name; field labels make sense out of context; nothing relies on colour alone; no motion (cross-fades only, Reduce Motion respected); rotating content can be paused (WCAG 2.2.2); menus open at their control, not the pointer.
+**Implementation**: Audit with the Accessibility API (`AXUIElementCopyAttributeValue`: AXDescription, AXTitle, AXTitleUIElement/AXLabelUIElements, subrole) — **not** System Events, which doesn't expose SwiftUI's labels and produced a false "unlabelled" finding. Settings controls are named by their linked visible labels. For the site, run Lighthouse accessibility in dark and light mode (the light palette failed contrast once). Say what hasn't been tested (no human VoiceOver session yet).
+**Example**: `App/Views/MiniPlayerView.swift` (heroDescription, MenuAnchor), `Widgets/AudioPaperWidgets.swift` (spokenDescription), `site/static/style.css` (in-text link underlines).

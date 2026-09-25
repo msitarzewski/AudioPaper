@@ -7,7 +7,7 @@ import Vision
 /// Order of work is cheapest first: reported size → download → decode → Vision filters → duplicate check.
 public struct FanArtPipeline: Sendable {
     /// Bump when sources, filters or thresholds change, so cached per-song results are searched again.
-    public static let version = 5
+    public static let version = 6
 
     public enum Event: Sendable {
         case accepted(Artwork)

@@ -110,15 +110,28 @@ public struct URLSessionHTTPClient: HTTPClient {
         if request.value(forHTTPHeaderField: "User-Agent") == nil {
             request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
         }
-        let (data, http) = try await BoundedLoad(session: session, request: request, limit: limit).run()
-        if http.statusCode == 429 || http.statusCode == 503 {
-            let until = Date.now.addingTimeInterval(HostBackoff.delay(retryAfter: http.value(forHTTPHeaderField: "Retry-After")))
+        for attempt in 1...2 {
+            let (data, http) = try await BoundedLoad(session: session, request: request, limit: limit).run()
+            guard http.statusCode == 429 || http.statusCode == 503 else {
+                guard (200..<300).contains(http.statusCode) else { throw HTTPError.status(http.statusCode, request.url) }
+                return (data, http)
+            }
+            let delay = HostBackoff.delay(
+                retryAfter: http.value(forHTTPHeaderField: "Retry-After"),
+                rateLimitReset: http.value(forHTTPHeaderField: "X-RateLimit-Reset")
+            )
+            // A momentary limit (MusicBrainz's shared pool refills every second) is worth one short wait;
+            // anything longer pauses the host so nothing more is sent until it asked.
+            if attempt == 1, delay <= HostBackoff.shortWait {
+                try await Task.sleep(for: .seconds(delay))
+                continue
+            }
+            let until = Date.now.addingTimeInterval(delay)
             await HostBackoff.shared.pause(host, until: until)
             log.info("\(host, privacy: .public) is rate limiting (HTTP \(http.statusCode)); pausing it")
             throw HTTPError.rateLimited(host: host, until: until)
         }
-        guard (200..<300).contains(http.statusCode) else { throw HTTPError.status(http.statusCode, request.url) }
-        return (data, http)
+        throw HTTPError.notHTTP  // unreachable: the second attempt always returns or throws
     }
 }
 
@@ -138,9 +151,16 @@ actor HostBackoff {
         pausedUntil[host] = max(until, pausedUntil[host] ?? .distantPast)
     }
 
-    /// Seconds to wait from a `Retry-After` header (seconds, or an HTTP date), defaulting to a minute and
-    /// capped at an hour so a hostile value can't switch a source off indefinitely.
-    static func delay(retryAfter: String?, now: Date = .now) -> TimeInterval {
+    /// Delays up to this long are waited out inside the request, once.
+    static let shortWait: TimeInterval = 5
+
+    /// Seconds to wait: from `Retry-After` (seconds, or an HTTP date), else from `X-RateLimit-Reset` (a Unix
+    /// time, as MusicBrainz sends), else 10 seconds; at least 1 and at most an hour, so a hostile value
+    /// can't switch a source off indefinitely.
+    static func delay(retryAfter: String?, rateLimitReset: String? = nil, now: Date = .now) -> TimeInterval {
+        if retryAfter == nil, let reset = rateLimitReset.flatMap({ TimeInterval($0.trimmingCharacters(in: .whitespaces)) }) {
+            return min(max(reset - now.timeIntervalSince1970, 1), 3600)
+        }
         let requested: TimeInterval? = retryAfter.flatMap { value in
             let value = value.trimmingCharacters(in: .whitespaces)
             if let seconds = TimeInterval(value) { return seconds }
@@ -150,7 +170,7 @@ actor HostBackoff {
             formatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
             return formatter.date(from: value).map { $0.timeIntervalSince(now) }
         }
-        return min(max(requested ?? 60, 1), 3600)
+        return min(max(requested ?? 10, 1), 3600)
     }
 }
 

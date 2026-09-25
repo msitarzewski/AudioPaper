@@ -19,6 +19,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
       <li><a href="#credits">Credits</a></li>
       <li><a href="#storage">What’s stored, and where</a></li>
       <li><a href="#untrusted">Untrusted replies</a></li>
+      <li><a href="#accessibility">Accessibility</a></li>
       <li><a href="#permissions">Permissions</a></li>
       <li><a href="#developers">For developers</a></li>
     </ol>
@@ -74,7 +75,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
     <tbody>
       <tr><td>fanart.tv</td><td>Fan-made artist backgrounds, 1920 × 1080 and 4K</td><td>Artist ID</td><td>Built in; your personal key is optional</td></tr>
       <tr><td>TheAudioDB</td><td>Artist backgrounds, 1280 × 720</td><td>Artist ID, or the exact name if there’s no ID</td><td>Built in (the free public key)</td></tr>
-      <tr><td>Wikimedia Commons</td><td>Freely licensed photos, with photographer and licence. Originals up to 4000 px wide; a 1920 px copy of larger ones</td><td>Artist ID → Wikidata → the artist’s Commons category</td><td>None</td></tr>
+      <tr><td>Wikimedia Commons</td><td>Freely licensed photos, with photographer and licence. Originals up to 4000 px wide; a 1920 px copy of larger ones</td><td>Artist ID → Wikidata → the artist’s Commons category, then its subcategories named after the artist (“… by year” → “… in 2025”, newest first) when the category itself has too few wallpaper-sized photos</td><td>None</td></tr>
       <tr><td>DeviantArt</td><td>Fan art, with the artist’s profile</td><td>Artist and song</td><td>Your own application</td></tr>
       <tr><td>Brave Search (fallback)</td><td>Images from the wider web</td><td>Up to three searches: “<em>artist song</em> fan art wallpaper”, “<em>artist</em> fan art wallpaper”, “<em>artist</em> press photo”, stopping once there’s enough</td><td>Your own key</td></tr>
     </tbody>
@@ -146,6 +147,16 @@ description: Every AudioPaper setting, where its art comes from, how images are 
     <li>“Now playing” notifications are acted on only while Music is running, with each field capped at 256 characters.</li>
   </ul>
   <p>Security reports go to the address in <a href="https://github.com/msitarzewski/AudioPaper/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+  <h2 id="accessibility">Accessibility</h2>
+  <p>AudioPaper aims for WCAG 2.2 AA as W3C’s <a href="https://www.w3.org/TR/wcag2ict-22/">WCAG2ICT</a> applies it to desktop software, and for Apple’s accessibility guidelines for macOS. This site aims for WCAG 2.2 AA directly.</p>
+  <ul>
+    <li><strong>VoiceOver:</strong> every control, image and link has a spoken name. The artwork says what’s on the desktop (“Photo by …, from Wikimedia Commons”). Settings fields include their service (“fanart.tv personal API key”), and the rotation slider speaks its value (“45 seconds”).</li>
+    <li><strong>Keyboard:</strong> the Mini Player and Settings use standard controls, which Full Keyboard Access can reach, and the “…” menu opens under its button however it’s pressed. See <a href="shortcuts.html">Keyboard shortcuts</a>.</li>
+    <li><strong>Motion:</strong> the wallpaper changes with a cross-fade, never movement. With Reduce Motion on, the Mini Player’s image strip jumps instead of scrolling. <strong>Pause Wallpaper Changes</strong> stops the rotation altogether.</li>
+    <li><strong>Transparency and contrast:</strong> the Liquid Glass surfaces are the system’s own, so they follow Reduce Transparency and Increase Contrast.</li>
+  </ul>
+  <p>These were checked with the macOS accessibility API and, for this site, automated audits. They haven’t yet been tested by a VoiceOver user; if something is hard to use, please <a href="https://github.com/msitarzewski/AudioPaper/issues/new/choose">open an issue</a>.</p>
 
   <h2 id="permissions">Permissions</h2>
   <p>AudioPaper runs in the App Sandbox, with the hardened runtime, and asks for only this:</p>

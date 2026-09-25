@@ -7,6 +7,7 @@ struct MenuBarMenu: View {
     let coordinator: NowPlayingCoordinator
     @Environment(\.openURL) private var openURL
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         nowPlaying
@@ -19,10 +20,8 @@ struct MenuBarMenu: View {
         }
         .keyboardShortcut("m", modifiers: [.command, .option])
         Divider()
-        SettingsLink {
-            Text("Settings…")
-        }
-        .keyboardShortcut(",", modifiers: .command)
+        Button("Settings…") { SettingsWindow.show(openSettings) }
+            .keyboardShortcut(",", modifiers: .command)
         Button("Quit AudioPaper") {
             NSApp.terminate(nil)
         }

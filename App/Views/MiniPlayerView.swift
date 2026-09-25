@@ -10,6 +10,9 @@ struct MiniPlayerView: View {
     /// Height of the hidden title bar. The artwork runs up under it, so the window gives it back at the
     /// bottom; otherwise the window sizes as if the title bar still took space, leaving a gap.
     @State private var titleBarHeight: CGFloat = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// An invisible view behind the "…" button, so its menu opens under it (also when pressed from the keyboard).
+    @State private var moreAnchor = MenuAnchor.Reference()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -62,7 +65,17 @@ struct MiniPlayerView: View {
             }
             // Square top (the window's own corners round it); rounded where it meets the content below.
             .clipShape(.rect(bottomLeadingRadius: 16, bottomTrailingRadius: 16))
-            .accessibilityElement(children: .combine)
+            // One element for VoiceOver: the song first, then what's on the desktop.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(heroDescription)
+            .accessibilityAddTraits(.isImage)
+    }
+
+    /// "Concrete, Poppy — I Disagree. On the desktop: Photo by …, from Wikimedia Commons."
+    private var heroDescription: String {
+        let song = [coordinator.track?.title ?? "Nothing playing", subtitle].joined(separator: ", ")
+        guard let artwork = coordinator.showing ?? coordinator.albumArtwork else { return song }
+        return "\(song). On the desktop: \(artwork.accessibilityName)."
     }
 
     private var subtitle: String {
@@ -104,7 +117,11 @@ struct MiniPlayerView: View {
             // Keep the image on the desktop in view, so its highlight is always visible.
             .onChange(of: coordinator.showing?.id, initial: true) { _, id in
                 guard let id else { return }
-                withAnimation(.smooth) { proxy.scrollTo(id, anchor: .center) }
+                if reduceMotion {
+                    proxy.scrollTo(id, anchor: .center)
+                } else {
+                    withAnimation(.smooth) { proxy.scrollTo(id, anchor: .center) }
+                }
             }
         }
     }
@@ -143,6 +160,7 @@ struct MiniPlayerView: View {
                     Label("More", systemImage: "ellipsis")
                 }
                 .help("Window options and settings")
+                .background(MenuAnchor(reference: moreAnchor))
             }
             .labelStyle(.iconOnly)
             .buttonStyle(.glass)
@@ -160,17 +178,38 @@ struct MiniPlayerView: View {
             preferences.miniPlayerOnAllDesktops.toggle()
         })
         menu.addItem(.separator())
-        menu.addItem(ClosureMenuItem("Settings…") {
-            NSApp.activate()
-            openSettings()
-        })
-        menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        menu.addItem(ClosureMenuItem("Settings…") { SettingsWindow.show(openSettings) })
+        // Under the button, like a pop-up menu, whether it was clicked or pressed from the keyboard.
+        if let anchor = moreAnchor.view {
+            let below = NSPoint(x: 0, y: anchor.isFlipped ? anchor.bounds.height + 4 : -4)
+            menu.popUp(positioning: nil, at: below, in: anchor)
+        } else {
+            menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        }
     }
 
     @ViewBuilder
     private var windowOptions: some View {
         Toggle("Float on Top", isOn: $preferences.miniPlayerFloatsOnTop)
         Toggle("Show on All Desktops", isOn: $preferences.miniPlayerOnAllDesktops)
+    }
+}
+
+/// An invisible AppKit view that marks where a SwiftUI control is, for positioning an `NSMenu` under it.
+private struct MenuAnchor: NSViewRepresentable {
+    @MainActor final class Reference {
+        weak var view: NSView?
+    }
+    let reference: Reference
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        reference.view = view
+        return view
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        reference.view = view
     }
 }
 
@@ -255,14 +294,24 @@ private struct WindowConfigurator: NSViewRepresentable {
     }
 }
 
+extension ArtworkCandidate {
+    /// The glyph for this kind of image: a disc for covers, a camera for photos, a palette for fan art.
+    var symbolName: String {
+        switch kind {
+        case .albumCover: "opticaldisc"
+        case .fanArt: kindLabel == "Photo" ? "camera" : "paintpalette"
+        }
+    }
+}
+
 extension Artwork {
     var accessibilityName: String {
         let attribution = candidate.attribution
         switch candidate.kind {
         case .albumCover: return "Album cover, \(attribution.title ?? "")"
         case .fanArt:
-            let by = attribution.creatorName.map { " by \($0)" } ?? ""
-            return "Fan art\(by), from \(attribution.sourceName)"
+            // "Photo by …" for Commons photos, "Art by …" for fan art, as the on-screen credit says.
+            return "\(candidate.creatorCredit ?? candidate.kindLabel), from \(attribution.sourceName)"
         }
     }
 }
@@ -275,9 +324,10 @@ struct AttributionRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            AvatarImage(url: attribution.creatorAvatarURL, placeholder: artwork.candidate.kind == .albumCover ? "opticaldisc" : "paintpalette")
+            AvatarImage(url: attribution.creatorAvatarURL, placeholder: artwork.candidate.symbolName)
                 .frame(width: 28, height: 28)
                 .clipShape(.circle)
+                .accessibilityHidden(true)  // decorative; the credit next to it says who
 
             VStack(alignment: .leading, spacing: 1) {
                 if let credit = artwork.candidate.creatorCredit {
@@ -303,6 +353,8 @@ struct AttributionRow: View {
                     Image(systemName: "arrow.up.right.square")
                 }
                 .help("Open where this art was found")
+                .accessibilityLabel(artwork.candidate.kind == .albumCover
+                    ? "View album on \(attribution.sourceName)" : "View image on \(attribution.sourceName)")
             }
         }
     }

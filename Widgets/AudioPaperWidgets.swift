@@ -118,7 +118,7 @@ struct NowPlayingView: View {
         .shadow(color: .black.opacity(0.5), radius: 3, y: 1)
         .containerBackground(for: .widget) {
             // Covers often carry their own lettering; a stronger scrim keeps the song title readable over it.
-            ArtworkFill(image: entry.image(entry.cover ?? entry.snapshot.showing))
+            ArtworkFill(image: entry.image(entry.cover ?? entry.snapshot.showing), label: (entry.cover ?? entry.snapshot.showing)?.spokenDescription)
                 .overlay(alignment: .bottom) { Scrim(strength: .strong) }
         }
     }
@@ -126,7 +126,7 @@ struct NowPlayingView: View {
     /// Medium: cover at left; song, credit and controls at right.
     private var medium: some View {
         HStack(spacing: 14) {
-            ArtworkTile(image: entry.image(entry.cover ?? entry.snapshot.showing))
+            ArtworkTile(image: entry.image(entry.cover ?? entry.snapshot.showing), label: (entry.cover ?? entry.snapshot.showing)?.spokenDescription)
                 .frame(maxHeight: .infinity)
                 .aspectRatio(1, contentMode: .fit)
             VStack(alignment: .leading, spacing: 6) {
@@ -143,7 +143,7 @@ struct NowPlayingView: View {
     /// Large: the image on the desktop, the song, the slideshow strip and controls.
     private var large: some View {
         VStack(alignment: .leading, spacing: 10) {
-            ArtworkTile(image: entry.image(entry.snapshot.showing ?? entry.cover))
+            ArtworkTile(image: entry.image(entry.snapshot.showing ?? entry.cover), label: (entry.snapshot.showing ?? entry.cover)?.spokenDescription)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -156,7 +156,7 @@ struct NowPlayingView: View {
             if entry.snapshot.slides.count > 1 {
                 HStack(spacing: 6) {
                     ForEach(entry.snapshot.slides.prefix(6)) { slide in
-                        ArtworkTile(image: entry.image(slide), cornerRadius: 6)
+                        ArtworkTile(image: entry.image(slide), label: slide.spokenDescription, cornerRadius: 6)
                             .frame(width: 40, height: 40)
                             .overlay {
                                 RoundedRectangle(cornerRadius: 6)
@@ -198,7 +198,7 @@ struct ArtworkWidgetView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .containerBackground(for: .widget) {
-            ArtworkFill(image: entry.image(entry.snapshot.showing ?? entry.cover))
+            ArtworkFill(image: entry.image(entry.snapshot.showing ?? entry.cover), label: (entry.snapshot.showing ?? entry.cover)?.spokenDescription)
                 .overlay(alignment: .bottom) { Scrim() }
         }
     }
@@ -231,7 +231,9 @@ struct Credit: View {
             Label {
                 Text(line(for: item)).lineLimit(1)
             } icon: {
-                Image(systemName: item.kind == .albumCover ? "opticaldisc" : "paintpalette")
+                // Photo credits read "Photo by …" / "Photo · …" (ArtworkCandidate.shortCredit).
+                Image(systemName: item.kind == .albumCover ? "opticaldisc" : item.credit.hasPrefix("Photo") ? "camera" : "paintpalette")
+                    .accessibilityHidden(true)
             }
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -264,6 +266,8 @@ struct Controls: View {
 
 struct ArtworkTile: View {
     let image: NSImage?
+    /// What VoiceOver says for the picture, e.g. "Album cover, I Disagree".
+    var label: String?
     var cornerRadius: CGFloat = 10
 
     var body: some View {
@@ -280,11 +284,15 @@ struct ArtworkTile: View {
                 }
             }
             .clipShape(.rect(cornerRadius: cornerRadius))
+            .accessibilityElement()
+            .accessibilityLabel(label ?? "No artwork")
+            .accessibilityAddTraits(.isImage)
     }
 }
 
 struct ArtworkFill: View {
     let image: NSImage?
+    var label: String?
 
     var body: some View {
         if let image {
@@ -292,10 +300,19 @@ struct ArtworkFill: View {
                 .resizable()
                 .widgetAccentedRenderingMode(.desaturated)
                 .scaledToFill()
+                .accessibilityLabel(label ?? "Artwork")
         } else {
             Rectangle().fill(.fill.tertiary)
                 .overlay { Image(systemName: "music.note").font(.largeTitle).foregroundStyle(.tertiary) }
+                .accessibilityLabel("No artwork")
         }
+    }
+}
+
+extension WidgetSnapshot.Image {
+    /// "Album cover, I Disagree" or the credit ("Photo by Justin Higuchi · CC BY 2.0"), for VoiceOver.
+    var spokenDescription: String {
+        kind == .albumCover ? "Album cover, \(title ?? "")" : credit
     }
 }
 

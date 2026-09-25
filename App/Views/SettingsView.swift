@@ -45,6 +45,7 @@ private struct GeneralSettings: View {
             LabeledContent("Change fan art every") {
                 HStack {
                     Slider(value: $preferences.rotationInterval, in: 15...300, step: 15)
+                        .accessibilityValue(Duration.seconds(preferences.rotationInterval).formatted(.units(allowed: [.minutes, .seconds], width: .wide)))
                     Text(Duration.seconds(preferences.rotationInterval).formatted(.units(allowed: [.minutes, .seconds], width: .abbreviated)))
                         .monospacedDigit()
                         .frame(width: 70, alignment: .trailing)
@@ -262,6 +263,16 @@ private struct AccountSettings: View {
 private struct CredentialField: View {
     let label: String
     let key: SecretKey
+    /// Out of its section, "Personal API key (optional)" is ambiguous; VoiceOver hears the service too.
+    private var spokenLabel: String {
+        let service = switch key {
+        case .braveAPIKey: "Brave Search"
+        case .fanartTVProjectKey, .fanartTVClientKey: "fanart.tv"
+        case .theAudioDBAPIKey: "TheAudioDB"
+        case .deviantArtClientID, .deviantArtClientSecret: "DeviantArt"
+        }
+        return "\(service) \(label)"
+    }
     let isSecret: Bool
     @Binding var text: String
     @Binding var failed: Set<SecretKey>
@@ -275,6 +286,7 @@ private struct CredentialField: View {
                 TextField(label, text: $text)
             }
         }
+        .accessibilityLabel(spokenLabel)
         .onAppear {
             text = KeychainSecretStore().value(for: key) ?? ""
             loaded = true

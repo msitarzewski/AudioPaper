@@ -322,3 +322,19 @@ import Testing
         #expect(AppleMusicSource.event(from: ["Player State": "Playing", "Name": "Beats 1"]) == nil)
     }
 }
+
+@Suite struct CommonsSubcategoryTests {
+    @Test func followsOnlyTheArtistsOwnSubcategoriesNewestFirst() {
+        let aespa = WikimediaCommonsSource.relevantSubcategories(
+            ["Category:Aespa by year", "Category:Aespa logos", "Category:Members of Aespa"], of: "Aespa (musical group)")
+        #expect(aespa == ["Aespa by year"], "logos and members' own categories are skipped")
+
+        let years = WikimediaCommonsSource.relevantSubcategories(
+            ["Category:Aespa in 2020", "Category:Aespa in 2025", "Category:Aespa in 2023"], of: "Aespa (musical group)")
+        #expect(years == ["Aespa in 2025", "Aespa in 2023", "Aespa in 2020"])
+
+        let poppy = WikimediaCommonsSource.relevantSubcategories(
+            ["Category:Poppy (singer) logos", "Category:Poppy (singer) by year", "Category:Chris Greatti (songwriter)"], of: "Poppy (singer)")
+        #expect(poppy == ["Poppy (singer) by year"], "other people filed under the artist aren't followed")
+    }
+}

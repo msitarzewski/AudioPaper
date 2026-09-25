@@ -17,8 +17,19 @@ LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchS
 
 cd "$ROOT"
 xcodegen generate --quiet
+
+# Sign with the same Developer ID certificate as releases when this Mac has it. The Keychain ties each saved
+# API key to the app's signature, so alternating Apple Development builds and Developer ID releases asks for
+# the login password once per key on every switch; one signature means it never asks. Without the
+# certificate (contributors), Xcode's automatic signing is used as before.
+TEAM="$(grep -m1 'DEVELOPMENT_TEAM:' project.yml | awk '{print $2}')"
+SIGNING=()
+if security find-identity -v -p codesigning | grep "Developer ID Application" | grep -q "($TEAM)"; then
+  SIGNING=(CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Developer ID Application" PROVISIONING_PROFILE_SPECIFIER=)
+fi
+
 xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -configuration "$CONFIGURATION" -destination "generic/platform=macOS" \
-  -derivedDataPath "$DERIVED" -allowProvisioningUpdates -quiet build
+  -derivedDataPath "$DERIVED" -allowProvisioningUpdates -quiet build ${SIGNING[@]+"${SIGNING[@]}"}
 
 # Quit the running copy cleanly so it saves its state (Mini Player position and open state).
 if pgrep -xq AudioPaper; then

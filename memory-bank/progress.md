@@ -20,6 +20,21 @@
 
 - Settings → About (mirrors Anomalous).
 
+## Done (after v0.1, 2026-09-25)
+- **Website** live on GitHub Pages (landing, Help, Keyboard shortcuts, Reference, Privacy, Network), framed with BEDROCK; Help ⌘? opens it. Real screenshots: aespa (David Lee, CC BY 2.0), Poppy (Justin Higuchi, CC BY 2.0), Ghosts V cover (public domain), Mini Players in album-cover mode.
+- **Security hardening** against untrusted responses (see `systemPatterns.md#Network and privacy`), found by a review that treated every response as hostile.
+- **v0.1.0 released**: notarized DMG, fanart.tv project key built in at release time.
+- **MusicBrainz 503s** (a shared pool refilling each second) are waited out once instead of pausing the host a minute.
+- **Commons subcategories**: aespa and Poppy photos, filed by year, are now found.
+- **Accessibility audit** (WCAG2ICT + Apple HIG; site WCAG 2.2 AA): spoken names for the artwork, photos, links and Settings fields; Reduce Motion; keyboard-safe "…" menu; widget descriptions; site links underlined and light-mode contrast fixed (Lighthouse 100 on every page, both schemes).
+- Settings opens in front from the menu (`SettingsWindow.show`).
+- Site: Credits page; BABYMETAL and BLACKPINK Mini Player screenshots (only covers + Commons photos), screenshots under CC BY-SA 4.0.
+- 0.1.1 built (version 0.1.1, build 2; pipeline version 6).
+- 108 tests.
+
 ## Next
+- **Publish 0.1.1** (built and notarized; commit, tag and release once the user says so).
+- Commons relevance: prefer files that name the artist (a NIN-cap photo of Gabriel Boric and a speaker stack came through).
+- A hands-on VoiceOver + Full Keyboard Access session.
 - **GitHub Pages website** and a **notarized release** — plan in `NEXT-SESSION.md`.
 - Verify DeviantArt with real credentials; Spotify source plugin; tune filters with more genres; decide on shipping the fanart.tv project key for release builds.
