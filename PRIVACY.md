@@ -34,7 +34,7 @@ Every request identifies itself with the User-Agent `AudioPaper/0.1 (https://git
 - **No cookies, no web cache.** Every request goes through a private network session that never stores or sends cookies and writes nothing to an HTTP cache. Image sites can't leave anything behind or recognise a returning visitor by cookie.
 - **Rate limits.** Requests to each service are spaced out (1–2 seconds apart), and each service gets at most a handful of calls per song. When a service asks AudioPaper to slow down, it waits as long as asked. At most 60 new songs are searched an hour.
 - **Nothing on your network.** Only `https` addresses on the public internet are contacted, even if a search result or redirect points elsewhere, so nothing on your own network is reachable through AudioPaper.
-- **Your keys stay yours.** API keys are stored in your Keychain and sent only to the service they belong to.
+- **Your keys stay yours.** API keys are stored in your Keychain and sent only to the service they belong to. The downloadable app includes AudioPaper's own fanart.tv project key, which identifies the app to fanart.tv, not you.
 
 ## What's stored on your Mac
 

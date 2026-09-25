@@ -189,6 +189,22 @@ import Testing
     @Test func unconfiguredWithoutProjectKey() {
         #expect(!FanartTVSource(http: StubHTTP { _ in nil }, secrets: StubSecrets(values: [:])).isConfigured)
     }
+
+    @Test func shippedProjectKeyFillsInUnlessYouSetYourOwn() {
+        let shipped = LayeredSecretStore(StubSecrets(values: [:]), bundled: [.fanartTVProjectKey: "shipped"])
+        #expect(shipped.value(for: .fanartTVProjectKey) == "shipped")
+        #expect(FanartTVSource(http: StubHTTP { _ in nil }, secrets: shipped).isConfigured)
+
+        let own = LayeredSecretStore(StubSecrets(values: [.fanartTVProjectKey: "mine"]), bundled: [.fanartTVProjectKey: "shipped"])
+        #expect(own.value(for: .fanartTVProjectKey) == "mine")
+
+        // Builds without the key carry an empty or unexpanded build setting.
+        for unset in ["", "$(FANART_PROJECT_KEY)", nil] as [String?] {
+            let store = LayeredSecretStore(StubSecrets(values: [:]), bundled: [.fanartTVProjectKey: unset])
+            #expect(store.value(for: .fanartTVProjectKey) == nil)
+            #expect(!store.isBundled(.fanartTVProjectKey))
+        }
+    }
 }
 
 @Suite struct MusicBrainzTests {

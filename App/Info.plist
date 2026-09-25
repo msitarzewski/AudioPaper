@@ -33,6 +33,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FanartTVProjectKey</key>
+	<string>$(FANART_PROJECT_KEY)</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.music</string>
 	<key>LSUIElement</key>

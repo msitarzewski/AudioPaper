@@ -59,7 +59,7 @@ The primary sources are asked in parallel. Brave is asked afterwards, only if fe
 
 | Host | Request | Sends | Per song |
 |---|---|---|---|
-| `webservice.fanart.tv` | `GET /v3/music/{artist MBID}?api_key=…[&client_key=…]` | artist ID, your fanart.tv key(s) | 1 per artist (remembered until quit) |
+| `webservice.fanart.tv` | `GET /v3/music/{artist MBID}?api_key=…[&client_key=…]` | artist ID; AudioPaper's project key (or yours, if you set one) and your optional personal key | 1 per artist (remembered until quit) |
 | `www.theaudiodb.com` | `GET /api/v1/json/{key}/artist-mb.php?i={MBID}` (or `search.php?s={artist}` without an ID); spaced 2.1 s | artist ID or name, the key (free public key `123`, or yours) | 1 per artist (remembered until quit) |
 | `commons.wikimedia.org` | `GET /w/api.php?action=query&generator=categorymembers&gcmtitle=Category:{artist}` (files with size, photographer, license); spaced 0.5 s | the artist's Commons category | 1 per artist (remembered until quit) |
 | `www.deviantart.com` | `POST /oauth2/token` (client credentials), then `GET /api/v1/oauth2/browse/popular?q={artist song}` and `browse/tags?tag={artist}` | artist + song; your client ID/secret to the token endpoint only | 2 (+1 token about hourly). Only with your credentials |

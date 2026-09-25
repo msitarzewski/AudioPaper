@@ -15,6 +15,28 @@ public protocol SecretStore: Sendable {
     func value(for key: SecretKey) -> String?
 }
 
+/// The person's own keys first, then keys the app ships with (the fanart.tv project key in release builds).
+public struct LayeredSecretStore: SecretStore {
+    private let primary: any SecretStore
+    private let bundled: [SecretKey: String]
+
+    public init(_ primary: any SecretStore, bundled: [SecretKey: String?]) {
+        self.primary = primary
+        // Unset build settings arrive empty, or as the unexpanded "$(NAME)"; neither is a key.
+        self.bundled = bundled.compactMapValues { value in
+            guard let value, !value.isEmpty, !value.hasPrefix("$(") else { return nil }
+            return value
+        }
+    }
+
+    public func value(for key: SecretKey) -> String? {
+        primary.value(for: key) ?? bundled[key]
+    }
+
+    /// Whether the app ships its own value for `key`.
+    public func isBundled(_ key: SecretKey) -> Bool { bundled[key] != nil }
+}
+
 public struct KeychainSecretStore: SecretStore {
     private let service: String
 

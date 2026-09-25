@@ -47,7 +47,7 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 
 - macOS 26 (Tahoe) or later
 - Apple Music (more players are planned; see [Roadmap](#roadmap))
-- Fan art works out of the box via TheAudioDB's free public key. For more and better images, add a [fanart.tv](https://fanart.tv) API key, and for artists those don't cover, a [Brave Search API](https://api-dashboard.search.brave.com/) key and/or a [DeviantArt application](https://www.deviantart.com/developers/) (client ID + secret), all in Settings → Accounts.
+- Fan art works out of the box: the downloadable app includes a fanart.tv project key, and TheAudioDB and Wikimedia Commons need none. For artists those don't cover, add a [Brave Search API](https://api-dashboard.search.brave.com/) key (billed by usage, so it's always your own) and/or a [DeviantArt application](https://www.deviantart.com/developers/) (client ID + secret) in Settings → Accounts. Builds from source need their own [fanart.tv](https://fanart.tv) project key there too.
 
 ## Build and run
 
@@ -105,7 +105,7 @@ AudioPaper uses these services. Each image shown in the app credits its source a
 | [iTunes Search API](https://performance-partners.apple.com/search-api) | Album covers | None |
 | [MusicBrainz](https://musicbrainz.org) + [Cover Art Archive](https://coverartarchive.org) | Album covers when Apple's catalog doesn't know the release; artist identity (by song) for fanart.tv and TheAudioDB | None |
 | Music app | Last-resort cover for the track that's playing | None |
-| [fanart.tv](https://fanart.tv) | Fan-made artist backgrounds (1920×1080 and 4K), by MusicBrainz ID | A project key, plus your optional personal key |
+| [fanart.tv](https://fanart.tv) | Fan-made artist backgrounds (1920×1080 and 4K), by MusicBrainz ID | Built into release builds (`scripts/release.sh` adds it at build time; it's never in the repo), plus your optional personal key |
 | [Wikimedia Commons](https://commons.wikimedia.org) (via [Wikidata](https://www.wikidata.org)) | Freely licensed artist photos, credited with photographer and license | None |
 | [TheAudioDB](https://www.theaudiodb.com) | Artist backgrounds (fan art and photos, 1280×720) | Free public key built in; optional personal key |
 | [DeviantArt API](https://www.deviantart.com/developers/) | Fan art, with artist profile links | Your own app credentials |

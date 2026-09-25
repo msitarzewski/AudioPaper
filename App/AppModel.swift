@@ -18,8 +18,13 @@ final class AppModel {
     var openWindow: OpenWindowAction?
     private var widgetCommands: WidgetCommand.Observation?
 
+    /// Your keys from the Keychain, falling back to the fanart.tv project key a release build ships with.
+    static let secrets = LayeredSecretStore(KeychainSecretStore(), bundled: [
+        .fanartTVProjectKey: Bundle.main.object(forInfoDictionaryKey: "FanartTVProjectKey") as? String,
+    ])
+
     private init() {
-        let secrets = KeychainSecretStore()
+        let secrets = Self.secrets
         coordinator = NowPlayingCoordinator(
             albumChain: AlbumArtworkChain(providers: [ITunesSearchProvider(), CoverArtArchiveProvider(), AppleMusicArtworkProvider()]),
             fanArtSources: [

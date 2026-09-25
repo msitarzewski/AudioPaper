@@ -88,6 +88,14 @@ Guidelines:
 - Match the surrounding code: small types, doc comments on public API and non-obvious decisions, no commented-out code.
 - File-system paths use `path(percentEncoded: false)`; `URL.path()` is percent-encoded.
 
+## Releasing (maintainer)
+
+`scripts/release.sh` builds the signed, notarized download: `build/release/AudioPaper-<version>.dmg`. It archives a Release build, exports it with the Developer ID certificate (the widget extension included), checks signatures, hardened runtime and sandbox, then notarizes and staples the app and the disk image. Bump `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `project.yml` first.
+
+It needs `APPLE_ID`, `APPLE_PASSWORD` (app-specific) and `APPLE_TEAM_ID` in the environment, plus the fanart.tv project key the app ships with, as `FANART_PROJECT_KEY` or `FAN_ART_API_KEY` in `.env`. The key goes into the built app's Info.plist only, never into the repository. Every other build leaves it empty, so fanart.tv then needs a key in Settings → Accounts.
+
+The website (`site/`) deploys itself on push to `main`; preview it with `python3 scripts/build_site.py && python3 -m http.server -d _site 8090` (needs pandoc).
+
 ## Reporting bugs
 
 Open an issue with:

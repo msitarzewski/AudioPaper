@@ -194,6 +194,7 @@ private struct AccountSettings: View {
     @State private var theAudioDB = ""
     @State private var fanartProject = ""
     @State private var fanartPersonal = ""
+    private let fanartBundled = AppModel.secrets.isBundled(.fanartTVProjectKey)
 
     var body: some View {
         Form {
@@ -210,14 +211,15 @@ private struct AccountSettings: View {
                 )
             }
             Section {
-                CredentialField(label: "Project API key", key: .fanartTVProjectKey, isSecret: true, text: $fanartProject, failed: $failed)
+                CredentialField(label: fanartBundled ? "Project API key (optional)" : "Project API key", key: .fanartTVProjectKey, isSecret: true, text: $fanartProject, failed: $failed)
                 CredentialField(label: "Personal API key (optional)", key: .fanartTVClientKey, isSecret: true, text: $fanartPersonal, failed: $failed)
             } header: {
                 Text("fanart.tv")
             } footer: {
                 CredentialFooter(
-                    isConfigured: !fanartProject.isEmpty,
+                    isConfigured: !fanartProject.isEmpty || fanartBundled,
                     failed: !failed.isDisjoint(with: [.fanartTVProjectKey, .fanartTVClientKey]),
+                    status: fanartProject.isEmpty ? "Using AudioPaper’s project key" : "Saved in Keychain",
                     linkTitle: "fanart.tv (sign in to create a project key)",
                     destination: URL(string: "https://fanart.tv")!
                 )

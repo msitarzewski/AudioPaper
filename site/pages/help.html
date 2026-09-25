@@ -26,7 +26,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
 
   <h2 id="install">Install</h2>
   <ol>
-    <li>Download <code>AudioPaper.dmg</code> from the <a href="https://github.com/msitarzewski/AudioPaper/releases/latest">latest release</a>. It is signed with a Developer ID and notarized by Apple, so it opens without warnings.</li>
+    <li>Download <code>AudioPaper-0.1.0.dmg</code> (or the newest version) from the <a href="https://github.com/msitarzewski/AudioPaper/releases/latest">latest release</a>. It is signed with a Developer ID and notarized by Apple, so it opens without warnings.</li>
     <li>Open it and drag <strong>AudioPaper</strong> into <strong>Applications</strong>. It must be in Applications for its widgets to show up.</li>
     <li>Open AudioPaper from Applications. A small display-and-note icon appears in the menu bar; there’s no window to start with.</li>
   </ol>
@@ -42,11 +42,11 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
   <p>Your own wallpaper is remembered the first time AudioPaper changes it, so <strong>Restore Original Wallpaper</strong> can put it back later.</p>
 
   <h2 id="more-art">Getting more art</h2>
-  <p>Out of the box, AudioPaper finds covers for nearly everything, and fan art and photos from <strong>TheAudioDB</strong> and <strong>Wikimedia Commons</strong>. Well-known artists usually have plenty; newer or smaller artists may have one image or none. These optional keys find more. Add them in <strong>Settings → Accounts</strong>; they’re saved in your Keychain as you type.</p>
+  <p>Out of the box, AudioPaper finds covers for nearly everything, and fan art and photos from <strong>fanart.tv</strong>, <strong>TheAudioDB</strong> and <strong>Wikimedia Commons</strong>. Well-known artists usually have plenty; newer or smaller artists may have one image or none. These optional keys find more. Add them in <strong>Settings → Accounts</strong>; they’re saved in your Keychain as you type.</p>
   <div class="table-wrap"><table>
     <thead><tr><th>Service</th><th>What it adds</th><th>How to get a key</th></tr></thead>
     <tbody>
-      <tr><td>fanart.tv</td><td>Fan-made artist backgrounds at 1920 × 1080 and 4K. Often the best source for well-known artists.</td><td>Make a free account at <a href="https://fanart.tv">fanart.tv</a>, then create an API key from your profile. Paste it into <strong>Project API key</strong>. A <strong>Personal API key</strong> is optional; with one, new images reach you sooner.</td></tr>
+      <tr><td>fanart.tv</td><td>Fan-made artist backgrounds at 1920 × 1080 and 4K. Often the best source for well-known artists.</td><td>Nothing needed: the downloaded app includes AudioPaper’s project key. Optionally, make a free account at <a href="https://fanart.tv">fanart.tv</a> and paste your <strong>Personal API key</strong>; new images then reach you after 2 days instead of 7. (If you built AudioPaper yourself, add a <strong>Project API key</strong> too.)</td></tr>
       <tr><td>Brave Search</td><td>Images from the wider web, used only when the other sources find fewer than three usable images for a song.</td><td>Sign up at the <a href="https://api-dashboard.search.brave.com/">Brave Search API dashboard</a>. The free plan allowed 2,000 searches a month as of September 2026; AudioPaper uses at most three per song, and only for songs that need it.</td></tr>
       <tr><td>DeviantArt</td><td>Fan art, with links to each artist’s DeviantArt profile. This source hasn’t yet been tested against a live DeviantArt account.</td><td><a href="https://www.deviantart.com/developers/">Register an application</a> and paste its <strong>Client ID</strong> and <strong>Client secret</strong>.</td></tr>
       <tr><td>TheAudioDB</td><td>Works without a key. A personal key only matters if you’re a supporter of theirs.</td><td><a href="https://www.theaudiodb.com/free_music_api">About TheAudioDB’s API</a></td></tr>
@@ -110,7 +110,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
   <h3>Only the album cover, no fan art</h3>
   <ul>
     <li>Check <strong>Settings → General → Wallpaper</strong> is set to show fan art, and that sources are switched on in <strong>Settings → Sources</strong>.</li>
-    <li>Some artists have no art in the sources you have. Adding a <a href="#more-art">fanart.tv or Brave Search key</a> finds more.</li>
+    <li>Some artists have no art in the sources you have. Adding a <a href="#more-art">Brave Search key</a> finds more.</li>
     <li>When nothing is found for a song, AudioPaper waits a week before searching for it again, so it doesn’t ask the services over and over.</li>
   </ul>
 

@@ -47,6 +47,9 @@ targets:
         LSUIElement: true
         NSAppleEventsUsageDescription: AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.
         NSHumanReadableCopyright: ""
+        # fanart.tv project key, supplied only by scripts/release.sh (never committed). Empty in other builds,
+        # which then need a key in Settings → Accounts.
+        FanartTVProjectKey: $(FANART_PROJECT_KEY)
     entitlements:
       path: App/AudioPaper.entitlements
       properties:
@@ -67,6 +70,7 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
+        FANART_PROJECT_KEY: ""
 
   AudioPaperWidgets:
     type: app-extension
