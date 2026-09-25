@@ -42,6 +42,8 @@ targets:
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.network.client: true
+        # Required under the hardened runtime for the launch-time "what's playing?" query to Music.
+        com.apple.security.automation.apple-events: true
         com.apple.security.temporary-exception.apple-events:
           - com.apple.Music
     settings:
