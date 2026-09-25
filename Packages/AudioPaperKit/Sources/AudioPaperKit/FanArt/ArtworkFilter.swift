@@ -84,7 +84,9 @@ public struct TextFilter: ArtworkFilter {
     /// Maximum number of recognized words.
     public var maxWords: Int
 
-    public init(maxCoverage: Double = 0.015, maxWords: Int = 3) {
+    /// Text over 1.5% of the image (titles, lyric cards, logos) is rejected. Up to six small words are
+    /// tolerated: incidental text in photos, like shirt numbers or a backdrop logo.
+    public init(maxCoverage: Double = 0.015, maxWords: Int = 6) {
         self.maxCoverage = maxCoverage
         self.maxWords = maxWords
     }

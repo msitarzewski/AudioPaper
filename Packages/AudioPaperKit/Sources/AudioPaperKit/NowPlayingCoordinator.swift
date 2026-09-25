@@ -96,7 +96,7 @@ public final class NowPlayingCoordinator {
                 self.present(showing, animated: false)
             }
         }
-        Task { await cache.prune() }
+        Task { await pruneCache() }
     }
 
     /// Re-subscribes after the enabled players change.
@@ -122,6 +122,22 @@ public final class NowPlayingCoordinator {
     public func refresh() {
         guard let showing else { return }
         present(showing, animated: true)
+    }
+
+    // MARK: Cache
+
+    public func cacheSize() async -> Int {
+        await cache.size()
+    }
+
+    /// Clears downloaded artwork and remembered search results, keeping what's on screen right now.
+    public func clearCache() async {
+        await cache.clear(keeping: Set(slides.map(\.fileURL)))
+    }
+
+    /// Trims the cache to the configured limit, never removing what's on screen.
+    public func pruneCache() async {
+        await cache.prune(maxBytes: preferences.cacheLimitBytes, keeping: Set(slides.map(\.fileURL)))
     }
 
     public func showNext() {
@@ -204,7 +220,7 @@ public final class NowPlayingCoordinator {
     }
 
     private func loadFanArt(for track: Track) async {
-        let key = "fanart:" + track.songKey
+        let key = "fanart:v\(FanArtPipeline.version):" + track.songKey
         if let cached = await cache.artworks(forKey: key) {
             if let first = cached.first {
                 fanArt = cached
@@ -234,6 +250,7 @@ public final class NowPlayingCoordinator {
         // The first image went up as soon as it passed; the rest of the rotation runs best-first.
         fanArt.sort { ($0.qualityScore ?? -.infinity) > ($1.qualityScore ?? -.infinity) }
         try? await cache.store(fanArt, forKey: key)
+        await pruneCache()
     }
 
     // MARK: Presentation

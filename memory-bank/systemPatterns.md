@@ -3,17 +3,20 @@
 ## Plugin protocols (AudioPaperKit)
 - `NowPlayingSource` (`Sources/NowPlayingSource.swift`) — `events() -> AsyncStream<PlaybackEvent>`; registered in `SourceRegistry.standard`. Compiled-in; no dynamic bundles (library validation).
 - `AlbumArtworkProvider` → ordered `AlbumArtworkChain` (iTunes → Cover Art Archive → Music app's own artwork, 800 px last resort).
-- `FanArtSource` (fanart.tv, TheAudioDB, DeviantArt, Brave) → `FanArtPipeline`. Sources marked `isFallback` (Brave) are asked only when the primaries return fewer than 3 candidates. `ArtworkCandidate.isCurated` relaxes the size floor to 1280×720.
+- `FanArtSource` (fanart.tv, TheAudioDB, DeviantArt, Brave) → `FanArtPipeline`. Sources marked `isFallback` (Brave) are asked only when fewer than 3 primary images *pass the filters* (counting found candidates starved BABYMONSTER to one image). Per-song fan-art cache keys carry `FanArtPipeline.version`; bump it when rules change. `ArtworkCandidate.isCurated` relaxes the size floor to 1280×720.
 - `ArtworkFilter` — pipeline steps returning `.accept(score:)` / `.reject(reason)`.
 
 ## Fan-art pipeline (cheapest first)
-reported size (`SizeFilter.accepts`) → download (`ArtworkCache`) → real size → `AestheticsFilter` (Vision `isUtility`, score ≥ −0.5) → `TextFilter` (accurate OCR, ≤1.5% area, ≤3 words) → `ClassificationFilter` (blocklist of real Vision identifiers ≥0.6 — screens/UI, advertising/retail, print/documents, products/mockups; a test checks each label exists; people and concert photos are allowed, per the user; `art`/`illustrations`/`painting`/`graffiti` add a ranking boost) → feature-print duplicate check (< 0.35) against accepted, album cover, and the current wallpaper. Results stream as they pass; the first is shown at once, and the rest of the rotation is sorted by `qualityScore` (aesthetics + art boost) when the search finishes.
+reported size (`SizeFilter.accepts`) → download (`ArtworkCache`) → real size → `AestheticsFilter` (Vision `isUtility`, score ≥ −0.5) → `TextFilter` (accurate OCR, ≤1.5% area, ≤6 words — incidental text in photos like shirt numbers passes) → `ClassificationFilter` (blocklist of real Vision identifiers ≥0.6 — screens/UI, advertising/retail, print/documents, products/mockups; a test checks each label exists; people and concert photos are allowed, per the user; `art`/`illustrations`/`painting`/`graffiti` add a ranking boost) → feature-print duplicate check (< 0.2; true duplicates measure 0.00–0.18, different photos from one shoot 0.23–0.32) against accepted, album cover, and the current wallpaper. Results stream as they pass; the first is shown at once, and the rest of the rotation is sorted by `qualityScore` (aesthetics + art boost) when the search finishes.
 
 ## Relevance (Brave)
 A result's title or page slug must name the artist, plus the song (1.0), the album (0.8), or a music word (0.6). Multi-word artist names alone count (0.5). This stops "Sleepover" (the band) from matching sleepover anime art.
 
 ## Coordinator flow (`NowPlayingCoordinator`)
 playing → 1.5 s debounce → album cover (cached per album key; redrawn only when the album changes) → fan art (cached per song key, empty results remembered for 7 days) → rotation every `rotationInterval`. No cover for a new album → restore original wallpaper (never leave the wrong album up). Presentations are serialized; newer requests supersede queued ones.
+
+## Cache
+`ArtworkCache` stores images by URL hash (re-searches reuse them; only new images download) and per-album/per-song result lists. Reuse refreshes a file's modification date, so pruning is least-recently-used; pruning and clearing never remove images on screen (`slides`). The limit (`Preferences.cacheLimitBytes`: 250 MB–2 GB, default 500 MB) is enforced at launch and after each song. Settings → General → Storage shows the live size, the limit, and Clear Cache… (confirmation dialog, per HIG). Settings panes size the window to their content (`scrollDisabled` + vertical `fixedSize`), per HIG.
 
 ## MusicBrainz
 `MusicBrainz` (Support/MusicBrainz.swift) owns the shared 1 req/s limiter (used by the cover lookup too) and artist-name → MBID resolution. Several exact-name artists ≥90 score means ambiguous → nil (a wrong artist is worse than none).

@@ -62,8 +62,65 @@ private struct GeneralSettings: View {
                         launchAtLogin = SMAppService.mainApp.status == .enabled
                     }
                 }
+            StorageSection(coordinator: coordinator, preferences: preferences)
         }
         .formStyle(.grouped)
+        // HIG: the settings window accommodates the size of the current pane, rather than scrolling.
+        .scrollDisabled(true)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Artwork cache size, its limit, and clearing it (with confirmation, as the HIG asks for destructive actions).
+private struct StorageSection: View {
+    let coordinator: NowPlayingCoordinator
+    @Bindable var preferences: Preferences
+    @State private var size: Int?
+    @State private var confirmingClear = false
+
+    var body: some View {
+        Section("Storage") {
+            LabeledContent("Artwork cache") {
+                if let size {
+                    Text(size.formatted(.byteCount(style: .file)))
+                        .monospacedDigit()
+                } else {
+                    ProgressView().controlSize(.small)
+                }
+            }
+            Picker("Keep up to", selection: $preferences.cacheLimitBytes) {
+                ForEach(Preferences.cacheLimitChoices, id: \.self) { limit in
+                    Text(limit.formatted(.byteCount(style: .file))).tag(limit)
+                }
+            }
+            .onChange(of: preferences.cacheLimitBytes) {
+                Task {
+                    await coordinator.pruneCache()
+                    await measure()
+                }
+            }
+            LabeledContent {
+                Button("Clear Cache…", role: .destructive) { confirmingClear = true }
+            } label: {
+                Text("Downloaded artwork")
+                Text("Artwork is downloaded again as songs play. What's on your desktop now is kept.")
+            }
+            .confirmationDialog("Clear the artwork cache?", isPresented: $confirmingClear) {
+                Button("Clear Cache", role: .destructive) {
+                    Task {
+                        await coordinator.clearCache()
+                        await measure()
+                    }
+                }
+            } message: {
+                Text("AudioPaper will search for and download artwork again the next time each song plays.")
+            }
+        }
+        .task { await measure() }
+    }
+
+    private func measure() async {
+        size = await coordinator.cacheSize()
     }
 }
 
@@ -98,6 +155,9 @@ private struct SourceSettings: View {
             }
         }
         .formStyle(.grouped)
+        // HIG: the settings window accommodates the size of the current pane, rather than scrolling.
+        .scrollDisabled(true)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     /// On when `id` is *not* in the disabled set.
@@ -179,6 +239,9 @@ private struct AccountSettings: View {
             }
         }
         .formStyle(.grouped)
+        // HIG: the settings window accommodates the size of the current pane, rather than scrolling.
+        .scrollDisabled(true)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

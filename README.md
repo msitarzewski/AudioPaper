@@ -68,6 +68,7 @@ xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath bui
 | Change fan art every | 45 s | 15 s – 5 min |
 | Show in menu bar | On | When off, AudioPaper appears in the Dock instead |
 | Restore my wallpaper when music stops | Off | Puts your own wallpaper back 30 s after playback stops |
+| Storage: keep up to | 500 MB | 250 MB – 2 GB of downloaded artwork; least-recently-used images go first. **Clear Cache…** empties it, keeping what's on screen |
 | Open at login | Off | Uses `SMAppService` |
 | Players / Fan art sources | All available | Turn each plugin on or off |
 
@@ -76,7 +77,7 @@ xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath bui
 - Searches send only the **artist, album and song names** to the lookup services listed below. Nothing else about you or your library leaves your Mac.
 - All image filtering (text, screenshots, duplicates, aesthetics) runs **on your Mac** with Vision.
 - API keys live in your **Keychain**.
-- Downloaded images are cached in `~/Library/Containers/com.audiopaper/Data/Library/Caches/AudioPaper`, and pruned automatically at 500 MB.
+- Downloaded images are cached in `~/Library/Containers/com.audiopaper/Data/Library/Caches/AudioPaper`, up to the limit you choose in Settings (500 MB by default).
 
 ## Data sources
 

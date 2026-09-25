@@ -31,6 +31,12 @@ public final class Preferences {
     public var fanArtFraming: FanArtFraming {
         didSet { defaults.set(fanArtFraming.rawValue, forKey: "fanArtFraming") }
     }
+    /// Most the artwork cache may use on disk; least-recently-used images are removed beyond it.
+    public var cacheLimitBytes: Int {
+        didSet { defaults.set(cacheLimitBytes, forKey: "cacheLimitBytes") }
+    }
+    public static let cacheLimitChoices = [250_000_000, 500_000_000, 1_000_000_000, 2_000_000_000]
+
     /// HIG: people, not the app, decide whether the menu bar extra is shown.
     public var showInMenuBar: Bool {
         didSet { defaults.set(showInMenuBar, forKey: "showInMenuBar") }
@@ -64,6 +70,7 @@ public final class Preferences {
         fanArtFraming = defaults.string(forKey: "fanArtFraming").flatMap(FanArtFraming.init(rawValue:)) ?? .automatic
         restoreWhenStopped = defaults.bool(forKey: "restoreWhenStopped")
         showInMenuBar = defaults.object(forKey: "showInMenuBar") as? Bool ?? true
+        cacheLimitBytes = defaults.object(forKey: "cacheLimitBytes") as? Int ?? 500_000_000
         miniPlayerFloatsOnTop = defaults.bool(forKey: "miniPlayerFloatsOnTop")
         miniPlayerOnAllDesktops = defaults.bool(forKey: "miniPlayerOnAllDesktops")
         miniPlayerOpen = defaults.bool(forKey: "miniPlayerOpen")

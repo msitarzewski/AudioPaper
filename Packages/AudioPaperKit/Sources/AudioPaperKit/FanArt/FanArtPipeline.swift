@@ -6,6 +6,9 @@ import Vision
 ///
 /// Order of work is cheapest first: reported size → download → decode → Vision filters → duplicate check.
 public struct FanArtPipeline: Sendable {
+    /// Bump when sources, filters or thresholds change, so cached per-song results are searched again.
+    public static let version = 2
+
     public enum Event: Sendable {
         case accepted(Artwork)
         case rejected(ArtworkCandidate, reason: String)
@@ -16,12 +19,13 @@ public struct FanArtPipeline: Sendable {
     public var filters: [any ArtworkFilter]
     public var cache: ArtworkCache
     public var candidatesPerSource = 30
-    /// Fallback sources are searched only when the primary sources return fewer candidates than this.
+    /// Fallback sources are searched only when fewer than this many primary images pass the filters.
     public var fallbackThreshold = 3
     public var maxAccepted = 8
     public var concurrentDownloads = 4
-    /// Feature-print distance under which two images count as the same picture.
-    public var duplicateDistance: Double = 0.35
+    /// Feature-print distance under which two images count as the same picture. True duplicates measure
+    /// 0.00–0.18; different photos from one shoot (group shots especially) measure 0.23–0.32, and are kept.
+    public var duplicateDistance: Double = 0.2
 
     public init(
         sources: [any FanArtSource],
@@ -47,7 +51,33 @@ public struct FanArtPipeline: Sendable {
     }
 
     private func execute(track: Track, excluding: [CGImage], continuation: AsyncStream<Event>.Continuation) async {
-        let candidates = await gatherCandidates(for: track)
+        var accepted = AcceptedSet()
+        for image in excluding {
+            if let print = try? await Self.featurePrint(image) { accepted.prints.append(print) }
+        }
+        let configured = sources.filter(\.isConfigured)
+
+        let primary = await gather(from: configured.filter { !$0.isFallback }, for: track)
+        await process(primary, into: &accepted, continuation: continuation)
+
+        // Metered fallbacks fill in only when too few images *passed* the filters (not merely were found).
+        guard !Task.isCancelled, accepted.count < fallbackThreshold else { return }
+        let seen = Set(primary.map(\.imageURL))
+        let fallback = await gather(from: configured.filter(\.isFallback), for: track).filter { !seen.contains($0.imageURL) }
+        await process(fallback, into: &accepted, continuation: continuation)
+    }
+
+    /// Feature prints and count of everything accepted so far (plus the excluded images' prints).
+    struct AcceptedSet {
+        var prints: [FeaturePrintObservation] = []
+        var count = 0
+    }
+
+    private func process(
+        _ candidates: [ArtworkCandidate],
+        into accepted: inout AcceptedSet,
+        continuation: AsyncStream<Event>.Continuation
+    ) async {
         var queue = candidates.filter { candidate in
             guard sizeFilter.accepts(width: candidate.width, height: candidate.height, curated: candidate.isCurated) else {
                 continuation.yield(.rejected(candidate, reason: "reported size \(candidate.width ?? 0)×\(candidate.height ?? 0)"))
@@ -55,13 +85,9 @@ public struct FanArtPipeline: Sendable {
             }
             return true
         }[...]
+        guard !queue.isEmpty, accepted.count < maxAccepted else { return }
 
-        var acceptedPrints: [FeaturePrintObservation] = []
-        for image in excluding {
-            if let print = try? await Self.featurePrint(image) { acceptedPrints.append(print) }
-        }
-        var acceptedCount = 0
-
+        var state = accepted
         await withTaskGroup(of: (ArtworkCandidate, Result<(AnalyzedImage, Double?), RejectReason>).self) { group in
             func startNext() {
                 guard let candidate = queue.popFirst() else { return }
@@ -70,7 +96,7 @@ public struct FanArtPipeline: Sendable {
             for _ in 0..<concurrentDownloads { startNext() }
 
             for await (candidate, result) in group {
-                if Task.isCancelled || acceptedCount >= maxAccepted {
+                if Task.isCancelled || state.count >= maxAccepted {
                     group.cancelAll()
                     break
                 }
@@ -80,15 +106,15 @@ public struct FanArtPipeline: Sendable {
                 case let .success((image, score)):
                     // Duplicate check is serialized here so every new image is compared to all accepted ones.
                     if let print = try? await Self.featurePrint(image.preview) {
-                        if let distance = acceptedPrints.lazy.compactMap({ try? print.distance(to: $0) }).min(),
+                        if let distance = state.prints.lazy.compactMap({ try? print.distance(to: $0) }).min(),
                            distance < duplicateDistance {
                             continuation.yield(.rejected(candidate, reason: String(format: "duplicate (%.2f)", distance)))
                             startNext()
                             continue
                         }
-                        acceptedPrints.append(print)
+                        state.prints.append(print)
                     }
-                    acceptedCount += 1
+                    state.count += 1
                     continuation.yield(.accepted(Artwork(
                         candidate: candidate, fileURL: image.fileURL,
                         pixelWidth: image.pixelWidth, pixelHeight: image.pixelHeight,
@@ -98,16 +124,7 @@ public struct FanArtPipeline: Sendable {
                 startNext()
             }
         }
-    }
-
-    /// Asks the primary sources, then the fallbacks only if the primaries came up short.
-    private func gatherCandidates(for track: Track) async -> [ArtworkCandidate] {
-        let configured = sources.filter(\.isConfigured)
-        let primary = await gather(from: configured.filter { !$0.isFallback }, for: track)
-        guard primary.count < fallbackThreshold else { return primary }
-        let fallback = await gather(from: configured.filter(\.isFallback), for: track)
-        var seen = Set(primary.map(\.imageURL))
-        return primary + fallback.filter { seen.insert($0.imageURL).inserted }
+        accepted = state
     }
 
     /// Round-robins sources (each already ordered by relevance) so no single source dominates.

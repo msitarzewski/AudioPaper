@@ -22,11 +22,14 @@ public actor ArtworkCache {
     public func download(_ candidate: ArtworkCandidate) async throws -> (URL, width: Int, height: Int) {
         try FileManager.default.createDirectory(at: imagesDir, withIntermediateDirectories: true)
         let file = imagesDir.appending(path: Self.hash(candidate.imageURL.absoluteString))
-        if candidate.imageURL.isFileURL {
+        if FileManager.default.fileExists(atPath: file.path(percentEncoded: false)), !candidate.imageURL.isFileURL {
+            // Reused: mark it recently used, so pruning removes images that haven't been needed longest.
+            try? FileManager.default.setAttributes([.modificationDate: Date.now], ofItemAtPath: file.path(percentEncoded: false))
+        } else if candidate.imageURL.isFileURL {
             // Artwork a player handed us locally; copy it so it lives as long as the cache entry.
             try? FileManager.default.removeItem(at: file)
             try FileManager.default.copyItem(at: candidate.imageURL, to: file)
-        } else if !FileManager.default.fileExists(atPath: file.path(percentEncoded: false)) {
+        } else {
             var request = URLRequest(url: candidate.imageURL, timeoutInterval: 20)
             request.setValue("image/*", forHTTPHeaderField: "Accept")
             let (data, _) = try await http.data(for: request)
@@ -61,8 +64,18 @@ public actor ArtworkCache {
         try data.write(to: indexDir.appending(path: Self.hash(key) + ".json"), options: .atomic)
     }
 
-    /// Removes least-recently-modified images until the image folder is under `maxBytes`.
-    public func prune(maxBytes: Int = 500_000_000) {
+    /// Total bytes on disk: downloaded images plus the per-album and per-song result lists.
+    public func size() -> Int {
+        [imagesDir, indexDir].reduce(0) { total, dir in
+            let files = (try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.fileSizeKey])) ?? []
+            return total + files.reduce(0) { $0 + ((try? $1.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0) }
+        }
+    }
+
+    /// Removes least-recently-used images until the image folder is under `maxBytes`, never touching `keeping`
+    /// (the images on screen). "Used" is the file's modification date, refreshed whenever a cached image is reused.
+    public func prune(maxBytes: Int, keeping: Set<URL> = []) {
+        let keep = Set(keeping.map { $0.standardizedFileURL.path(percentEncoded: false) })
         let keys: [URLResourceKey] = [.fileSizeKey, .contentModificationDateKey]
         guard let files = try? FileManager.default.contentsOfDirectory(at: imagesDir, includingPropertiesForKeys: keys) else { return }
         let entries = files.compactMap { url -> (URL, Int, Date)? in
@@ -70,9 +83,20 @@ public actor ArtworkCache {
             return (url, values.fileSize ?? 0, values.contentModificationDate ?? .distantPast)
         }.sorted { $0.2 < $1.2 }
         var total = entries.reduce(0) { $0 + $1.1 }
-        for (url, size, _) in entries where total > maxBytes {
+        for (url, size, _) in entries where total > maxBytes && !keep.contains(url.standardizedFileURL.path(percentEncoded: false)) {
             try? FileManager.default.removeItem(at: url)
             total -= size
+        }
+    }
+
+    /// Deletes every cached image except `keeping`, and every remembered search result, so songs are
+    /// searched afresh next time they play.
+    public func clear(keeping: Set<URL> = []) {
+        try? FileManager.default.removeItem(at: indexDir)
+        let keep = Set(keeping.map { $0.standardizedFileURL.path(percentEncoded: false) })
+        let files = (try? FileManager.default.contentsOfDirectory(at: imagesDir, includingPropertiesForKeys: nil)) ?? []
+        for file in files where !keep.contains(file.standardizedFileURL.path(percentEncoded: false)) {
+            try? FileManager.default.removeItem(at: file)
         }
     }
 

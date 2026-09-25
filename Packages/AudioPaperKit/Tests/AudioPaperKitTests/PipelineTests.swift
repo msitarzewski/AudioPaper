@@ -87,22 +87,32 @@ func fanArtCandidate(_ name: String, width: Int? = 1920, height: Int? = 1080) ->
         #expect(!http.requests.contains { $0.lastPathComponent == "small.png" }, "reported-too-small images are never downloaded")
     }
 
-    @Test func fallbackSourcesOnlyFillGaps() async {
-        let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: StubHTTP { _ in nil })
-        let plenty = FixedFanArt(id: "primary", list: ["a", "b", "c"].map { fanArtCandidate($0, width: 10, height: 10) })
-        let fallback = FixedFanArt(id: "fallback", isFallback: true, list: [fanArtCandidate("z", width: 10, height: 10)])
-        var seen: [String] = []
-        for await event in FanArtPipeline(sources: [plenty, fallback], filters: [], cache: cache).run(for: .sample()) {
-            if case let .rejected(candidate, _) = event { seen.append(candidate.imageURL.lastPathComponent) }
+    @Test func fallbackIsAskedOnlyWhenTooFewImagesPass() async {
+        let http = StubHTTP { _ in Fixture.png(width: 1920, height: 1080) }
+        let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: http)
+        let fallback = FixedFanArt(id: "fallback", isFallback: true, list: [fanArtCandidate("z")])
+        func run(_ primary: FixedFanArt) async -> (accepted: [String], rejected: [String]) {
+            var pipeline = FanArtPipeline(sources: [primary, fallback], filters: [], cache: cache)
+            pipeline.duplicateDistance = -1  // identical test images must not count as duplicates here
+            var accepted: [String] = [], rejected: [String] = []
+            for await event in pipeline.run(for: .sample()) {
+                switch event {
+                case let .accepted(artwork): accepted.append(artwork.candidate.imageURL.lastPathComponent)
+                case let .rejected(candidate, _): rejected.append(candidate.imageURL.lastPathComponent)
+                }
+            }
+            return (accepted, rejected)
         }
-        #expect(seen == ["a", "b", "c"], "three primary candidates means the fallback is never asked")
 
-        let sparse = FixedFanArt(id: "primary", list: [fanArtCandidate("a", width: 10, height: 10)])
-        seen = []
-        for await event in FanArtPipeline(sources: [sparse, fallback], filters: [], cache: cache).run(for: .sample()) {
-            if case let .rejected(candidate, _) = event { seen.append(candidate.imageURL.lastPathComponent) }
-        }
-        #expect(seen == ["a", "z"])
+        // Three primary images pass: the metered fallback is never searched.
+        let plenty = await run(FixedFanArt(id: "primary", list: ["a", "b", "c"].map { fanArtCandidate($0) }))
+        #expect(Set(plenty.accepted) == ["a", "b", "c"])
+
+        // Plenty of primary candidates, but all rejected: the fallback fills in.
+        let rejectedPrimary = FixedFanArt(id: "primary", list: ["a", "b", "c", "d"].map { fanArtCandidate($0, width: 10, height: 10) })
+        let short = await run(rejectedPrimary)
+        #expect(short.accepted == ["z"])
+        #expect(Set(short.rejected) == ["a", "b", "c", "d"])
     }
 
     @Test func unconfiguredSourcesAreSkipped() async {
@@ -174,5 +184,52 @@ func fanArtCandidate(_ name: String, width: Int? = 1920, height: Int? = 1080) ->
         let unknownArt = ClassificationFilter.artLabels.subtracting(supported)
         #expect(unknownRejected.isEmpty, "not in Vision's taxonomy: \(unknownRejected.sorted())")
         #expect(unknownArt.isEmpty, "not in Vision's taxonomy: \(unknownArt.sorted())")
+    }
+}
+
+@Suite struct ArtworkCacheTests {
+    func cacheWithImages(_ names: [String]) async throws -> (ArtworkCache, [String: URL]) {
+        let http = StubHTTP { _ in Fixture.png(width: 400, height: 300) }
+        let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: http)
+        var files: [String: URL] = [:]
+        for (offset, name) in names.enumerated() {
+            let (file, _, _) = try await cache.download(fanArtCandidate("\(name).png"))
+            // Distinct, ascending "last used" times: the first name is the least recently used.
+            try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: TimeInterval(offset * 60))], ofItemAtPath: file.path(percentEncoded: false))
+            files[name] = file
+        }
+        return (cache, files)
+    }
+
+    func exists(_ url: URL?) -> Bool {
+        url.map { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) } ?? false
+    }
+
+    @Test func pruneRemovesLeastRecentlyUsedButKeepsWhatsOnScreen() async throws {
+        let (cache, files) = try await cacheWithImages(["oldest", "old", "new"])
+        let oneImage = try #require(files["new"].flatMap { try? $0.resourceValues(forKeys: [.fileSizeKey]).fileSize })
+        await cache.prune(maxBytes: oneImage, keeping: [try #require(files["oldest"])])
+        #expect(exists(files["oldest"]), "on screen, so kept even though it's the least recently used")
+        // The kept image alone fills the one-image budget, so both others go, least recently used first.
+        #expect(!exists(files["old"]))
+        #expect(!exists(files["new"]))
+    }
+
+    @Test func reusingAnImageMarksItRecentlyUsed() async throws {
+        let (cache, files) = try await cacheWithImages(["reused", "other"])
+        _ = try await cache.download(fanArtCandidate("reused.png"))
+        let reused = try #require(files["reused"]?.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
+        #expect(reused > Date(timeIntervalSinceNow: -60))
+    }
+
+    @Test func clearKeepsOnlyWhatsOnScreenAndForgetsResults() async throws {
+        let (cache, files) = try await cacheWithImages(["shown", "gone"])
+        try await cache.store([], forKey: "fanart:v2:someone|song")
+        let before = await cache.size()
+        await cache.clear(keeping: [try #require(files["shown"])])
+        #expect(exists(files["shown"]))
+        #expect(!exists(files["gone"]))
+        #expect(await cache.artworks(forKey: "fanart:v2:someone|song") == nil)
+        #expect(await cache.size() < before)
     }
 }
