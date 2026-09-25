@@ -18,7 +18,9 @@
   - Tests: `cd Packages/AudioPaperKit && swift test`
   - Filter spike: `swift run apctl fanart "<artist>" "<song>" [outDir]`, `apctl cover`, `apctl labels <files>`
   - App: `xcodegen generate && xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath build/DerivedData build`
+- **Install**: `scripts/install.sh [Debug|Release]` builds, installs to `/Applications`, re-registers with Launch Services and relaunches. Needed for widgets: the gallery only lists extensions of apps in an Applications folder (a DerivedData build registers with chronod but never appears).
 - **Gotchas**
+  - XcodeGen writes a literal "1.0" version unless Info.plist properties set `CFBundleShortVersionString: $(MARKETING_VERSION)` / `CFBundleVersion: $(CURRENT_PROJECT_VERSION)` (both targets do).
   - Keychain reads can block on an access prompt after the signing identity changes; keep them off the main thread (the coordinator checks `isConfigured` in a detached task).
   - zsh has a `log` builtin — use `/usr/bin/log show/stream`.
   - `URL.path()` is percent-encoded; use `path(percentEncoded: false)` for file-system paths.

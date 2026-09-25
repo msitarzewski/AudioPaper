@@ -112,9 +112,11 @@ struct NowPlayingView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .foregroundStyle(.white)
+        .shadow(color: .black.opacity(0.5), radius: 3, y: 1)
         .containerBackground(for: .widget) {
+            // Covers often carry their own lettering; a stronger scrim keeps the song title readable over it.
             ArtworkFill(image: entry.image(entry.cover ?? entry.snapshot.showing))
-                .overlay(alignment: .bottom) { Scrim() }
+                .overlay(alignment: .bottom) { Scrim(strength: .strong) }
         }
     }
 
@@ -291,7 +293,24 @@ struct ArtworkFill: View {
 
 /// Bottom gradient that keeps white text legible over any artwork.
 struct Scrim: View {
+    enum Strength {
+        /// A light fade for a single caption line.
+        case regular
+        /// Taller and darker, for a title and subtitle over busy art.
+        case strong
+    }
+
+    var strength: Strength = .regular
+
     var body: some View {
-        LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom)
+        switch strength {
+        case .regular:
+            LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom)
+        case .strong:
+            LinearGradient(
+                stops: [.init(color: .clear, location: 0.25), .init(color: .black.opacity(0.45), location: 0.55), .init(color: .black.opacity(0.8), location: 1)],
+                startPoint: .top, endPoint: .bottom
+            )
+        }
     }
 }

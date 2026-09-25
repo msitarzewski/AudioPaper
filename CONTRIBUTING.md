@@ -32,6 +32,12 @@ swift test                               # the whole core, no network needed
 
 The `.xcodeproj` is generated and git-ignored. Change `project.yml`, not the project file.
 
+To work on the widgets, install the app instead of running it from Xcode's build folder. The widget gallery only offers widgets from apps in an Applications folder:
+
+```sh
+scripts/install.sh            # build, install to /Applications, relaunch (Release: scripts/install.sh Release)
+```
+
 ### Signing
 
 `project.yml` sets the maintainer's team (`DEVELOPMENT_TEAM`). To build locally, either choose your own team in Xcode's Signing & Capabilities tab (don't commit that change), or build unsigned:

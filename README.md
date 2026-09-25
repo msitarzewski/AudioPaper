@@ -51,6 +51,8 @@ open AudioPaper.xcodeproj
 
 Run the **AudioPaper** scheme. It appears in the menu bar rather than the Dock. Add API keys in **Settings → Accounts**; they're stored in your Keychain.
 
+To use the widgets, install it to `/Applications` (the widget gallery only lists installed apps): `scripts/install.sh`.
+
 Building from the command line, or without an Apple Developer team:
 
 ```sh

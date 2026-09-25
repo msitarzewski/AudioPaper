@@ -34,6 +34,8 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: AudioPaper
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         # Shared with the widget extension; must match the application-groups entitlement.
         AudioPaperAppGroup: $(DEVELOPMENT_TEAM).com.audiopaper
         LSApplicationCategoryType: public.app-category.music
@@ -73,6 +75,8 @@ targets:
       path: Widgets/Info.plist
       properties:
         CFBundleDisplayName: AudioPaper
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AudioPaperAppGroup: $(DEVELOPMENT_TEAM).com.audiopaper
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
