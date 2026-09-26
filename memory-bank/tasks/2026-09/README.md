@@ -86,3 +86,6 @@
 
 ### 2026-09-26: Update switches in About (0.1.5)
 - The user couldn't find an auto-update option: Sparkle only asks once, on the second launch, and nothing let you change the answer later. Settings → About (where the version is, the user's choice) now has "Check for updates automatically", "Download and install updates automatically" (needs the first), the last check time and Check Now, all bound straight to `SPUUpdater`. The user's Mac showed automatic checks off. Docs: README, Help, Reference, NETWORK.
+
+### 2026-09-26: Compact Mini Player (0.1.6)
+- User idea: the large artwork duplicated the desktop. Now optional (**Show Artwork** in the "…" menu, context menu and Window menu; off by default); both layouts read song → strip (image on the desktop outlined) → its credit → controls, and the song moves under the window buttons when the artwork is hidden. Verified with window-only captures; the user: "it's amazing". Noted for later: the credit row's ↗ link is faint on tinted glass.

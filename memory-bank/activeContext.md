@@ -1,6 +1,6 @@
 # Active Context
 
-**State** (2026-09-26): **v0.1.5 live** (update switches in Settings → About); 0.1.4 added Spotify (songs, podcasts, ads ignored), "During podcasts: My wallpaper / Podcast cover art", player icon + note/mic glyph; first update delivered through Sparkle. Open: DeviantArt OAuth question (issue #1181, decide by ~2026-10-09), Commons relevance, VoiceOver session. See NEXT-SESSION.md.
+**State** (2026-09-26): **v0.1.6 live** (compact Mini Player); 0.1.5 added update switches in Settings → About; 0.1.4 added Spotify (songs, podcasts, ads ignored), "During podcasts: My wallpaper / Podcast cover art", player icon + note/mic glyph; first update delivered through Sparkle. Open: DeviantArt OAuth question (issue #1181, decide by ~2026-10-09), Commons relevance, VoiceOver session. See NEXT-SESSION.md.
 
 ## User decisions (2026-09-25)
 - Follow Apple's HIG, Apple's own UI examples and per-platform icon practice, macOS only for now (`projectRules.md`).
@@ -20,7 +20,7 @@
 - Settings has an About pane mirroring Anomalous's.
 - Featured artists in song titles ("feat. …") fill in when the credited artist has no art.
 
-- **Mini Player compact by default (user, 2026-09-26):** the large artwork duplicated the desktop, so it's optional (**Show Artwork** in the "…" menu, the window's context menu and the Window menu; `Preferences.miniPlayerShowsArtwork`, default off). Order in both layouts: song (player icon + note/mic) → strip → credit of the image on the desktop → controls. User: "it's amazing". Uncommitted until the user asks.
+- **Mini Player compact by default (user, 2026-09-26):** the large artwork duplicated the desktop, so it's optional (**Show Artwork** in the "…" menu, the window's context menu and the Window menu; `Preferences.miniPlayerShowsArtwork`, default off). Order in both layouts: song (player icon + note/mic) → strip → credit of the image on the desktop → controls. User: "it's amazing". Shipped in 0.1.6.
 
 ## Open items
 - DeviantArt credentials needed to verify that provider live.

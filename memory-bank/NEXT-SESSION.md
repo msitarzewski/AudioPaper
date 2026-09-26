@@ -3,7 +3,8 @@
 Updated 2026-09-26 (Spotify / podcasts session).
 
 ## Where things stand
-- **v0.1.5 is live** (2026-09-26): Settings → About gained the update switches (check automatically, install automatically, last checked, Check Now).
+- **v0.1.6 is live** (2026-09-26): compact Mini Player (Show Artwork optional, off by default; song → strip → credit → controls). The Help page's Mini Player screenshots still show the old layout; retake with covers/Commons-only sources before the user-growth push.
+- v0.1.5 (2026-09-26): Settings → About gained the update switches (check automatically, install automatically, last checked, Check Now).
 - v0.1.4 (2026-09-26): Spotify support, "During podcasts" setting, player icon and music/podcast glyph. The first release delivered through Sparkle (0.1.3 users get it from the feed). Tag `v0.1.4` = `6fd20fd`; the feed commit follows it.
 - Website live (landing, Help, Shortcuts, Reference, Privacy, Network, Credits) and the social card name Apple Music and Spotify. 130 tests.
 - Spotify is installed on this Mac (Homebrew cask) with the user's free account; handy for testing.

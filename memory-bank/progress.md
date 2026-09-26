@@ -34,6 +34,7 @@
 - **v0.1.2**: song changes show the new cover in the app at once and on the desktop right after; downloaded covers skip the debounce; the cover holds 10 s before fan art (was often skipped).
 - **v0.1.4** (2026-09-26): Spotify player (songs, podcasts, ads ignored), "During podcasts" setting, player icon and music/podcast glyph in the Mini Player and menu, Spotify cover fallback, players stored as disabled, install.sh icon-cache fix. 130 tests.
 - **v0.1.5** (2026-09-26): Settings → About has the update switches (check automatically; download and install automatically) plus last-checked and Check Now. The user's Mac had automatic checks off, with no way to turn them on before this.
+- **v0.1.6** (2026-09-26): compact Mini Player — artwork optional (Show Artwork, off by default); order song → strip → credit → controls. 131 tests.
 
 ## Next
 - Commons relevance: prefer files that name the artist (a NIN-cap photo of Gabriel Boric and a speaker stack came through).
