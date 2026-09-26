@@ -5,6 +5,12 @@ public protocol AlbumArtworkProvider: Sendable {
     var id: String { get }
     var displayName: String { get }
     func albumArtwork(for track: Track) async throws -> ArtworkCandidate?
+    /// Whether it can find a podcast's cover; album catalogs can't, and aren't asked.
+    var handlesPodcasts: Bool { get }
+}
+
+extension AlbumArtworkProvider {
+    public var handlesPodcasts: Bool { false }
 }
 
 /// Plugin that finds community artwork for a track (song first, then artist).
@@ -33,7 +39,7 @@ public struct AlbumArtworkChain: Sendable {
     }
 
     public func artwork(for track: Track) async -> ArtworkCandidate? {
-        for provider in providers {
+        for provider in providers where !track.isPodcast || provider.handlesPodcasts {
             do {
                 if let candidate = try await provider.albumArtwork(for: track), candidate.matchScore >= minimumScore {
                     return candidate

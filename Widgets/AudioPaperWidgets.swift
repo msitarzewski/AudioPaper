@@ -23,9 +23,9 @@ struct Entry: TimelineEntry {
         item.flatMap { images[$0.file] }
     }
 
-    /// The album cover: the first slide, when it is one.
+    /// The album or podcast cover: the first slide, when it is one.
     var cover: WidgetSnapshot.Image? {
-        snapshot.slides.first { $0.kind == .albumCover }
+        snapshot.slides.first { $0.kind.isCover }
     }
 }
 
@@ -232,7 +232,7 @@ struct Credit: View {
                 Text(line(for: item)).lineLimit(1)
             } icon: {
                 // Photo credits read "Photo by …" / "Photo · …" (ArtworkCandidate.shortCredit).
-                Image(systemName: item.kind == .albumCover ? "opticaldisc" : item.credit.hasPrefix("Photo") ? "camera" : "paintpalette")
+                Image(systemName: item.kind == .albumCover ? "opticaldisc" : item.kind == .podcastCover ? "mic" : item.credit.hasPrefix("Photo") ? "camera" : "paintpalette")
                     .accessibilityHidden(true)
             }
             .font(.caption)
@@ -312,7 +312,11 @@ struct ArtworkFill: View {
 extension WidgetSnapshot.Image {
     /// "Album cover, I Disagree" or the credit ("Photo by Justin Higuchi · CC BY 2.0"), for VoiceOver.
     var spokenDescription: String {
-        kind == .albumCover ? "Album cover, \(title ?? "")" : credit
+        switch kind {
+        case .albumCover: "Album cover, \(title ?? "")"
+        case .podcastCover: "Podcast cover, \(title ?? "")"
+        case .fanArt: credit
+        }
     }
 }
 

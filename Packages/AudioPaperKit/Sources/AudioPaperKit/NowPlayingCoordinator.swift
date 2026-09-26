@@ -95,6 +95,11 @@ public final class NowPlayingCoordinator {
     }
 
     public var availableSources: [any NowPlayingSource] { registry.available }
+
+    /// The player a track came from, for its name and icon.
+    public func player(for track: Track) -> (any NowPlayingSource)? {
+        registry.sources.first { $0.id == track.sourceID }
+    }
     public var allFanArtSources: [any FanArtSource] { fanArtSources }
 
     // MARK: Lifecycle
@@ -118,7 +123,7 @@ public final class NowPlayingCoordinator {
     /// Re-subscribes after the enabled players change.
     public func restartEvents() {
         eventsTask?.cancel()
-        let stream = registry.events(enabled: preferences.enabledSources)
+        let stream = registry.events(disabled: preferences.disabledSources)
         eventsTask = Task { [weak self] in
             for await event in stream {
                 self?.handle(event)
@@ -179,8 +184,13 @@ public final class NowPlayingCoordinator {
         case let .playing(newTrack):
             isPlaying = true
             restoreTask?.cancel()
-            if newTrack.songKey == track?.songKey, showing != nil {
+            // The same item again (resumed after a pause) keeps its art — unless a stop cancelled its lookup.
+            if newTrack.songKey == track?.songKey, showing != nil, trackTask?.isCancelled != true {
                 startRotation()
+                return
+            }
+            if newTrack.isPodcast, preferences.podcastWallpaper == .myWallpaper {
+                showOwnWallpaper(during: newTrack)
                 return
             }
             track = newTrack
@@ -221,10 +231,41 @@ public final class NowPlayingCoordinator {
             // way to the desktop, which restoring cancels.
             if onDesktop != nil || isPresenting { restoreOriginalWallpaper() }
         }
-        guard preferences.mode == .albumThenFanArt else { return }
+        // A podcast shows its cover alone: a show has no artist to find photos of.
+        guard preferences.mode == .albumThenFanArt, !track.isPodcast else { return }
         // The cover holds the place for a few seconds while the artist's images load; then the fan art takes over.
         startRotation(firstAfter: coverHold)
         await loadFanArt(for: track)
+    }
+
+    /// "During podcasts: My wallpaper": the desktop goes back to the person's own wallpaper until music returns.
+    private func showOwnWallpaper(during episode: Track) {
+        track = episode
+        trackTask?.cancel()
+        stopRotation()
+        fanArt = []
+        albumArtwork = nil
+        albumKey = nil
+        if showing != nil || onDesktop != nil || isPresenting { restoreOriginalWallpaper() }
+        status = "Podcast playing"
+        // The episode's cover still shows in the app (Mini Player, widgets); only the desktop is left alone.
+        trackTask = Task { [weak self] in
+            guard let self, let cover = await self.resolveAlbum(for: episode), !Task.isCancelled else { return }
+            self.albumArtwork = cover
+            self.albumKey = episode.albumKey
+        }
+    }
+
+    /// Whether the desktop is being left as the person's own wallpaper for the podcast playing now.
+    private var keepsOwnWallpaper: Bool {
+        track?.isPodcast == true && preferences.podcastWallpaper == .myWallpaper
+    }
+
+    /// Applies a changed podcast setting to the episode playing now.
+    public func podcastSettingChanged() {
+        guard let track, track.isPodcast, isPlaying else { return }
+        self.track = nil
+        handle(.playing(track))
     }
 
     /// On a song change: puts the new album's cover up straight away when it's already downloaded (no
@@ -406,6 +447,7 @@ public final class NowPlayingCoordinator {
     }
 
     private func resume() {
+        guard !keepsOwnWallpaper else { return }
         if let showing {
             present(showing, animated: true)
         } else if let albumArtwork {

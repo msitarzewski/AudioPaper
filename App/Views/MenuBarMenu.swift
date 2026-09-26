@@ -33,7 +33,18 @@ struct MenuBarMenu: View {
     private var nowPlaying: some View {
         if let track = coordinator.track {
             Text(track.title)
-            Text([track.artist, track.album].filter { !$0.isEmpty }.joined(separator: " — "))
+            if let player = coordinator.player(for: track), let bundleID = player.appBundleID,
+               let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+                // The player's own icon, as Control Center's Now Playing shows it.
+                Label {
+                    Text(track.subtitle)
+                } icon: {
+                    Image(nsImage: NSWorkspace.shared.icon(forFile: url.path(percentEncoded: false)))
+                }
+                .accessibilityLabel("\(track.subtitle), in \(player.displayName)")
+            } else {
+                Text(track.subtitle)
+            }
         } else {
             Text(coordinator.status)
         }
@@ -47,7 +58,7 @@ struct MenuBarMenu: View {
                 }
             }
             if let page = attribution.pageURL {
-                Button(showing.candidate.kind == .albumCover ? "View Album on \(attribution.sourceName)" : "View Image on \(attribution.sourceName)") {
+                Button("View \(showing.candidate.pageNoun) on \(attribution.sourceName)") {
                     openURL(page)
                 }
             }

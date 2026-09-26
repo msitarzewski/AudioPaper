@@ -7,8 +7,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.3"
-    CURRENT_PROJECT_VERSION: "4"
+    MARKETING_VERSION: "0.1.4"
+    CURRENT_PROJECT_VERSION: "5"
     DEAD_CODE_STRIPPING: YES
     ENABLE_USER_SCRIPT_SANDBOXING: YES
 packages:
@@ -52,7 +52,7 @@ targets:
         AudioPaperAppGroup: $(DEVELOPMENT_TEAM).com.audiopaper
         LSApplicationCategoryType: public.app-category.music
         LSUIElement: true
-        NSAppleEventsUsageDescription: AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.
+        NSAppleEventsUsageDescription: AudioPaper asks your music player what is playing when it starts, so your wallpaper matches right away, and asks Spotify for the cover of what it's playing.
         NSHumanReadableCopyright: ""
         # fanart.tv project key, supplied only by scripts/release.sh (never committed). Empty in other builds,
         # which then need a key in Settings → Accounts.
@@ -76,6 +76,7 @@ targets:
         com.apple.security.automation.apple-events: true
         com.apple.security.temporary-exception.apple-events:
           - com.apple.Music
+          - com.spotify.client
         com.apple.security.application-groups:
           - $(DEVELOPMENT_TEAM).com.audiopaper
         # Sparkle's installer launcher and its status channel, reachable from the sandbox (Sparkle's

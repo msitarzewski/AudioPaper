@@ -11,6 +11,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
     <ol>
       <li><a href="#install">Install</a></li>
       <li><a href="#first-launch">The first launch</a></li>
+      <li><a href="#spotify">Spotify, podcasts and ads</a></li>
       <li><a href="#more-art">Getting more art</a></li>
       <li><a href="#menu">The menu bar menu</a></li>
       <li><a href="#mini-player">The Mini Player</a></li>
@@ -31,17 +32,25 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
     <li>Open it and drag <strong>AudioPaper</strong> into <strong>Applications</strong>. It must be in Applications for its widgets to show up.</li>
     <li>Open AudioPaper from Applications. A small display-and-note icon appears in the menu bar; there’s no window to start with.</li>
   </ol>
-  <p>You need macOS 26 or later and the Music app. If you’d rather build it yourself, the <a href="https://github.com/msitarzewski/AudioPaper#build-and-run">README</a> has the steps.</p>
+  <p>You need macOS 26 or later, and the Music app or Spotify (a free Spotify account works). If you’d rather build it yourself, the <a href="https://github.com/msitarzewski/AudioPaper#build-and-run">README</a> has the steps.</p>
 
   <p><strong>Updating:</strong> on its second launch AudioPaper asks whether to check for updates automatically (about once a day). Either way, <strong>Check for Updates…</strong> in its menu checks now, and installs the update when you say so. Your settings, keys and downloaded art are kept.</p>
 
   <h2 id="first-launch">The first launch</h2>
-  <p>If music is already playing, macOS asks: <em>“AudioPaper” wants access to control “Music”</em>, with AudioPaper’s reason: <em>AudioPaper asks Music what is playing when it starts, so your wallpaper matches right away.</em></p>
+  <p>If music is already playing, macOS asks: <em>“AudioPaper” wants access to control “Music”</em> (or “Spotify”), with AudioPaper’s reason: <em>AudioPaper asks your music player what is playing when it starts, so your wallpaper matches right away, and asks Spotify for the cover of what it’s playing.</em> Each player is asked about once.</p>
   <ul>
     <li><strong>Allow</strong>, and the wallpaper changes straight away.</li>
     <li><strong>Don’t Allow</strong>, and it changes when the next song starts instead. Track changes don’t need this permission. You can change your answer in <strong>System Settings → Privacy &amp; Security → Automation</strong>.</li>
   </ul>
-  <p>AudioPaper uses this only to read the current track (and, as a last resort, the cover art Music already has). It never plays, pauses or skips anything.</p>
+  <p>AudioPaper uses this only to read the current track (and, as a last resort, the cover art the player already has; for Spotify podcasts, the episode’s cover). It never plays, pauses or skips anything.</p>
+
+  <h2 id="spotify">Spotify, podcasts and ads</h2>
+  <p>AudioPaper follows Spotify the same way it follows Music, on free and paid accounts alike. With both open, the one that changed most recently wins. You can switch either off in <strong>Settings → Sources</strong>.</p>
+  <ul>
+    <li><strong>Podcasts</strong> get no fan art: a show has no artist to find photos of. <strong>Settings → General → During podcasts</strong> chooses what the desktop shows: <strong>My wallpaper</strong> (the default) puts your own wallpaper back until music returns, and <strong>Podcast cover art</strong> shows the episode’s cover from Spotify. Either way, the Mini Player and widgets show the episode’s cover.</li>
+    <li>The Mini Player and the menu show which app is playing, with its icon, and a note or a microphone for music or a podcast.</li>
+    <li><strong>Ads</strong> are ignored. Spotify doesn’t announce them, so the last song’s art simply stays up until the next song.</li>
+  </ul>
   <p>Your own wallpaper is remembered the first time AudioPaper changes it, so <strong>Restore Original Wallpaper</strong> can put it back later.</p>
 
   <h2 id="more-art">Getting more art</h2>
@@ -108,7 +117,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
 
   <h3>The wallpaper doesn’t change</h3>
   <ul>
-    <li>AudioPaper follows the <strong>Music</strong> app only. Other players aren’t supported yet.</li>
+    <li>AudioPaper follows the <strong>Music</strong> app and <strong>Spotify</strong>. Other players aren’t supported yet, and a player switched off in <strong>Settings → Sources</strong> is ignored.</li>
     <li>Check the menu bar icon: if it shows a pause mark, choose <strong>Resume Wallpaper Changes</strong>.</li>
     <li>The first song after launch needs the Automation permission (see <a href="#first-launch">The first launch</a>). The next song works without it.</li>
   </ul>

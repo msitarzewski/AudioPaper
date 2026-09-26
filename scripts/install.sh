@@ -39,6 +39,9 @@ fi
 
 rm -rf "$TARGET"
 ditto "$BUILT" "$TARGET"
+# ditto keeps the build's dates, and the Dock keys its icon cache on them, so a replaced app could show an
+# icon from an old install. A fresh date makes it re-read the icon.
+touch "$TARGET"
 # One registered copy only, so the widget gallery and Launch Services find the installed app.
 "$LSREGISTER" -u "$BUILT" 2>/dev/null || true
 "$LSREGISTER" -f -R "$TARGET"

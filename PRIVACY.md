@@ -21,8 +21,11 @@ AudioPaper changes your wallpaper to match the music you're playing. To do that,
 | **Wikimedia** (Wikidata, Commons) | Which artist (by ID) | Freely licensed artist photos |
 | **DeviantArt** (only with your credentials) | Each new song (artist + title) | Fan art |
 | **Brave Search** (only with your key, and only as a fallback) | Each new song it's used for ("artist song fan art wallpaper") | Fan art when the sources above find too little |
+| **Spotify** (only if you play in Spotify) | Which cover image is downloaded from its image server, `i.scdn.co`: a podcast episode's cover (shown in the app, and on the desktop if you chose **Podcast cover art**), or a song's cover when neither Apple nor MusicBrainz knows the album | Spotify's own cover for the item. Spotify already knows what you play in its app |
 | **GitHub** (the update feed and downloads) | That a copy of AudioPaper checked for updates, and its version, from your IP address: about once a day if you allowed automatic checks, otherwise only when you choose **Check for Updates…** | To offer updates. No system profile is sent |
 | **Websites Brave points to** | Your IP address, when one of their images is downloaded | They host the image; they don't learn what you're listening to |
+
+**Podcasts aren't looked up anywhere else:** an episode you play in Spotify is never sent to Apple, MusicBrainz or any fan-art service. Nor are Spotify's ads, which AudioPaper ignores.
 
 **In practice, MusicBrainz sees the most:** roughly a list of the new songs you play, because that's how AudioPaper tells artists with the same name apart (ROSÉ of BLACKPINK is not Rose, the French singer). Apple sees new albums. The others see artists, or, if you've enabled them, song searches. Each song is searched only once, ever.
 
@@ -53,7 +56,7 @@ All of it stays inside AudioPaper's sandbox container (`~/Library/Containers/com
 
 ## Permissions
 
-- **Automation (Music):** asked once, so AudioPaper can read what's already playing when it launches and, as a last resort, the album artwork Music has. It never controls playback. Track changes come from a notification Music broadcasts, which needs no permission.
+- **Automation (Music, Spotify):** asked once per player, so AudioPaper can read what's already playing when it launches and, as a last resort, the artwork the player has (Music's own artwork; Spotify's cover link, which is also where podcast covers come from). It never controls playback. Track changes come from a notification each player broadcasts, which needs no permission.
 - **Network (outgoing only):** for the lookups above. AudioPaper accepts no incoming connections.
 - **Keychain:** for your API keys.
 
@@ -61,7 +64,7 @@ AudioPaper is sandboxed, and asks for nothing else: no location, contacts, camer
 
 ## Turning things off
 
-- **Settings → Sources:** switch off any art source individually. With every fan-art source off (or **Wallpaper: Album cover** in General), AudioPaper contacts only Apple (and MusicBrainz as a fallback) for covers.
+- **Settings → Sources:** switch off any art source individually. With every fan-art source off (or **Wallpaper: Album cover** in General), AudioPaper contacts only Apple (and MusicBrainz as a fallback) for covers, plus Spotify's image server for Spotify songs neither knows.
 - **Settings → Accounts:** remove a key or DeviantArt credentials, and that service is never contacted.
 - **Settings → General → Clear Cache…:** deletes downloaded artwork, remembered searches and artist identities.
 

@@ -53,10 +53,18 @@ struct MiniPlayerView: View {
                     Text(coordinator.track?.title ?? "Nothing playing")
                         .font(.headline)
                         .lineLimit(1)
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 5) {
+                        if let track = coordinator.track {
+                            PlayerIcon(bundleID: coordinator.player(for: track)?.appBundleID)
+                            // Music or podcast, at a glance.
+                            Image(systemName: track.isPodcast ? "mic.fill" : "music.note")
+                                .imageScale(.small)
+                        }
+                        Text(subtitle)
+                            .lineLimit(1)
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -71,16 +79,21 @@ struct MiniPlayerView: View {
             .accessibilityAddTraits(.isImage)
     }
 
-    /// "Concrete, Poppy — I Disagree. On the desktop: Photo by …, from Wikimedia Commons."
+    /// "Concrete, Poppy — I Disagree, in Spotify. On the desktop: Photo by …, from Wikimedia Commons."
     private var heroDescription: String {
-        let song = [coordinator.track?.title ?? "Nothing playing", subtitle].joined(separator: ", ")
-        guard let artwork = coordinator.showing ?? coordinator.albumArtwork else { return song }
+        var song = [coordinator.track?.title ?? "Nothing playing", subtitle].joined(separator: ", ")
+        if let track = coordinator.track, let player = coordinator.player(for: track) {
+            song += ", in \(player.displayName)"
+        }
+        guard let artwork = coordinator.showing else {
+            // A podcast's cover can show here while the desktop keeps the person's own wallpaper.
+            return coordinator.albumArtwork == nil ? song : "\(song). On the desktop: your wallpaper."
+        }
         return "\(song). On the desktop: \(artwork.accessibilityName)."
     }
 
     private var subtitle: String {
-        guard let track = coordinator.track else { return coordinator.status }
-        return [track.artist, track.album].filter { !$0.isEmpty }.joined(separator: " — ")
+        coordinator.track?.subtitle ?? coordinator.status
     }
 
     private var filmstrip: some View {
@@ -299,6 +312,7 @@ extension ArtworkCandidate {
     var symbolName: String {
         switch kind {
         case .albumCover: "opticaldisc"
+        case .podcastCover: "mic"
         case .fanArt: kindLabel == "Photo" ? "camera" : "paintpalette"
         }
     }
@@ -308,10 +322,25 @@ extension Artwork {
     var accessibilityName: String {
         let attribution = candidate.attribution
         switch candidate.kind {
-        case .albumCover: return "Album cover, \(attribution.title ?? "")"
+        case .albumCover, .podcastCover: return "\(candidate.kindLabel), \(attribution.title ?? "")"
         case .fanArt:
             // "Photo by …" for Commons photos, "Art by …" for fan art, as the on-screen credit says.
             return "\(candidate.creatorCredit ?? candidate.kindLabel), from \(attribution.sourceName)"
+        }
+    }
+}
+
+/// The icon of the app that's playing (Music, Spotify), read from the installed app so AudioPaper ships no
+/// one else's logo. Decorative: VoiceOver hears the player's name in the hero's description instead.
+struct PlayerIcon: View {
+    let bundleID: String?
+
+    var body: some View {
+        if let bundleID, let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+            Image(nsImage: NSWorkspace.shared.icon(forFile: url.path(percentEncoded: false)))
+                .resizable()
+                .frame(width: 16, height: 16)
+                .accessibilityHidden(true)
         }
     }
 }
@@ -353,8 +382,7 @@ struct AttributionRow: View {
                     Image(systemName: "arrow.up.right.square")
                 }
                 .help("Open where this art was found")
-                .accessibilityLabel(artwork.candidate.kind == .albumCover
-                    ? "View album on \(attribution.sourceName)" : "View image on \(attribution.sourceName)")
+                .accessibilityLabel("View \(artwork.candidate.pageNoun.lowercased()) on \(attribution.sourceName)")
             }
         }
     }

@@ -54,7 +54,11 @@ public struct Attribution: Hashable, Sendable, Codable {
 
 public enum ArtworkKind: String, Hashable, Sendable, Codable {
     case albumCover
+    case podcastCover
     case fanArt
+
+    /// A release's own cover (album or podcast), shown first and framed whole, as opposed to fan art.
+    public var isCover: Bool { self != .fanArt }
 }
 
 extension ArtworkCandidate {
@@ -62,6 +66,7 @@ extension ArtworkCandidate {
     public var kindLabel: String {
         switch kind {
         case .albumCover: "Album cover"
+        case .podcastCover: "Podcast cover"
         case .fanArt: providerID == "wikimedia" ? "Photo" : "Fan art"
         }
     }
@@ -75,6 +80,15 @@ extension ArtworkCandidate {
     public var creatorCredit: String? {
         guard kind == .fanArt, let creator = attribution.creatorName else { return nil }
         return "\(kindLabel == "Photo" ? "Photo" : "Art") by \(creator)"
+    }
+
+    /// What a credit's link opens, for "View Album on Apple Music" / "View Podcast on Spotify" / "View Image on …".
+    public var pageNoun: String {
+        switch kind {
+        case .albumCover: "Album"
+        case .podcastCover: "Podcast"
+        case .fanArt: "Image"
+        }
     }
 
     /// One line for tight spaces (widgets): the maker plus license or source, else `creditLine`.

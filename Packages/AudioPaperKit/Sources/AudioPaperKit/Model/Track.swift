@@ -1,6 +1,12 @@
 import Foundation
 
-/// A track reported by a now-playing source.
+/// What a player is playing: music, or a podcast episode (which has a show, not an artist).
+public enum MediaKind: String, Hashable, Sendable, Codable {
+    case song
+    case podcastEpisode
+}
+
+/// A track reported by a now-playing source. For a podcast episode, `artist` and `album` are the show.
 public struct Track: Hashable, Sendable, Codable {
     public var title: String
     public var artist: String
@@ -9,6 +15,7 @@ public struct Track: Hashable, Sendable, Codable {
     /// Source-specific stable identifier, when the player provides one.
     public var persistentID: String?
     public var sourceID: String
+    public var kind: MediaKind
 
     public init(
         title: String,
@@ -16,7 +23,8 @@ public struct Track: Hashable, Sendable, Codable {
         album: String,
         albumArtist: String? = nil,
         persistentID: String? = nil,
-        sourceID: String
+        sourceID: String,
+        kind: MediaKind = .song
     ) {
         self.title = title
         self.artist = artist
@@ -24,6 +32,33 @@ public struct Track: Hashable, Sendable, Codable {
         self.albumArtist = albumArtist
         self.persistentID = persistentID
         self.sourceID = sourceID
+        self.kind = kind
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case title, artist, album, albumArtist, persistentID, sourceID, kind
+    }
+
+    /// Tracks saved before podcasts were supported have no kind; they were songs.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            title: try container.decode(String.self, forKey: .title),
+            artist: try container.decode(String.self, forKey: .artist),
+            album: try container.decode(String.self, forKey: .album),
+            albumArtist: try container.decodeIfPresent(String.self, forKey: .albumArtist),
+            persistentID: try container.decodeIfPresent(String.self, forKey: .persistentID),
+            sourceID: try container.decode(String.self, forKey: .sourceID),
+            kind: try container.decodeIfPresent(MediaKind.self, forKey: .kind) ?? .song
+        )
+    }
+
+    public var isPodcast: Bool { kind == .podcastEpisode }
+
+    /// The line under the title: "Artist — Album" for music, "Podcast · Show" for an episode.
+    public var subtitle: String {
+        if isPodcast { return "Podcast · \(album)" }
+        return [artist, album].filter { !$0.isEmpty }.joined(separator: " — ")
     }
 
     /// The artist credited for the album as a whole (falls back to the track artist).

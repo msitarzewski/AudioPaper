@@ -1,8 +1,9 @@
 # System Patterns
 
 ## Plugin protocols (AudioPaperKit)
-- `NowPlayingSource` (`Sources/NowPlayingSource.swift`) — `events() -> AsyncStream<PlaybackEvent>`; registered in `SourceRegistry.standard`. Compiled-in; no dynamic bundles (library validation).
-- `AlbumArtworkProvider` → ordered `AlbumArtworkChain` (iTunes → Cover Art Archive → Music app's own artwork, 800 px last resort).
+- `NowPlayingSource` (`Sources/NowPlayingSource.swift`) — `events() -> AsyncStream<PlaybackEvent>`, `playsPodcasts`, `appBundleID` (for the player's icon); registered in `SourceRegistry.standard` (Apple Music, Spotify). Compiled-in; no dynamic bundles (library validation). Shared parsing in `PlayerInfo` (256-char field cap, one-off AppleScript query). Players are stored as `disabledSources` (migrated from the old `enabledSources`).
+- **Spotify** (`Sources/SpotifySource.swift`, 2026-09-26): `com.spotify.client.PlaybackStateChanged`, same keys as Music plus `Track ID`. Items are classified by ID only: `spotify:track:` → song, `spotify:episode:` → `Track.kind = .podcastEpisode` (Spotify leaves Artist empty and puts the show in Album; the show becomes artist and album). Everything else (ads `spotify:ad:`, local files, future kinds) is ignored, pauses included. **Spotify posts no notification for ads**; AppleScript reports them (empty artist, no artwork), so only the launch query can see one. Spotify can post a momentary `Stopped` between items; a Stopped-cancelled lookup is redone when the same item plays again.
+- `AlbumArtworkProvider` → ordered `AlbumArtworkChain` (iTunes → Cover Art Archive → Music app's own artwork, 800 px → Spotify's own cover link, 640 px from `i.scdn.co` only). Podcasts ask only providers with `handlesPodcasts` (Spotify's); covers of either kind are `ArtworkKind.isCover` (`.albumCover`, `.podcastCover`).
 - `FanArtSource` (fanart.tv, TheAudioDB, Wikimedia Commons, DeviantArt, Brave) → `FanArtPipeline`. One size floor for every source, 1280×720, with portrait allowed (aspect 0.5–2.6) because Automatic framing fits portraits; the old "curated" exception was removed (Kim Petras: 2 → 8 images). Brave credits name the matched artist, not the page's SEO title. Sources marked `isFallback` (Brave) are asked only when fewer than 3 primary images *pass the filters* (counting found candidates starved BABYMONSTER to one image). Per-song fan-art cache keys carry `FanArtPipeline.version`; bump it when rules change.
 - `ArtworkFilter` — pipeline steps returning `.accept(score:)` / `.reject(reason)`.
 
@@ -13,6 +14,8 @@ reported size (`SizeFilter.accepts`, ≥1280×720, aspect 0.5–2.6) → downloa
 A result's title or page slug must name the artist **as a phrase** (hyphens bind words in titles, so "Blu-ray Noir" isn't "Ray Noir"; they separate words in slugs; a leading "The" is optional), plus the song (1.0), the album (0.8), or a music word (0.6). Multi-word artist names alone count (0.5). Names with accents must appear with them. Phrase matching uses NSRegularExpression (Swift `Regex` has no look-behind). Queries: "{artist} {song} fan art wallpaper", "{artist} fan art wallpaper", then "{artist} press photo" while relevant results are short ("fan art" drifts to namesakes like Chat Noir; "4k" found Blu-ray listings). This stops "Sleepover" (the band) matching sleepover anime art, and "Rose" standing in for "ROSÉ".
 
 ## Coordinator flow (`NowPlayingCoordinator`)
+**Podcasts:** no fan art ever. `Preferences.podcastWallpaper`: `.myWallpaper` (default) restores the person's wallpaper and still resolves the episode cover into `albumArtwork` for the app only (`resume()` won't present it); `.podcastCover` presents the cover alone. `podcastSettingChanged()` re-applies to the episode playing.
+
 playing → 1.5 s debounce → album cover (cached per album key; redrawn only when the album changes) → fan art (cached per song key, empty results remembered for 7 days) → rotation every `rotationInterval` (best-first by `qualityScore`). No cover for a new album → restore original wallpaper (never leave the wrong album up). Presentations are serialized; newer requests supersede queued ones. `slides` = album cover + fan art. `onStateChange` (coalesced to one call per main-actor turn) feeds the widget snapshot.
 
 
@@ -38,7 +41,7 @@ MBID → MusicBrainz `url-rels` → Wikidata QID → `P373` Commons category →
 Music credits collabs as one string ("LE SSERAFIM & j-hope"). `Track.creditedArtists` splits on `,` `&` `feat.` `ft.` `featuring` `with` and lowercase ` x `/` × ` (capital X stays: "Lil Nas X"). The pipeline searches the full credit first — real names contain separators ("Simon & Garfunkel") — and only if that finds nothing searches `Track.fallbackArtists`: each credited artist, then the featured artists parsed from the title (`Track.featuredArtists`: "(feat. …)", "[ft. …]", "featuring", "(with …)"), each once, interleaving the results. Applies to primary and fallback sources. Disturbing tha Peace (a label crew with no art) → Ludacris/Mystikal backgrounds: 0 → 8.
 
 ## Preferences
-New plugins must start enabled: fan-art sources are stored as `disabledFanArtSources`.
+New plugins must start enabled: fan-art sources are stored as `disabledFanArtSources`, players as `disabledSources`.
 
 ## Wallpaper
 `WallpaperComposer` (Core Image): album = cover at 56% screen height over a blurred, saturated wash of itself. Fan art = `FanArtFraming` (automatic by default): fill when cropping ≤15%, otherwise fit at full height/width with feathered edges over a blurred edge-clamp extension (Apple has no public generative outpainting API). HEIC per screen at native pixel size.

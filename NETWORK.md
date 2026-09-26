@@ -15,9 +15,11 @@ Every reply is treated as untrusted, since web search results can point anywhere
 
 | Moment | Network? |
 |---|---|
-| App launch | Music is asked locally (Apple Events) what's playing. If that song isn't cached, its lookups follow, exactly as for a new song. Nothing else. |
+| App launch | Music and Spotify, if running, are asked locally (Apple Events) what's playing. If that song isn't cached, its lookups follow, exactly as for a new song. Nothing else. |
 | A **new album** starts (cover not cached) | Album cover lookup, below |
 | A **new song** starts, and its artist's pool has room | Artist identity and fan-art lookups, below. Each song is searched once, ever. |
+| A **podcast episode** starts in Spotify | One image download from `i.scdn.co` if the show's cover isn't cached: it shows in the Mini Player and widgets, and on the desktop too with **During podcasts: Podcast cover art**. Never a catalog or fan-art lookup |
+| A **Spotify ad** plays | **None**: Spotify doesn't announce ads, and AudioPaper ignores them when it asks |
 | Replaying a song or album already cached | **None** (the artist's pooled images are shown, least recently seen first) |
 | A song by an artist whose pool is full (24 images) | **None** |
 | A song with nothing found in the last 7 days | **None** |
@@ -37,9 +39,10 @@ Providers are tried in order; the first confident match wins and later ones aren
 | 1a | `is1-ssl.mzstatic.com` | the cover image (up to 3000×3000) | — |
 | 2 | `musicbrainz.org` | `GET /ws/2/release-group?query=…&limit=5` (only if Apple has no match) | artist + album |
 | 2a | `coverartarchive.org` → `archive.org` (redirect) | the cover image (1200 px) | — |
-| 3 | — | Music's own artwork, read locally | — |
+| 3 | — | Music's own artwork, read locally (songs from Music) | — |
+| 4 | `i.scdn.co` | the cover Spotify reports for the item playing (640 px); the link is read locally from Spotify (songs from Spotify, and podcast covers, which skip 1–3) | — |
 
-**Typical: 2 requests** (Apple search + image). **At most 4.**
+**Typical: 2 requests** (Apple search + image). **At most 5.**
 
 ## Artist identity (per new artist)
 

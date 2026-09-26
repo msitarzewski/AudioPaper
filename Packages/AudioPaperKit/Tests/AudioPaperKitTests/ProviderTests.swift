@@ -323,6 +323,151 @@ import Testing
     }
 }
 
+/// Fixtures are real notifications from Spotify 1.3 on a free account (2026-09-26).
+@Suite struct SpotifySourceTests {
+    let song: [AnyHashable: Any] = [
+        "Player State": "Playing", "Name": "One More Time", "Artist": "Daft Punk", "Album": "Discovery",
+        "Album Artist": "Daft Punk", "Track ID": "spotify:track:0DiWol3AO6WpXZgp0goxAV",
+        "Duration": 320_000, "Has Artwork": true, "Popularity": 85,
+    ]
+    let episode: [AnyHashable: Any] = [
+        "Player State": "Playing", "Name": "You'll Pay For This | Reading Reddit Stories",
+        "Artist": "", "Album": "Smosh Reads Reddit Stories", "Album Artist": "",
+        "Track ID": "spotify:episode:0VbdV027zhYClsR8W2KaKz", "Disc Number": 0,
+    ]
+    /// What Spotify reported for an ad over AppleScript; it posts no notification for ads.
+    let ad: [AnyHashable: Any] = [
+        "Player State": "Playing", "Name": "New Toy Story. Now on Disney+.", "Artist": "", "Album": "",
+        "Album Artist": "", "Track ID": "spotify:ad:ac33a4766a9d47deb7f05d5fcd14615a",
+    ]
+
+    @Test func songBecomesTrack() throws {
+        let track = try #require(SpotifySource.track(from: song))
+        #expect(track.title == "One More Time")
+        #expect(track.artist == "Daft Punk")
+        #expect(track.album == "Discovery")
+        #expect(track.kind == .song)
+        #expect(track.persistentID == "spotify:track:0DiWol3AO6WpXZgp0goxAV")
+        #expect(track.sourceID == "spotify")
+        #expect(SpotifySource.event(from: song) == .playing(track))
+    }
+
+    @Test func episodeBecomesPodcastWithTheShowAsArtist() throws {
+        let track = try #require(SpotifySource.track(from: episode))
+        #expect(track.kind == .podcastEpisode)
+        #expect(track.isPodcast)
+        #expect(track.artist == "Smosh Reads Reddit Stories")
+        #expect(track.album == "Smosh Reads Reddit Stories")
+        #expect(track.title == "You'll Pay For This | Reading Reddit Stories")
+        #expect(track.subtitle == "Podcast · Smosh Reads Reddit Stories")
+        #expect(try #require(SpotifySource.track(from: song)).subtitle == "Daft Punk — Discovery")
+    }
+
+    @Test func adsAreIgnoredWhetherPlayingOrPaused() {
+        #expect(SpotifySource.event(from: ad) == nil)
+        var paused = ad
+        paused["Player State"] = "Paused"
+        #expect(SpotifySource.event(from: paused) == nil, "an ad's pause mustn't stop the slideshow")
+    }
+
+    @Test func unknownOrMalformedIDsAreIgnored() {
+        for id in ["spotify:local:Artist:Album:Title:200", "spotify:track:", "spotify:track:abc/../x", "https://open.spotify.com/track/x", ""] {
+            var info = song
+            info["Track ID"] = id
+            #expect(SpotifySource.track(from: info) == nil, "\(id)")
+        }
+        var missing = song
+        missing["Track ID"] = nil
+        #expect(SpotifySource.track(from: missing) == nil)
+    }
+
+    @Test func songWithoutArtistOrEpisodeWithoutShowIsIgnored() {
+        var noArtist = song
+        noArtist["Artist"] = ""
+        #expect(SpotifySource.track(from: noArtist) == nil)
+        var noShow = episode
+        noShow["Album"] = ""
+        #expect(SpotifySource.track(from: noShow) == nil)
+    }
+
+    @Test func pausedResumedAndStopped() throws {
+        var paused = song
+        paused["Player State"] = "Paused"
+        #expect(SpotifySource.event(from: paused) == .paused(try #require(SpotifySource.track(from: song))))
+        // Spotify posts a bare Stopped, sometimes only for a moment between items.
+        #expect(SpotifySource.event(from: ["Player State": "Stopped"]) == .stopped)
+        #expect(SpotifySource.event(from: ["Player State": "Buffering"]) == nil)
+    }
+
+    @Test func fieldsAreLengthCapped() throws {
+        var info = song
+        info["Name"] = String(repeating: "x", count: 10_000)
+        let track = try #require(SpotifySource.track(from: info))
+        #expect(track.title.count == PlayerInfo.maxFieldLength)
+    }
+
+    @Test func creditLinksGoToSpotifysWebPlayer() {
+        #expect(SpotifySource.pageURL(for: "spotify:track:0DiWol3AO6WpXZgp0goxAV")?.absoluteString
+            == "https://open.spotify.com/track/0DiWol3AO6WpXZgp0goxAV")
+        #expect(SpotifySource.pageURL(for: "spotify:episode:0VbdV027zhYClsR8W2KaKz")?.absoluteString
+            == "https://open.spotify.com/episode/0VbdV027zhYClsR8W2KaKz")
+        #expect(SpotifySource.pageURL(for: "spotify:ad:ac33a4766a9d47deb7f05d5fcd14615a") == nil)
+    }
+
+    @Test func coversOnlyComeFromSpotifysImageServer() throws {
+        let track = try #require(SpotifySource.track(from: episode))
+        let id = "spotify:episode:0VbdV027zhYClsR8W2KaKz"
+        let cover = try #require(SpotifyArtworkProvider.candidate(
+            for: track, itemID: id, imageURL: URL(string: "https://i.scdn.co/image/ab67616d0000b273bee0df3b4d44eafa11f6a722")!))
+        #expect(cover.kind == .podcastCover)
+        #expect(cover.kindLabel == "Podcast cover")
+        #expect(cover.attribution.pageURL?.absoluteString == "https://open.spotify.com/episode/0VbdV027zhYClsR8W2KaKz")
+        #expect(SpotifyArtworkProvider.candidate(for: track, itemID: id, imageURL: URL(string: "http://i.scdn.co/image/x")!) == nil)
+        #expect(SpotifyArtworkProvider.candidate(for: track, itemID: id, imageURL: URL(string: "https://evil.example/image/x")!) == nil)
+        #expect(SpotifyArtworkProvider.candidate(for: track, itemID: id, imageURL: URL(string: "file:///etc/passwd")!) == nil)
+    }
+
+    @Test func albumCatalogsAreNotAskedForPodcastCovers() async throws {
+        let track = try #require(SpotifySource.track(from: episode))
+        let chain = AlbumArtworkChain(providers: [FixedAlbumProvider(handlesPodcasts: false)])
+        #expect(await chain.artwork(for: track) == nil)
+        #expect(await chain.artwork(for: .sample()) != nil)
+    }
+}
+
+@MainActor
+@Suite struct PlayerPreferenceTests {
+    func defaults() -> UserDefaults { UserDefaults(suiteName: "AudioPaperTests-\(UUID().uuidString)")! }
+
+    @Test func newPlayersStartEnabled() {
+        #expect(Preferences(defaults: defaults()).disabledSources.isEmpty)
+    }
+
+    @Test func appleMusicTurnedOffBeforeTheUpdateStaysOff() {
+        let store = defaults()
+        store.set([String](), forKey: "enabledSources")
+        #expect(Preferences(defaults: store).disabledSources == ["apple-music"])
+        #expect(store.object(forKey: "enabledSources") == nil)
+        #expect(Preferences(defaults: store).disabledSources == ["apple-music"], "migration result is kept")
+    }
+
+    @Test func appleMusicLeftOnMeansNothingIsOff() {
+        let store = defaults()
+        store.set(["apple-music"], forKey: "enabledSources")
+        #expect(Preferences(defaults: store).disabledSources.isEmpty)
+    }
+
+    @Test func podcastsDefaultToMyWallpaper() {
+        #expect(Preferences(defaults: defaults()).podcastWallpaper == .myWallpaper)
+    }
+
+    @Test func tracksSavedBeforePodcastsDecodeAsSongs() throws {
+        let json = #"{"title":"Closer","artist":"Nine Inch Nails","album":"The Downward Spiral","sourceID":"apple-music"}"#
+        let track = try JSONDecoder().decode(Track.self, from: Data(json.utf8))
+        #expect(track.kind == .song)
+    }
+}
+
 @Suite struct CommonsSubcategoryTests {
     @Test func followsOnlyTheArtistsOwnSubcategoriesNewestFirst() {
         let aespa = WikimediaCommonsSource.relevantSubcategories(

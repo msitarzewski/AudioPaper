@@ -32,10 +32,10 @@
 - **v0.1.1 released** (version 0.1.1, build 2; pipeline version 6).
 - **v0.1.3**: Sparkle auto-update (verified sandboxed install end to end), internet-content disclaimer, CI timing fix.
 - **v0.1.2**: song changes show the new cover in the app at once and on the desktop right after; downloaded covers skip the debounce; the cover holds 10 s before fan art (was often skipped).
-- 108 tests.
+- **v0.1.4** (2026-09-26): Spotify player (songs, podcasts, ads ignored), "During podcasts" setting, player icon and music/podcast glyph in the Mini Player and menu, Spotify cover fallback, players stored as disabled, install.sh icon-cache fix. 130 tests.
 
 ## Next
 - Commons relevance: prefer files that name the artist (a NIN-cap photo of Gabriel Boric and a speaker stack came through).
 - A hands-on VoiceOver + Full Keyboard Access session.
-- **GitHub Pages website** and a **notarized release** — plan in `NEXT-SESSION.md`.
-- Verify DeviantArt with real credentials; Spotify source plugin; tune filters with more genres; decide on shipping the fanart.tv project key for release builds.
+- Idea: for artists with no fan art (e.g. Chemlab), fanart.tv's scans of their other album covers.
+- DeviantArt: issue #1181, decide by ~2026-10-09 (PKCE or drop). Verify with real credentials; tune filters with more genres; decide on shipping the fanart.tv project key for release builds.

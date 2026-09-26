@@ -37,6 +37,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
       <tr><td>Fan art framing</td><td>Automatic</td><td><em>Fill</em> the screen, <em>Fit</em> the whole image, or <em>Automatic</em>: fill, unless that would crop more than 15% of the image.</td></tr>
       <tr><td>Change fan art every</td><td>45 seconds</td><td>From 15 seconds to 5 minutes.</td></tr>
       <tr><td>Restore my wallpaper when music stops</td><td>Off</td><td>Puts your own wallpaper back 30 seconds after playback stops.</td></tr>
+      <tr><td>During podcasts</td><td>My wallpaper</td><td>For Spotify podcasts: your own wallpaper until music returns, or <em>Podcast cover art</em>, the episode’s cover from Spotify. The Mini Player and widgets show the cover either way. Podcasts never get fan art. Shown when Spotify is installed.</td></tr>
       <tr><td>Show in menu bar</td><td>On</td><td>When off, AudioPaper appears in the Dock instead.</td></tr>
       <tr><td>Open at login</td><td>Off</td><td>Registers AudioPaper as a login item.</td></tr>
       <tr><td>Storage: keep up to</td><td>500 MB</td><td>250 MB, 500 MB, 1 GB or 2 GB of downloaded art. <strong>Clear Cache…</strong> empties it, keeping the images on screen.</td></tr>
@@ -44,7 +45,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
   </table></div>
 
   <h3>Sources</h3>
-  <p>Switches for each player (Apple Music, for now) and each fan-art source. New sources start switched on. A source that needs credentials says so until you add them; Brave Search is marked as the fallback it is.</p>
+  <p>Switches for each player (Apple Music and Spotify) and each fan-art source. New players and sources start switched on. A source that needs credentials says so until you add them; Brave Search is marked as the fallback it is.</p>
 
   <h3>Accounts</h3>
   <p>Keys for fanart.tv (the downloaded app has its own project key; a personal key is optional), TheAudioDB (optional), Brave Search and DeviantArt (client ID and secret). They’re saved to your Keychain half a second after you stop typing, and each is sent only to its own service. How to get them is on the <a href="help.html#more-art">Help page</a>.</p>
@@ -57,8 +58,9 @@ description: Every AudioPaper setting, where its art comes from, how images are 
   <ol>
     <li><strong>Apple’s iTunes Search</strong>, at up to 3000 × 3000.</li>
     <li><strong>MusicBrainz and the Cover Art Archive</strong>, at 1200 px, when Apple doesn’t have the release.</li>
-    <li><strong>The Music app’s own artwork</strong>, read on your Mac.</li>
+    <li><strong>The player’s own artwork</strong>: Music’s, read on your Mac, or for Spotify, the cover Spotify shows, from its image server (<code>i.scdn.co</code>).</li>
   </ol>
+  <p>A Spotify podcast episode, when <strong>During podcasts</strong> is set to <em>Podcast cover art</em>, skips the catalogs and uses Spotify’s cover directly. Spotify’s ads are never looked up.</p>
   <p>A match is scored on both artist and album name, with edition noise (“Deluxe Edition”, “2011 Remaster”, “- Single”) removed first, so a tribute album with the same title doesn’t win.</p>
 
   <h2 id="identity">Identifying the artist</h2>
@@ -167,7 +169,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
   <p>AudioPaper runs in the App Sandbox, with the hardened runtime, and asks for only this:</p>
   <ul>
     <li><strong>Outgoing network connections</strong>, for the lookups. It accepts no incoming ones.</li>
-    <li><strong>Automation of Music</strong>, to read what’s playing at launch, and Music’s artwork as a last resort. It never controls playback.</li>
+    <li><strong>Automation of Music and Spotify</strong>, to read what’s playing at launch, and the player’s artwork as a last resort (for Spotify, also podcast covers). It never controls playback.</li>
     <li><strong>An App Group</strong>, shared with its own widgets.</li>
   </ul>
   <p>No location, contacts, camera, microphone, photos or files.</p>

@@ -11,6 +11,7 @@ public struct AppleMusicSource: NowPlayingSource {
 
     public let id = "apple-music"
     public let displayName = "Apple Music"
+    public var appBundleID: String? { Self.bundleID }
 
     public init() {}
 
@@ -60,14 +61,10 @@ public struct AppleMusicSource: NowPlayingSource {
         !NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty
     }
 
-    /// Longest title, artist or album kept; real ones are far shorter, and every field ends up in search
-    /// queries and on screen.
-    static let maxFieldLength = 256
+    static let maxFieldLength = PlayerInfo.maxFieldLength
 
     static func track(from info: [AnyHashable: Any]) -> Track? {
-        func field(_ key: String) -> String? {
-            (info[key] as? String).map { String($0.prefix(maxFieldLength)) }
-        }
+        let field = { PlayerInfo.string(info, $0) }
         guard let title = field("Name"), !title.isEmpty,
               let artist = field("Artist"), !artist.isEmpty
         else { return nil }
@@ -87,6 +84,7 @@ public struct AppleMusicSource: NowPlayingSource {
     }
 
     /// Asks Music what's playing right now. Only runs if Music is already open, so it never launches it.
+    @MainActor
     static func currentState() -> PlaybackEvent? {
         guard isMusicRunning else { return nil }
         let source = """
@@ -96,15 +94,10 @@ public struct AppleMusicSource: NowPlayingSource {
             return {name of t, artist of t, album of t, album artist of t, persistent ID of t}
         end tell
         """
-        var error: NSDictionary?
-        guard let result = NSAppleScript(source: source)?.executeAndReturnError(&error), result.numberOfItems == 5 else {
-            if let error { log.info("Music state query unavailable: \(error, privacy: .public)") }
-            return nil
-        }
-        let field = { (index: Int) in result.atIndex(index)?.stringValue ?? "" }
+        guard let values = PlayerInfo.query(source, count: 5, player: "Music") else { return nil }
         let info: [AnyHashable: Any] = [
-            "Player State": "Playing", "Name": field(1), "Artist": field(2),
-            "Album": field(3), "Album Artist": field(4), "PersistentID": field(5),
+            "Player State": "Playing", "Name": values[0], "Artist": values[1],
+            "Album": values[2], "Album Artist": values[3], "PersistentID": values[4],
         ]
         return event(from: info)
     }

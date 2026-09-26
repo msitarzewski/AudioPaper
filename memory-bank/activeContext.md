@@ -1,6 +1,6 @@
 # Active Context
 
-**State** (2026-09-25): **v0.1.3** — Sparkle auto-update (feed `site/static/appcast.xml` on GitHub Pages; EdDSA key in the login Keychain, `generate_keys --account AudioPaper`), internet-content disclaimer (Settings → Sources, About, README, site). Everyone installs 0.1.3 by hand once; later versions update through Sparkle. Next: Commons relevance, VoiceOver session.
+**State** (2026-09-25, pause point before compaction): **v0.1.3 live** with Sparkle auto-update (feed on GitHub Pages, verified up to date); HEAD `3b650cc` changed only docs/site since, so the release is current. Website and README have credited screenshots; README lists other projects. Open: DeviantArt OAuth question (github.com/wix-incubator/DeviantArt-API/issues/1181), Commons relevance, VoiceOver session. Next release 0.1.4 is the first delivered by Sparkle. See NEXT-SESSION.md.
 
 ## User decisions (2026-09-25)
 - Follow Apple's HIG, Apple's own UI examples and per-platform icon practice, macOS only for now (`projectRules.md`).
@@ -26,4 +26,4 @@
 - Security sweep done and fixes approved and implemented (2026-09-25): https + named hosts only (redirects too), header stripping across hosts, response caps and a 60 s total timeout, Retry-After, web-only credit links, explicit local-artwork flag, pixel and format caps before decode, no recording of failed or cancelled searches, backslash escaping, spoof limits, modern Keychain, apctl redaction.
 - Stylized band logos can slip past OCR.
 - Letterboxed video stills (black bars) pass the filters; could detect and crop the bars.
-- Spotify source plugin.
+- Spotify source plugin. **Approved 2026-09-26; built on branch `spotify-source` (uncommitted), 130 tests pass, app builds, installed locally for a live test.** Labels: "During podcasts: My wallpaper / Podcast cover art". An ad was observed: Spotify posts NO notification for ads; AppleScript reports `spotify:ad:…` with empty artist and no artwork; the next song is announced normally. Probed live with a free account: `com.spotify.client.PlaybackStateChanged` carries Name/Artist/Album/Album Artist/Player State/Track ID (`spotify:track:…`); podcasts arrive with empty Artist and `spotify:episode:…`; Spotify can post a brief `Stopped` between items; ads (documented as `spotify:ad:…`) not yet observed. Rule: accept `spotify:track:` as songs, `spotify:episode:` as podcasts, ignore everything else. User asked for a setting "During podcasts: ( ) System wallpaper ( ) Podcast cover art", system wallpaper the default. Spotify installed via `brew install --cask spotify`; probe in the session scratchpad.

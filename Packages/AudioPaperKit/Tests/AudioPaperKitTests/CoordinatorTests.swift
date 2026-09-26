@@ -21,11 +21,12 @@ final class ManualSource: NowPlayingSource, @unchecked Sendable {
 struct FixedAlbumProvider: AlbumArtworkProvider {
     let id = "fixed-album"
     let displayName = "Fixed"
+    var handlesPodcasts = true
     func albumArtwork(for track: Track) async throws -> ArtworkCandidate? {
         guard track.album != "Unknown Release" else { return nil }
         return ArtworkCandidate(
             imageURL: URL(string: "https://img.example/cover-\(Normalizer.key(track.album).replacingOccurrences(of: " ", with: "-")).png")!,
-            kind: .albumCover, providerID: id,
+            kind: track.isPodcast ? .podcastCover : .albumCover, providerID: id,
             attribution: Attribution(title: track.album, sourceName: "test")
         )
     }
@@ -51,7 +52,6 @@ final class RecordingDisplay: WallpaperDisplay {
         let cache = ArtworkCache(root: Fixture.temporaryDirectory(), http: http)
         let defaults = UserDefaults(suiteName: "AudioPaperTests-\(UUID().uuidString)")!
         let preferences = Preferences(defaults: defaults)
-        preferences.enabledSources = ["manual"]
         preferences.mode = .albumOnly
         coordinator = NowPlayingCoordinator(
             registry: SourceRegistry(sources: [source]),
@@ -69,6 +69,69 @@ final class RecordingDisplay: WallpaperDisplay {
         for _ in 0..<200 where !condition() {
             try? await Task.sleep(for: .milliseconds(10))
         }
+    }
+
+    static let episode = Track(
+        title: "Robert De Niro", artist: "A Podcast", album: "A Podcast",
+        persistentID: "spotify:episode:3dv12elbBInUZ0pBngnggL", sourceID: "spotify", kind: .podcastEpisode
+    )
+
+    @Test func podcastShowsMyWallpaperByDefault() async {
+        coordinator.start()
+        source.send(.playing(.sample()))
+        await waitUntil { display.shown.count == 1 }
+        source.send(.playing(Self.episode))
+        await waitUntil { display.restored == 1 }
+        #expect(display.restored == 1)
+        #expect(coordinator.showing == nil)
+        #expect(coordinator.track == Self.episode)
+        // The app still shows the episode's cover; the desktop doesn't.
+        await waitUntil { coordinator.albumArtwork != nil }
+        #expect(coordinator.albumArtwork?.candidate.kind == .podcastCover)
+        #expect(display.shown.count == 1)
+        coordinator.isSuspended = true
+        coordinator.isSuspended = false
+        try? await Task.sleep(for: .milliseconds(100))
+        #expect(display.shown.count == 1, "resuming doesn't put the podcast cover on the desktop")
+        // Music coming back puts AudioPaper back.
+        source.send(.playing(.sample("Hurt", album: "Broken")))
+        await waitUntil { display.shown.count == 2 }
+        #expect(coordinator.showing?.candidate.attribution.title == "Broken")
+    }
+
+    @Test func podcastCoverWhenChosen() async {
+        coordinator.preferences.podcastWallpaper = .podcastCover
+        coordinator.start()
+        source.send(.playing(Self.episode))
+        await waitUntil { display.shown.count == 1 }
+        #expect(coordinator.showing?.candidate.kind == .podcastCover)
+        #expect(coordinator.fanArt.isEmpty)
+        #expect(display.restored == 0)
+    }
+
+    @Test func changingThePodcastSettingAppliesToTheEpisodePlaying() async {
+        coordinator.start()
+        source.send(.playing(Self.episode))
+        try? await Task.sleep(for: .milliseconds(150))
+        #expect(display.shown.isEmpty)
+        coordinator.preferences.podcastWallpaper = .podcastCover
+        coordinator.podcastSettingChanged()
+        await waitUntil { display.shown.count == 1 }
+        #expect(coordinator.showing?.candidate.kind == .podcastCover)
+        coordinator.preferences.podcastWallpaper = .myWallpaper
+        coordinator.podcastSettingChanged()
+        #expect(coordinator.showing == nil)
+        #expect(display.restored == 1)
+    }
+
+    @Test func aMomentaryStopDoesNotLoseTheNewItemsCover() async {
+        coordinator.start()
+        // Spotify can post Playing, then Stopped at once, then Playing again for the same item.
+        source.send(.playing(.sample()))
+        source.send(.stopped)
+        source.send(.playing(.sample()))
+        await waitUntil { display.shown.count == 1 }
+        #expect(coordinator.showing?.candidate.attribution.title == "The Downward Spiral")
     }
 
     @Test func rapidSkipsLoadOnlyTheTrackThatSettles() async {
@@ -166,7 +229,6 @@ final class GatedDisplay: WallpaperDisplay {
 
     init() {
         preferences = Preferences(defaults: UserDefaults(suiteName: "AudioPaperTests-\(UUID().uuidString)")!)
-        preferences.enabledSources = ["manual"]
         preferences.mode = .albumThenFanArt
     }
 

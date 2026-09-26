@@ -83,7 +83,7 @@ public struct WallpaperComposer: Sendable {
         for screen in screens {
             let canvas = CGRect(x: 0, y: 0, width: screen.pixelWidth, height: screen.pixelHeight)
             let image = switch artwork.candidate.kind {
-            case .albumCover: Self.albumScene(source, canvas: canvas)
+            case .albumCover, .podcastCover: Self.albumScene(source, canvas: canvas)
             case .fanArt:
                 framing.fits(imageSize: source.extent.size, canvas: canvas.size)
                     ? Self.fittedScene(source, canvas: canvas)

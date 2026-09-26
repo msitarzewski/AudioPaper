@@ -53,6 +53,16 @@ private struct GeneralSettings: View {
             }
             .disabled(preferences.mode == .albumOnly)
             Toggle("Restore my wallpaper when music stops", isOn: $preferences.restoreWhenStopped)
+            if coordinator.availableSources.contains(where: \.playsPodcasts) {
+                Picker(selection: $preferences.podcastWallpaper) {
+                    ForEach(PodcastWallpaper.allCases) { Text($0.title).tag($0) }
+                } label: {
+                    Text("During podcasts")
+                    Text("For podcasts played in Spotify. Podcast cover art is the episode's cover, from Spotify.")
+                }
+                .pickerStyle(.radioGroup)
+                .onChange(of: preferences.podcastWallpaper) { coordinator.podcastSettingChanged() }
+            }
             Toggle(isOn: $preferences.showInMenuBar) {
                 Text("Show in menu bar")
                 Text("When hidden, AudioPaper appears in the Dock instead. Open it again from Finder to get back here.")
@@ -135,10 +145,10 @@ private struct SourceSettings: View {
         Form {
             Section("Players") {
                 ForEach(coordinator.availableSources, id: \.id) { source in
-                    Toggle(source.displayName, isOn: membership(source.id, in: $preferences.enabledSources))
+                    Toggle(source.displayName, isOn: exclusion(source.id, from: $preferences.disabledSources))
                 }
             }
-            .onChange(of: preferences.enabledSources) { coordinator.restartEvents() }
+            .onChange(of: preferences.disabledSources) { coordinator.restartEvents() }
 
             Section {
                 ForEach(coordinator.allFanArtSources, id: \.id) { source in
@@ -176,15 +186,6 @@ private struct SourceSettings: View {
             get: { !set.wrappedValue.contains(id) },
             set: { enabled in
                 if enabled { set.wrappedValue.remove(id) } else { set.wrappedValue.insert(id) }
-            }
-        )
-    }
-
-    private func membership(_ id: String, in set: Binding<Set<String>>) -> Binding<Bool> {
-        Binding(
-            get: { set.wrappedValue.contains(id) },
-            set: { enabled in
-                if enabled { set.wrappedValue.insert(id) } else { set.wrappedValue.remove(id) }
             }
         )
     }

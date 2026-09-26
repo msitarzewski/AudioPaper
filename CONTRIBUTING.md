@@ -68,7 +68,7 @@ Each extension point is a protocol in `AudioPaperKit`. Add one file, register it
 
 | You want to add… | Conform to | Register in |
 |---|---|---|
-| A music player (Spotify, …) | `NowPlayingSource` | `SourceRegistry.standard` |
+| A music player (see `SpotifySource`; ignore IDs you don't recognise, such as ads) | `NowPlayingSource` (set `playsPodcasts` if it reports episodes) | `SourceRegistry.standard`, plus its bundle ID under `com.apple.security.temporary-exception.apple-events` in `project.yml` if it queries the player |
 | An album-cover source | `AlbumArtworkProvider` | the `AlbumArtworkChain` in `App/AppModel.swift` |
 | A fan-art / artist-image source | `FanArtSource` | `fanArtSources` in `App/AppModel.swift` |
 | A new image check | `ArtworkFilter` | `FanArtPipeline.filters` |

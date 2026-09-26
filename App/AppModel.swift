@@ -26,7 +26,7 @@ final class AppModel {
     private init() {
         let secrets = Self.secrets
         coordinator = NowPlayingCoordinator(
-            albumChain: AlbumArtworkChain(providers: [ITunesSearchProvider(), CoverArtArchiveProvider(), AppleMusicArtworkProvider()]),
+            albumChain: AlbumArtworkChain(providers: [ITunesSearchProvider(), CoverArtArchiveProvider(), AppleMusicArtworkProvider(), SpotifyArtworkProvider()]),
             fanArtSources: [
                 FanartTVSource(secrets: secrets),
                 TheAudioDBSource(secrets: secrets),

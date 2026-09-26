@@ -15,6 +15,21 @@ public enum ArtworkMode: String, CaseIterable, Sendable, Identifiable {
     }
 }
 
+/// What the desktop shows while a podcast episode plays.
+public enum PodcastWallpaper: String, CaseIterable, Sendable, Identifiable {
+    case myWallpaper
+    case podcastCover
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .myWallpaper: "My wallpaper"
+        case .podcastCover: "Podcast cover art"
+        }
+    }
+}
+
 /// User settings, persisted to UserDefaults and observable from SwiftUI.
 @MainActor
 @Observable
@@ -55,8 +70,12 @@ public final class Preferences {
     public var restoreWhenStopped: Bool {
         didSet { defaults.set(restoreWhenStopped, forKey: "restoreWhenStopped") }
     }
-    public var enabledSources: Set<String> {
-        didSet { defaults.set(Array(enabledSources), forKey: "enabledSources") }
+    public var podcastWallpaper: PodcastWallpaper {
+        didSet { defaults.set(podcastWallpaper.rawValue, forKey: "podcastWallpaper") }
+    }
+    /// Stored as the players turned *off*, so newly added players start enabled.
+    public var disabledSources: Set<String> {
+        didSet { defaults.set(Array(disabledSources), forKey: "disabledSources") }
     }
     /// Stored as the sources turned *off*, so newly added sources start enabled.
     public var disabledFanArtSources: Set<String> {
@@ -74,7 +93,19 @@ public final class Preferences {
         miniPlayerFloatsOnTop = defaults.bool(forKey: "miniPlayerFloatsOnTop")
         miniPlayerOnAllDesktops = defaults.bool(forKey: "miniPlayerOnAllDesktops")
         miniPlayerOpen = defaults.bool(forKey: "miniPlayerOpen")
-        enabledSources = Set(defaults.stringArray(forKey: "enabledSources") ?? ["apple-music"])
+        podcastWallpaper = defaults.string(forKey: "podcastWallpaper").flatMap(PodcastWallpaper.init(rawValue:)) ?? .myWallpaper
+        disabledSources = Self.migratedDisabledSources(defaults)
         disabledFanArtSources = Set(defaults.stringArray(forKey: "disabledFanArtSources") ?? [])
+    }
+
+    /// Before 0.1.4 the enabled players were stored, and Apple Music was the only one: if it had been turned
+    /// off, it stays off. Every other player, Spotify included, starts enabled.
+    private static func migratedDisabledSources(_ defaults: UserDefaults) -> Set<String> {
+        if let stored = defaults.stringArray(forKey: "disabledSources") { return Set(stored) }
+        guard let enabled = defaults.stringArray(forKey: "enabledSources") else { return [] }
+        let disabled: Set<String> = enabled.contains("apple-music") ? [] : ["apple-music"]
+        defaults.set(Array(disabled), forKey: "disabledSources")
+        defaults.removeObject(forKey: "enabledSources")
+        return disabled
     }
 }

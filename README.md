@@ -25,8 +25,8 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 
 ## How it works
 
-1. **Hears the track change.** Apple Music posts a system notification on every change, so there's no polling and no special permission. On launch, AudioPaper asks Music once what's already playing.
-2. **Shows the album cover.** It's looked up online, at up to 3000×3000, from the Apple Music catalog, then MusicBrainz / Cover Art Archive, and finally the artwork Music itself has. The cover sits centered over a blurred, colour-matched wash of itself.
+1. **Hears the track change.** Apple Music and Spotify each post a system notification on every change, so there's no polling and no special permission. On launch, AudioPaper asks the player once what's already playing. Spotify's ads are never shown; its podcasts show your own wallpaper, or the episode's cover if you choose.
+2. **Shows the album cover.** It's looked up online, at up to 3000×3000, from the Apple Music catalog, then MusicBrainz / Cover Art Archive, and finally the artwork the player itself has (Music's own, or Spotify's). The cover sits centered over a blurred, colour-matched wash of itself.
 3. **Cross-fades in fan art and artist photos.** It asks fanart.tv (fan-made 1080p and 4K artist backgrounds), TheAudioDB (curated artist backgrounds, no key needed), Wikimedia Commons (freely licensed photos, credited to the photographer) and DeviantArt first. Brave Image Search fills in only when fewer than three images pass the filters, which saves its quota for artists the others don't cover.
 
    Each artist builds a pool of up to 24 images as you play their songs (each song is searched once), and every play shows the ones you've seen least recently, so favourites stay fresh without extra network use.
@@ -68,7 +68,7 @@ Audited on 2026-09-25 through the macOS accessibility API, plus Lighthouse on ev
 ## Requirements
 
 - macOS 26 (Tahoe) or later
-- Apple Music (more players are planned; see [Roadmap](#roadmap))
+- Apple Music or Spotify (a free Spotify account works)
 - Fan art works out of the box: the downloadable app includes a fanart.tv project key, and TheAudioDB and Wikimedia Commons need none. For artists those don't cover, add a [Brave Search API](https://api-dashboard.search.brave.com/) key (billed by usage, so it's always your own) and/or a [DeviantArt application](https://www.deviantart.com/developers/) (client ID + secret) in Settings → Accounts. Builds from source need their own [fanart.tv](https://fanart.tv) project key there too.
 
 ## Updates
@@ -104,9 +104,10 @@ xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath bui
 | Change fan art every | 45 s | 15 s – 5 min |
 | Show in menu bar | On | When off, AudioPaper appears in the Dock instead |
 | Restore my wallpaper when music stops | Off | Puts your own wallpaper back 30 s after playback stops |
+| During podcasts | My wallpaper | Or the episode's cover art, from Spotify, on the desktop too (the Mini Player shows it either way). Shown when Spotify is installed |
 | Storage: keep up to | 500 MB | 250 MB – 2 GB of downloaded artwork; least-recently-used images go first. **Clear Cache…** empties it, keeping what's on screen |
 | Open at login | Off | Uses `SMAppService` |
-| Players / Fan art sources | All available | Turn each plugin on or off; new sources start on |
+| Players / Fan art sources | All available | Turn each plugin on or off; new players and sources start on |
 
 Settings reopens on the tab you used last.
 
@@ -131,6 +132,7 @@ AudioPaper uses these services. Each image shown in the app credits its source a
 | [iTunes Search API](https://performance-partners.apple.com/search-api) | Album covers | None |
 | [MusicBrainz](https://musicbrainz.org) + [Cover Art Archive](https://coverartarchive.org) | Album covers when Apple's catalog doesn't know the release; artist identity (by song) for fanart.tv and TheAudioDB | None |
 | Music app | Last-resort cover for the track that's playing | None |
+| Spotify app + its image server (`i.scdn.co`) | Podcast covers (when chosen), and a last-resort cover for Spotify songs | None |
 | [fanart.tv](https://fanart.tv) | Fan-made artist backgrounds (1920×1080 and 4K), by MusicBrainz ID | Built into release builds (`scripts/release.sh` adds it at build time; it's never in the repo), plus your optional personal key |
 | [Wikimedia Commons](https://commons.wikimedia.org) (via [Wikidata](https://www.wikidata.org)) | Freely licensed artist photos, credited with photographer and license | None |
 | [TheAudioDB](https://www.theaudiodb.com) | Artist backgrounds (fan art and photos, 1280×720) | Free public key built in; optional personal key |
@@ -149,7 +151,7 @@ App/                          SwiftUI app: menu bar menu, Mini Player window, Se
 Widgets/                      WidgetKit extension (Now Playing, Artwork); reads the App Group snapshot
 Packages/AudioPaperKit/       Everything else, as a Swift package
   Sources/AudioPaperKit/
-    Sources/                  NowPlayingSource plugins (Apple Music)
+    Sources/                  NowPlayingSource plugins (Apple Music, Spotify)
     Artwork/                  AlbumArtworkProvider plugins + chain
     FanArt/                   FanArtSource plugins, Vision ArtworkFilters, FanArtPipeline
     Wallpaper/                Core Image composer, NSWorkspace wallpaper service + cross-fade
@@ -170,7 +172,6 @@ The interface follows Apple's Human Interface Guidelines for macOS: a menu (not 
 
 ## Roadmap
 
-- More players: Spotify first (it posts the same kind of change notification Music does)
 - More art sources: Deezer
 - A paid TheAudioDB key would be needed before any Mac App Store release (their free key excludes app stores)
 - Smarter logo detection (stylized band logos can slip past text recognition)
