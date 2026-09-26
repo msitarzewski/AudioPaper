@@ -6,6 +6,23 @@
     <description>AudioPaper updates</description>
     <language>en</language>
     <item>
+      <title>AudioPaper 0.1.4</title>
+      <pubDate>Sat, 26 Sep 2026 21:32:53 GMT</pubDate>
+      <sparkle:version>5</sparkle:version>
+      <sparkle:shortVersionString>0.1.4</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/msitarzewski/AudioPaper/releases/tag/v0.1.4</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<h2>AudioPaper 0.1.4: Spotify</h2>
+<ul>
+<li><strong>Spotify works now</strong>, alongside Apple Music, and a free account is enough. AudioPaper follows whichever player changed most recently; either can be switched off in Settings → Sources.</li>
+<li><strong>Podcasts:</strong> Settings → General → During podcasts chooses your own wallpaper (the default) or the episode's cover art. Podcasts never get fan art, and the Mini Player shows the episode's cover either way.</li>
+<li><strong>Ads are ignored.</strong> The last song's art stays up until the next song.</li>
+<li>The Mini Player and menu show which app is playing, with its icon, and a note or a microphone for music or a podcast.</li>
+</ul>
+<p>The first time, macOS may ask to let AudioPaper control Spotify; that lets it read what's playing at launch and the podcast covers.</p>]]></description>
+      <enclosure url="https://github.com/msitarzewski/AudioPaper/releases/download/v0.1.4/AudioPaper-0.1.4.zip" length="5012459" type="application/octet-stream" sparkle:edSignature="MOMy9yOhzFFnXS137mxQr1t8UpQd4O+ICMGHmC4p6Up3BDIrYftqxe5aLqbtqBUBZH5rnPq6/eSTRIlMUULuDQ=="/>
+    </item>
+    <item>
       <title>AudioPaper 0.1.3</title>
       <pubDate>Fri, 25 Sep 2026 22:16:21 GMT</pubDate>
       <sparkle:version>4</sparkle:version>
