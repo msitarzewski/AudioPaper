@@ -457,6 +457,10 @@ import Testing
         #expect(Preferences(defaults: store).disabledSources.isEmpty)
     }
 
+    @Test func miniPlayerStartsCompact() {
+        #expect(Preferences(defaults: defaults()).miniPlayerShowsArtwork == false)
+    }
+
     @Test func podcastsDefaultToMyWallpaper() {
         #expect(Preferences(defaults: defaults()).podcastWallpaper == .myWallpaper)
     }

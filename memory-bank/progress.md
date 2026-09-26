@@ -39,4 +39,5 @@
 - Commons relevance: prefer files that name the artist (a NIN-cap photo of Gabriel Boric and a speaker stack came through).
 - A hands-on VoiceOver + Full Keyboard Access session.
 - Idea: for artists with no fan art (e.g. Chemlab), fanart.tv's scans of their other album covers.
+- **Backlog: narrower Apple Events permission.** Replace `temporary-exception.apple-events` (Music, Spotify) with `com.apple.security.scripting-targets` for the groups the apps publish: Music `com.apple.Music.playback` (+ `com.apple.Music.library.read` if artwork needs it), Spotify `com.spotify.playback`. Same Automation prompt for users; macOS then enforces read-only. Verify every AppleScript term live (terms outside the groups fail silently), then say so in PRIVACY.md.
 - DeviantArt: issue #1181, decide by ~2026-10-09 (PKCE or drop). Verify with real credentials; tune filters with more genres; decide on shipping the fanart.tv project key for release builds.

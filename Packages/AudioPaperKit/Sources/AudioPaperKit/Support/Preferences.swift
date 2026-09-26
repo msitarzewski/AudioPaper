@@ -60,6 +60,11 @@ public final class Preferences {
     public var miniPlayerFloatsOnTop: Bool {
         didSet { defaults.set(miniPlayerFloatsOnTop, forKey: "miniPlayerFloatsOnTop") }
     }
+    /// Whether the Mini Player shows the large picture of the wallpaper. Off by default: the desktop already
+    /// shows it, and the strip marks which image is up.
+    public var miniPlayerShowsArtwork: Bool {
+        didSet { defaults.set(miniPlayerShowsArtwork, forKey: "miniPlayerShowsArtwork") }
+    }
     /// Whether the Mini Player was open, so it comes back after relaunch.
     public var miniPlayerOpen: Bool {
         didSet { defaults.set(miniPlayerOpen, forKey: "miniPlayerOpen") }
@@ -93,6 +98,7 @@ public final class Preferences {
         miniPlayerFloatsOnTop = defaults.bool(forKey: "miniPlayerFloatsOnTop")
         miniPlayerOnAllDesktops = defaults.bool(forKey: "miniPlayerOnAllDesktops")
         miniPlayerOpen = defaults.bool(forKey: "miniPlayerOpen")
+        miniPlayerShowsArtwork = defaults.bool(forKey: "miniPlayerShowsArtwork")
         podcastWallpaper = defaults.string(forKey: "podcastWallpaper").flatMap(PodcastWallpaper.init(rawValue:)) ?? .myWallpaper
         disabledSources = Self.migratedDisabledSources(defaults)
         disabledFanArtSources = Set(defaults.stringArray(forKey: "disabledFanArtSources") ?? [])

@@ -20,6 +20,8 @@
 - Settings has an About pane mirroring Anomalous's.
 - Featured artists in song titles ("feat. …") fill in when the credited artist has no art.
 
+- **Mini Player compact by default (user, 2026-09-26):** the large artwork duplicated the desktop, so it's optional (**Show Artwork** in the "…" menu, the window's context menu and the Window menu; `Preferences.miniPlayerShowsArtwork`, default off). Order in both layouts: song (player icon + note/mic) → strip → credit of the image on the desktop → controls. User: "it's amazing". Uncommitted until the user asks.
+
 ## Open items
 - DeviantArt credentials needed to verify that provider live.
 - **Decided 2026-09-25:** release builds ship the fanart.tv project key, injected at build time from an environment variable (never in the repo; the build fails if it's missing). Rationale: fanart.tv keys are free and unlimited (not usage-billed), and a project key per app is fanart.tv's model. User's rule: any usage-billed service (Brave) needs the user's own key. Recommended a dedicated AudioPaper project key, separate from the user's personal one, so it can be revoked and rotated alone.

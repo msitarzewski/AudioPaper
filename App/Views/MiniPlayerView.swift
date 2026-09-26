@@ -1,8 +1,9 @@
 import AudioPaperKit
 import SwiftUI
 
-/// The Mini Player window: what's on the desktop, who made it, the slideshow, and its controls.
-/// Modelled on Music's MiniPlayer — artwork-forward, draggable by its background, optionally floating.
+/// The Mini Player window: what's playing, the slideshow, who made the image on the desktop, and controls.
+/// Modelled on Music's MiniPlayer — draggable by its background, optionally floating, with the large
+/// artwork optional (Show Artwork), since the desktop itself already shows it.
 struct MiniPlayerView: View {
     let coordinator: NowPlayingCoordinator
     @Bindable var preferences: Preferences
@@ -16,14 +17,19 @@ struct MiniPlayerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Artwork runs to the window's top edge, under the traffic lights, as in Music's MiniPlayer.
-            hero
+            if preferences.miniPlayerShowsArtwork {
+                // Artwork runs to the window's top edge, under the traffic lights, as in Music's MiniPlayer.
+                hero
+            } else {
+                songHeader
+            }
             VStack(alignment: .leading, spacing: 12) {
-                if let showing = coordinator.showing {
-                    AttributionRow(artwork: showing)
-                }
                 if !coordinator.slides.isEmpty || coordinator.isSearchingFanArt {
                     filmstrip
+                }
+                // Under the strip, so the credit sits right below the tile it describes.
+                if let showing = coordinator.showing {
+                    AttributionRow(artwork: showing)
                 }
                 controls
             }
@@ -49,27 +55,11 @@ struct MiniPlayerView: View {
         ArtworkImage(artwork: coordinator.showing ?? coordinator.albumArtwork)
             .frame(height: 230)
             .overlay(alignment: .bottomLeading) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(coordinator.track?.title ?? "Nothing playing")
-                        .font(.headline)
-                        .lineLimit(1)
-                    HStack(spacing: 5) {
-                        if let track = coordinator.track {
-                            PlayerIcon(bundleID: coordinator.player(for: track)?.appBundleID)
-                            // Music or podcast, at a glance.
-                            Image(systemName: track.isPodcast ? "mic.fill" : "music.note")
-                                .imageScale(.small)
-                        }
-                        Text(subtitle)
-                            .lineLimit(1)
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .glassEffect(.regular, in: .rect(cornerRadius: 12))
-                .padding(10)
+                songInfo
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 12))
+                    .padding(10)
             }
             // Square top (the window's own corners round it); rounded where it meets the content below.
             .clipShape(.rect(bottomLeadingRadius: 16, bottomTrailingRadius: 16))
@@ -79,12 +69,49 @@ struct MiniPlayerView: View {
             .accessibilityAddTraits(.isImage)
     }
 
-    /// "Concrete, Poppy — I Disagree, in Spotify. On the desktop: Photo by …, from Wikimedia Commons."
-    private var heroDescription: String {
+    /// The title, and the player, kind and artist — album (or show) under it.
+    private var songInfo: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(coordinator.track?.title ?? "Nothing playing")
+                .font(.headline)
+                .lineLimit(1)
+            HStack(spacing: 5) {
+                if let track = coordinator.track {
+                    PlayerIcon(bundleID: coordinator.player(for: track)?.appBundleID)
+                    // Music or podcast, at a glance.
+                    Image(systemName: track.isPodcast ? "mic.fill" : "music.note")
+                        .imageScale(.small)
+                }
+                Text(subtitle)
+                    .lineLimit(1)
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    /// Without the artwork: the song sits just under the window buttons, in the glass title bar.
+    private var songHeader: some View {
+        songInfo
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.top, titleBarHeight + 2)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(songDescription)
+    }
+
+    /// "Concrete, Poppy — I Disagree, in Spotify."
+    private var songDescription: String {
         var song = [coordinator.track?.title ?? "Nothing playing", subtitle].joined(separator: ", ")
         if let track = coordinator.track, let player = coordinator.player(for: track) {
             song += ", in \(player.displayName)"
         }
+        return song
+    }
+
+    /// "Concrete, Poppy — I Disagree, in Spotify. On the desktop: Photo by …, from Wikimedia Commons."
+    private var heroDescription: String {
+        let song = songDescription
         guard let artwork = coordinator.showing else {
             // A podcast's cover can show here while the desktop keeps the person's own wallpaper.
             return coordinator.albumArtwork == nil ? song : "\(song). On the desktop: your wallpaper."
@@ -184,6 +211,10 @@ struct MiniPlayerView: View {
     /// Pops up the window options menu at the pointer (the "…" button's menu).
     private func showMoreMenu() {
         let menu = NSMenu()
+        menu.addItem(ClosureMenuItem("Show Artwork", checked: preferences.miniPlayerShowsArtwork) {
+            preferences.miniPlayerShowsArtwork.toggle()
+        })
+        menu.addItem(.separator())
         menu.addItem(ClosureMenuItem("Float on Top", checked: preferences.miniPlayerFloatsOnTop) {
             preferences.miniPlayerFloatsOnTop.toggle()
         })
@@ -203,6 +234,8 @@ struct MiniPlayerView: View {
 
     @ViewBuilder
     private var windowOptions: some View {
+        Toggle("Show Artwork", isOn: $preferences.miniPlayerShowsArtwork)
+        Divider()
         Toggle("Float on Top", isOn: $preferences.miniPlayerFloatsOnTop)
         Toggle("Show on All Desktops", isOn: $preferences.miniPlayerOnAllDesktops)
     }

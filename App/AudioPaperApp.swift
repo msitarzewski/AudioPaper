@@ -69,6 +69,7 @@ private struct MiniPlayerCommands: View {
         @Bindable var preferences = model.coordinator.preferences
         Button("Show Mini Player") { openWindow(id: MiniPlayerScene.id) }
             .keyboardShortcut("m", modifiers: [.command, .option])
+        Toggle("Show Artwork in Mini Player", isOn: $preferences.miniPlayerShowsArtwork)
         Toggle("Float Mini Player on Top", isOn: $preferences.miniPlayerFloatsOnTop)
         Toggle("Show Mini Player on All Desktops", isOn: $preferences.miniPlayerOnAllDesktops)
     }
