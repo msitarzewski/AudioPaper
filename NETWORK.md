@@ -89,7 +89,7 @@ When the Mini Player credits a DeviantArt artist, their avatar is fetched from D
 
 ## Checking for updates (Sparkle)
 
-AudioPaper uses [Sparkle](https://sparkle-project.org). On the second launch it asks whether to check automatically; nothing is checked until you choose.
+AudioPaper uses [Sparkle](https://sparkle-project.org). On the second launch it asks whether to check automatically; nothing is checked until you choose. **Settings → About** changes the answer later.
 
 | Host | Request | When | Sends |
 |---|---|---|---|

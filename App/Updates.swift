@@ -1,8 +1,9 @@
 import AppKit
+import Observation
 import Sparkle
 
 /// Sparkle auto-update. Sparkle asks on the second launch whether to check automatically (about once a
-/// day); "Check for Updates…" checks now. Updates are verified against the EdDSA public key in Info.plist
+/// day), and Settings → About can change that answer; "Check for Updates…" checks now. Updates are verified against the EdDSA public key in Info.plist
 /// before anything is installed.
 @MainActor
 final class Updates: NSObject {
@@ -20,6 +21,51 @@ final class Updates: NSObject {
     func checkForUpdates() {
         NSApp.activate(ignoringOtherApps: true)
         controller.checkForUpdates(nil)
+    }
+
+    /// The update preferences shown in Settings → About, bound to Sparkle's own.
+    private(set) lazy var settings = UpdateSettings(updater: controller.updater)
+}
+
+/// Sparkle's update preferences for SwiftUI. Reads and writes go straight to `SPUUpdater`, which stores
+/// them, so the second-launch question and these switches never disagree.
+@MainActor
+@Observable
+final class UpdateSettings {
+    @ObservationIgnored private let updater: SPUUpdater
+    @ObservationIgnored private var observations: [NSKeyValueObservation] = []
+
+    var automaticallyChecks: Bool {
+        didSet { if updater.automaticallyChecksForUpdates != automaticallyChecks { updater.automaticallyChecksForUpdates = automaticallyChecks } }
+    }
+    var automaticallyDownloads: Bool {
+        didSet { if updater.automaticallyDownloadsUpdates != automaticallyDownloads { updater.automaticallyDownloadsUpdates = automaticallyDownloads } }
+    }
+    private(set) var lastChecked: Date?
+    private(set) var canCheck: Bool
+
+    init(updater: SPUUpdater) {
+        self.updater = updater
+        automaticallyChecks = updater.automaticallyChecksForUpdates
+        automaticallyDownloads = updater.automaticallyDownloadsUpdates
+        lastChecked = updater.lastUpdateCheckDate
+        canCheck = updater.canCheckForUpdates
+        // Sparkle changes these itself (the second-launch answer, a finished check, a check in progress),
+        // always on the main thread.
+        observations = [
+            updater.observe(\.automaticallyChecksForUpdates) { [weak self] updater, _ in
+                MainActor.assumeIsolated { self?.automaticallyChecks = updater.automaticallyChecksForUpdates }
+            },
+            updater.observe(\.automaticallyDownloadsUpdates) { [weak self] updater, _ in
+                MainActor.assumeIsolated { self?.automaticallyDownloads = updater.automaticallyDownloadsUpdates }
+            },
+            updater.observe(\.lastUpdateCheckDate) { [weak self] updater, _ in
+                MainActor.assumeIsolated { self?.lastChecked = updater.lastUpdateCheckDate }
+            },
+            updater.observe(\.canCheckForUpdates) { [weak self] updater, _ in
+                MainActor.assumeIsolated { self?.canCheck = updater.canCheckForUpdates }
+            },
+        ]
     }
 }
 

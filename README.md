@@ -73,7 +73,7 @@ Audited on 2026-09-25 through the macOS accessibility API, plus Lighthouse on ev
 
 ## Updates
 
-AudioPaper updates itself with [Sparkle](https://sparkle-project.org). On the second launch it asks whether to check automatically (about once a day); **Check for Updates…** in the menu checks now. Updates are verified with an EdDSA signature before they're installed. Sparkle is AudioPaper's one third-party dependency, chosen because macOS has no updater for apps outside the Mac App Store.
+AudioPaper updates itself with [Sparkle](https://sparkle-project.org). On the second launch it asks whether to check automatically (about once a day); **Settings → About** changes that answer, can also download and install updates automatically, and shows when it last checked. **Check for Updates…** in the menu checks now. Updates are verified with an EdDSA signature before they're installed. Sparkle is AudioPaper's one third-party dependency, chosen because macOS has no updater for apps outside the Mac App Store.
 
 ## Build and run
 

@@ -83,3 +83,6 @@
 - User-requested setting **During podcasts: My wallpaper / Podcast cover art** (default My wallpaper); podcasts never get fan art, and the Mini Player/widgets show the episode cover either way (the user's sketch). Player's own app icon plus a note/mic glyph in the Mini Player and menu; podcasts read "Podcast · Show".
 - Spotify's cover link (`i.scdn.co`, host pinned) is the podcast cover source and the last-resort song cover. Players stored as `disabledSources` with a migration, so Spotify starts on for everyone. A Stopped-cancelled lookup is redone. `install.sh` touches the bundle (the Dock showed a camera-era cached icon).
 - Docs: README, PRIVACY, NETWORK, CONTRIBUTING, Help (new "Spotify, podcasts and ads"), Reference, landing, social card. 19 new tests (130). See [260926_spotify-podcasts.md](./260926_spotify-podcasts.md).
+
+### 2026-09-26: Update switches in About (0.1.5)
+- The user couldn't find an auto-update option: Sparkle only asks once, on the second launch, and nothing let you change the answer later. Settings → About (where the version is, the user's choice) now has "Check for updates automatically", "Download and install updates automatically" (needs the first), the last check time and Check Now, all bound straight to `SPUUpdater`. The user's Mac showed automatic checks off. Docs: README, Help, Reference, NETWORK.

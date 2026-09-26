@@ -336,6 +336,34 @@ private struct CredentialFooter: View {
 }
 
 /// App identity, links and license — the same layout as the family's other apps (Anomalous).
+/// Settings → About, under the version: whether and how AudioPaper updates itself.
+private struct UpdateControls: View {
+    @Bindable var settings: UpdateSettings
+
+    var body: some View {
+        VStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle("Check for updates automatically", isOn: $settings.automaticallyChecks)
+                Toggle("Download and install updates automatically", isOn: $settings.automaticallyDownloads)
+                    .disabled(!settings.automaticallyChecks)
+            }
+            .toggleStyle(.checkbox)
+            HStack(spacing: 10) {
+                Text(lastChecked)
+                    .font(.caption).foregroundStyle(.secondary)
+                Button("Check Now") { Updates.shared.checkForUpdates() }
+                    .controlSize(.small)
+                    .disabled(!settings.canCheck)
+            }
+        }
+    }
+
+    private var lastChecked: String {
+        guard let date = settings.lastChecked else { return "Not checked yet" }
+        return "Last checked \(date.formatted(.relative(presentation: .named)))"
+    }
+}
+
 private struct AboutSettings: View {
     private static let repository = URL(string: "https://github.com/msitarzewski/AudioPaper")!
 
@@ -353,6 +381,8 @@ private struct AboutSettings: View {
                 .accessibilityHidden(true)
             Text("AudioPaper").font(.title2.weight(.semibold))
             Text(version).font(.caption).foregroundStyle(.secondary)
+            UpdateControls(settings: Updates.shared.settings)
+                .padding(.vertical, 4)
             Text("Your desktop, set to the music you’re playing — album covers, fan art and artist photos, all credited.")
                 .font(.callout).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
