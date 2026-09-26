@@ -6,6 +6,19 @@
     <description>AudioPaper updates</description>
     <language>en</language>
     <item>
+      <title>AudioPaper 0.1.5</title>
+      <pubDate>Sat, 26 Sep 2026 21:43:18 GMT</pubDate>
+      <sparkle:version>6</sparkle:version>
+      <sparkle:shortVersionString>0.1.5</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/msitarzewski/AudioPaper/releases/tag/v0.1.5</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<h2>AudioPaper 0.1.5: update settings</h2>
+<ul>
+<li><strong>Settings → About</strong> now has <em>Check for updates automatically</em> and <em>Download and install updates automatically</em>, with when AudioPaper last checked and a Check Now button. Before, the only way to choose was the question on the second launch.</li>
+</ul>]]></description>
+      <enclosure url="https://github.com/msitarzewski/AudioPaper/releases/download/v0.1.5/AudioPaper-0.1.5.zip" length="5027098" type="application/octet-stream" sparkle:edSignature="c9VcxVaVgegA3lHuFJVdnGumECQuStHyQobPkjptXRa8tur6fbZUllP/QUWCwCEU37IgRwGXY0hIjRkzqX7jDQ=="/>
+    </item>
+    <item>
       <title>AudioPaper 0.1.4</title>
       <pubDate>Sat, 26 Sep 2026 21:32:53 GMT</pubDate>
       <sparkle:version>5</sparkle:version>
