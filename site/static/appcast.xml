@@ -6,6 +6,20 @@
     <description>AudioPaper updates</description>
     <language>en</language>
     <item>
+      <title>AudioPaper 0.1.6</title>
+      <pubDate>Sat, 26 Sep 2026 23:54:53 GMT</pubDate>
+      <sparkle:version>7</sparkle:version>
+      <sparkle:shortVersionString>0.1.6</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/msitarzewski/AudioPaper/releases/tag/v0.1.6</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<h2>AudioPaper 0.1.6: a compact Mini Player</h2>
+<ul>
+<li><strong>The Mini Player is smaller.</strong> Your desktop already shows the wallpaper, so the large copy of it is now optional: <em>Show Artwork</em> in the … menu (and the Window menu) brings it back.</li>
+<li>It reads top to bottom: the song, with the playing app's icon and a note or a microphone; the strip of images, with the one on your desktop outlined; that image's credit; the controls.</li>
+</ul>]]></description>
+      <enclosure url="https://github.com/msitarzewski/AudioPaper/releases/download/v0.1.6/AudioPaper-0.1.6.zip" length="5034150" type="application/octet-stream" sparkle:edSignature="Hp+fn3jmvuWQBTrQ6Vj3ZSdfAXLxAH0O30WfETRsKowvADycGTr0ErN94eR8XPYZXrCaX8vdDqFqnW0JphfUCA=="/>
+    </item>
+    <item>
       <title>AudioPaper 0.1.5</title>
       <pubDate>Sat, 26 Sep 2026 21:43:18 GMT</pubDate>
       <sparkle:version>6</sparkle:version>
