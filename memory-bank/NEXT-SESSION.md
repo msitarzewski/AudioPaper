@@ -14,5 +14,7 @@ Updated 2026-09-25 (end of the website / release / hardening / accessibility ses
 3. **Site screenshots** (done): BABYMETAL and BLACKPINK Mini Players captured by the user with only covers + Commons sources on; every image credited on `site/pages/credits.html` (identified by matching against Commons categories); screenshots offered under CC BY-SA 4.0. A Springsteen capture is held back: its single cover shows "ICE OUT" protest signs, and the site stays out of sides — the user's call.
 4. A hands-on VoiceOver + Full Keyboard Access session.
 
+5. **DeviantArt auth model** (raised by a Codex review, confirmed in DeviantArt's docs 2026-09-25): native apps are *public* OAuth clients (client ID only, Authorization Code + PKCE, OAuth 2.1 for new apps); Client Credentials needs a secret and is for confidential clients. AudioPaper uses Client Credentials with a per-user app ID + secret in the user's Keychain, public browse endpoints only. Ask DeviantArt whether that pattern is supported (the user sends it); if not, move to PKCE (user signs in) or drop the source. Still untested live.
+
 ## Loose ends
 - DeviantArt unverified live (needs credentials). Stylized logos can pass OCR. Letterboxed stills. Spotify plugin.

@@ -10,9 +10,18 @@
 [![CI](https://github.com/msitarzewski/AudioPaper/actions/workflows/ci.yml/badge.svg)](https://github.com/msitarzewski/AudioPaper/actions/workflows/ci.yml)
 [![Sponsor](https://img.shields.io/badge/♥-Sponsor-EC4899?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/msitarzewski)
 
-AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the song changes. It puts the album cover up straight away, then cross-fades in fan art and artist photos while the song plays, like a Photos-folder wallpaper slideshow. It lives in the menu bar, with a Liquid Glass Mini Player and desktop widgets when you want more. It's native, with no third-party dependencies, no accounts and no telemetry.
+AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the song changes. It puts the album cover up straight away, then cross-fades in fan art and artist photos while the song plays, like a Photos-folder wallpaper slideshow. It lives in the menu bar, with a Liquid Glass Mini Player and desktop widgets when you want more. It's native, with no accounts and no telemetry, and one third-party dependency (Sparkle, for updates).
 
-**Website:** [msitarzewski.github.io/AudioPaper](https://msitarzewski.github.io/AudioPaper/): [help](https://msitarzewski.github.io/AudioPaper/help.html), [keyboard shortcuts](https://msitarzewski.github.io/AudioPaper/shortcuts.html) and the [full reference](https://msitarzewski.github.io/AudioPaper/reference.html).
+**Download:** [the latest release](https://github.com/msitarzewski/AudioPaper/releases/latest) (signed and notarized; it updates itself after that). **Website:** [msitarzewski.github.io/AudioPaper](https://msitarzewski.github.io/AudioPaper/): [help](https://msitarzewski.github.io/AudioPaper/help.html), [keyboard shortcuts](https://msitarzewski.github.io/AudioPaper/shortcuts.html) and the [full reference](https://msitarzewski.github.io/AudioPaper/reference.html).
+
+<p align="center">
+  <img src="site/static/shots/desktop-aespa.jpg" width="820" alt="A desktop wallpaper made by AudioPaper while aespa's Next Level plays: the four members of aespa on stage, lit in blue and pink, filling the screen.">
+</p>
+<p align="center">
+  <img src="site/static/shots/mini-babymetal.webp" width="300" alt="The Mini Player during BABYMETAL's Gimme Chocolate!!: a concert photo credited Photo by Chester, CC BY 2.0, Wikimedia Commons, with a strip of more photos and the controls.">
+  <img src="site/static/shots/mini-blackpink.webp" width="300" alt="The Mini Player during BLACKPINK's JUMP: the four members on stage, credited Photo by @aanglerrr (aang), CC BY 4.0, Wikimedia Commons, with the JUMP cover and more stage photos in the strip.">
+</p>
+<p align="center"><sub>A wallpaper AudioPaper rendered for aespa's "Next Level", and the Mini Player for BABYMETAL and BLACKPINK. Every image here is an album cover or a freely licensed photo, credited on the <a href="https://msitarzewski.github.io/AudioPaper/credits.html">Credits page</a>; the screenshots are shared under CC BY-SA 4.0.</sub></p>
 
 ## How it works
 
@@ -37,6 +46,8 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 4. **Rotates like a slideshow.** The cover holds the place for about 10 seconds while the artist's images load, then a new image fades in every 45 seconds (you can change this). The menu, Mini Player and widgets switch to each image the moment it's chosen, and the wallpaper follows as soon as it's drawn; a cover AudioPaper has seen before goes up without waiting. The fade is drawn in a click-through window just above the desktop, and then the real wallpaper is set underneath. So the picture stays after you quit, and it shows up in Mission Control on every Space and every display.
 
 ## Where it lives
+
+<img src="site/static/shots/menu.webp" width="300" align="right" alt="AudioPaper's menu: the song and artist, View Image on TheAudioDB, Next Image, Pause Wallpaper Changes, Restore Original Wallpaper, Show Mini Player (Option-Command-M), Check for Updates, Settings (Command-comma) and Quit AudioPaper (Command-Q).">
 
 - **Menu bar:** a standard macOS menu, per Apple's guidelines. It shows the track, credits the art (with a link to the artist's profile and the page it came from), and has Next Image, Pause, Restore Original Wallpaper, Show Mini Player (⌥⌘M), Check for Updates…, Settings… and Quit. You can hide the menu bar icon in Settings.
 - **Mini Player:** a small window modelled on Music's MiniPlayer, with the artwork under the window controls and a Liquid Glass background that takes on the colours of your wallpaper. It shows the credit, a strip of every image in rotation (the one on screen stays highlighted and in view), and the controls. From its **…** button it can *Float on Top* and *Show on All Desktops*. It reopens at launch if you left it open, in the same spot.
@@ -126,7 +137,7 @@ AudioPaper uses these services. Each image shown in the app credits its source a
 | [DeviantArt API](https://www.deviantart.com/developers/) | Fan art, with artist profile links | Your own app credentials |
 | [Brave Search API](https://brave.com/search/api/) | Fan art and artist photos when the sources above come up short | Your own key (the free tier is 2,000 queries/month; AudioPaper caches results and spaces requests to stay within it) |
 
-Fan art belongs to the people who made it. AudioPaper shows it on your own desktop with credit, and never saves it anywhere else or shares it.
+Fan art belongs to the people who made it. AudioPaper shows it on your own desktop with credit, keeps a copy only in its local cache, and never uploads, republishes or redistributes it.
 
 **Images come from the internet, found automatically.** They come from other people and services, and may be mislabelled, show the wrong person, or be unexpected; the filters catch a lot, not everything. **Next Image** skips one, and reports help improve the matching.
 
@@ -165,6 +176,17 @@ The interface follows Apple's Human Interface Guidelines for macOS: a menu (not 
 - Smarter logo detection (stylized band logos can slip past text recognition)
 - Commons relevance: categories also hold photos *related to* an artist (a fan in the band's cap, a show's speaker stacks); prefer files that name the artist
 - A hands-on VoiceOver and Full Keyboard Access session
+
+## Other projects
+
+Also by [Michael Sitarzewski](https://github.com/msitarzewski), all open source:
+
+- [**Agency Agents**](https://github.com/msitarzewski/agency-agents): a library of specialized AI agent personas for coding assistants.
+- [**Agency Agents app**](https://agencyagents.app): a small native Mac app for browsing and installing those agents across the AI tools you use.
+- [**Brew Browser**](https://brew-browser.zerologic.com): a native Mac app for Homebrew, the macOS package manager.
+- [**Anomalous**](https://anomalous.bot): system anomaly detection for macOS, with on-device judgement about what's worth your attention.
+- [**AGENT-ZERO**](https://github.com/msitarzewski/AGENT-ZERO): the AGENTS.md workflow this project is built with.
+- [**BEDROCK**](https://github.com/msitarzewski/bedrock): a free library about how a person becomes who they are.
 
 ## Support
 
