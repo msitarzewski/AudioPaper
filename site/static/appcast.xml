@@ -6,6 +6,22 @@
     <description>AudioPaper updates</description>
     <language>en</language>
     <item>
+      <title>AudioPaper 0.1.8</title>
+      <pubDate>Sun, 27 Sep 2026 13:47:42 GMT</pubDate>
+      <sparkle:version>9</sparkle:version>
+      <sparkle:shortVersionString>0.1.8</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/msitarzewski/AudioPaper/releases/tag/v0.1.8</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<h2>AudioPaper 0.1.8: your wallpaper, untouched</h2>
+<ul>
+<li><strong>Art now goes over your wallpaper, not in place of it.</strong> Your own desktop picture is never changed, so macOS’s moving wallpapers (Golden Gate, the Aerials) keep moving underneath, and it’s back the moment the music stops. Settings → General → Show art → “As my wallpaper” keeps the old way.</li>
+<li><strong>Your wallpaper comes back</strong> after the music stops (now on by default) or when Music or Spotify quits. In “As my wallpaper” mode it’s restored on every display and desktop.</li>
+<li><strong>Click the song</strong> in the Mini Player or the menu to show it in Music or Spotify.</li>
+<li>Siri: “AudioPaper credit”. Plus fixes: the Settings window, a tidier rotation label, cleaner photo credits.</li>
+</ul>]]></description>
+      <enclosure url="https://github.com/msitarzewski/AudioPaper/releases/download/v0.1.8/AudioPaper-0.1.8.zip" length="5213668" type="application/octet-stream" sparkle:edSignature="LgsFXPqpLMpmfFGJmUWOj31Up1ZwhKOej+DxAxp1anYSnryGzRVfgSoV/gfSn8T6iMnh2CxpxyhnMELx3aATCg=="/>
+    </item>
+    <item>
       <title>AudioPaper 0.1.7</title>
       <pubDate>Sun, 27 Sep 2026 03:29:56 GMT</pubDate>
       <sparkle:version>8</sparkle:version>
