@@ -6,6 +6,21 @@
     <description>AudioPaper updates</description>
     <language>en</language>
     <item>
+      <title>AudioPaper 0.1.7</title>
+      <pubDate>Sun, 27 Sep 2026 03:29:56 GMT</pubDate>
+      <sparkle:version>8</sparkle:version>
+      <sparkle:shortVersionString>0.1.7</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/msitarzewski/AudioPaper/releases/tag/v0.1.7</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<h2>AudioPaper 0.1.7: ask Siri</h2>
+<ul>
+<li><strong>“What’s on my desktop in AudioPaper?”</strong> Siri answers with the credit: who made the image, its licence, where it came from, and the song it’s for. Siri also knows “Open the AudioPaper image source”, “Next image in AudioPaper”, “Pause AudioPaper” and “Resume AudioPaper”.</li>
+<li>The same actions are in <strong>Shortcuts</strong> and Spotlight, and AppleScript can read what’s showing and pick an image from the strip.</li>
+<li><strong>Switching a fan-art source off now takes its images out of the rotation at once</strong>, including ones found earlier. They’re kept, and come back if you switch the source on again.</li>
+</ul>]]></description>
+      <enclosure url="https://github.com/msitarzewski/AudioPaper/releases/download/v0.1.7/AudioPaper-0.1.7.zip" length="5087148" type="application/octet-stream" sparkle:edSignature="1Ukaj9suiYyEs3wyOCj21h+Q9rBHTcbHt/8vU2sFOxSVP6GL5USshEDD7rl5aOx90CRFcRK85/WCAezUgOnGCw=="/>
+    </item>
+    <item>
       <title>AudioPaper 0.1.6</title>
       <pubDate>Sat, 26 Sep 2026 23:54:53 GMT</pubDate>
       <sparkle:version>7</sparkle:version>
