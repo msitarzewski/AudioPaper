@@ -7,8 +7,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.6"
-    CURRENT_PROJECT_VERSION: "7"
+    MARKETING_VERSION: "0.1.7"
+    CURRENT_PROJECT_VERSION: "8"
     DEAD_CODE_STRIPPING: YES
     ENABLE_USER_SCRIPT_SANDBOXING: YES
 packages:
@@ -54,6 +54,10 @@ targets:
         LSUIElement: true
         NSAppleEventsUsageDescription: AudioPaper asks your music player what is playing when it starts, so your wallpaper matches right away, and asks Spotify for the cover of what it's playing.
         NSHumanReadableCopyright: ""
+        # AppleScript: App/AudioPaper.sdef (read what's showing, pick an image, pause). Callers need the
+        # person's Automation permission.
+        NSAppleScriptEnabled: true
+        OSAScriptingDefinition: AudioPaper.sdef
         # fanart.tv project key, supplied only by scripts/release.sh (never committed). Empty in other builds,
         # which then need a key in Settings → Accounts.
         FanartTVProjectKey: $(FANART_PROJECT_KEY)

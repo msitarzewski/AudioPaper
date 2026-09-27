@@ -21,6 +21,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
       <li><a href="#untrusted">Untrusted replies</a></li>
       <li><a href="#accessibility">Accessibility</a></li>
       <li><a href="#updates">Updates</a></li>
+      <li><a href="#automation">Siri, Shortcuts and AppleScript</a></li>
       <li><a href="#permissions">Permissions</a></li>
       <li><a href="#developers">For developers</a></li>
     </ol>
@@ -45,7 +46,7 @@ description: Every AudioPaper setting, where its art comes from, how images are 
   </table></div>
 
   <h3>Sources</h3>
-  <p>Switches for each player (Apple Music and Spotify) and each fan-art source. New players and sources start switched on. A source that needs credentials says so until you add them; Brave Search is marked as the fallback it is.</p>
+  <p>Switches for each player (Apple Music and Spotify) and each fan-art source. New players and sources start switched on. Switching a source off takes its images out of the rotation straight away, even ones found earlier; they stay in the cache, and come back if you switch it on again. A source that needs credentials says so until you add them; Brave Search is marked as the fallback it is.</p>
 
   <h3>Accounts</h3>
   <p>Keys for fanart.tv (the downloaded app has its own project key; a personal key is optional), TheAudioDB (optional), Brave Search and DeviantArt (client ID and secret). They’re saved to your Keychain half a second after you stop typing, and each is sent only to its own service. How to get them is on the <a href="help.html#more-art">Help page</a>.</p>
@@ -164,6 +165,27 @@ description: Every AudioPaper setting, where its art comes from, how images are 
 
   <h2 id="updates">Updates</h2>
   <p>AudioPaper updates itself with <a href="https://sparkle-project.org">Sparkle</a>. On the second launch it asks whether to check automatically; if you agree, it reads the update feed about once a day. <strong>Settings → About</strong> has the same switch, plus <em>Download and install updates automatically</em> (off unless you turn it on; the update is installed when AudioPaper quits) and when it last checked. <strong>Check for Updates…</strong>, in the menu bar menu and the AudioPaper menu, checks now. Every update is verified against the EdDSA public key built into the app before it’s installed. No system profile is sent. Your settings, keys and downloaded art are kept.</p>
+
+  <h2 id="automation">Siri, Shortcuts and AppleScript</h2>
+  <p>Five App Intents, available to Siri (with ready-made phrases), Shortcuts and Spotlight:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Action</th><th>Siri phrases</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>What’s on My Desktop</td><td>“What’s on my desktop in AudioPaper”, “Who made my AudioPaper wallpaper”, “AudioPaper credit”</td><td>Says what’s up, who made it, the licence, the source and the song, and returns it as text for shortcuts.</td></tr>
+      <tr><td>Open Where This Image Came From</td><td>“Open the AudioPaper image source”</td><td>Opens the image’s page (the photo, the fan art, the album) in your browser.</td></tr>
+      <tr><td>Next Image</td><td>“Next image in AudioPaper”</td><td>Shows the next image in the rotation.</td></tr>
+      <tr><td>Pause Wallpaper Changes</td><td>“Pause AudioPaper”</td><td>Leaves the current wallpaper up. The music keeps playing.</td></tr>
+      <tr><td>Resume Wallpaper Changes</td><td>“Resume AudioPaper”</td><td>Changes the wallpaper with the music again.</td></tr>
+    </tbody>
+  </table></div>
+  <p>AppleScript (the dictionary is in Script Editor’s library): the properties <code>current song</code>, <code>image count</code>, <code>current image</code> (its position in the strip, from 1), <code>current credit</code> and <code>paused</code> (settable), and the commands <code>show image</code> <em>n</em> and <code>next image</code>.</p>
+  <pre><code>tell application "AudioPaper"
+    get {current song, image count, current image, current credit}
+    show image 3        -- the third image in the strip, on the desktop now
+    next image
+    set paused to true  -- the same as Pause in the Mini Player
+end tell</code></pre>
+  <p>macOS asks you before another app or script may send these (<strong>System Settings → Privacy &amp; Security → Automation</strong>). Nothing here controls playback, and nothing leaves your Mac.</p>
 
   <h2 id="permissions">Permissions</h2>
   <p>AudioPaper runs in the App Sandbox, with the hardened runtime, and asks for only this:</p>

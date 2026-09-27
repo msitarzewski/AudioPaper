@@ -1,6 +1,6 @@
 # Active Context
 
-**State** (2026-09-26): **v0.1.6 live** (compact Mini Player); 0.1.5 added update switches in Settings → About; 0.1.4 added Spotify (songs, podcasts, ads ignored), "During podcasts: My wallpaper / Podcast cover art", player icon + note/mic glyph; first update delivered through Sparkle. Open: DeviantArt OAuth question (issue #1181, decide by ~2026-10-09), Commons relevance, VoiceOver session. See NEXT-SESSION.md.
+**State** (2026-09-26): **v0.1.7 live** (Siri/Shortcuts/AppleScript; switched-off sources hidden); 0.1.6 compact Mini Player; 0.1.5 added update switches in Settings → About; 0.1.4 added Spotify (songs, podcasts, ads ignored), "During podcasts: My wallpaper / Podcast cover art", player icon + note/mic glyph; first update delivered through Sparkle. Open: DeviantArt OAuth question (issue #1181, decide by ~2026-10-09), Commons relevance, VoiceOver session. See NEXT-SESSION.md.
 
 ## User decisions (2026-09-25)
 - Follow Apple's HIG, Apple's own UI examples and per-platform icon practice, macOS only for now (`projectRules.md`).

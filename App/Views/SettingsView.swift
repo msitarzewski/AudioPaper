@@ -163,6 +163,7 @@ private struct SourceSettings: View {
                     }
                     .disabled(!source.isConfigured)
                 }
+                .onChange(of: preferences.disabledFanArtSources) { coordinator.fanArtSourcesChanged() }
             } header: {
                 Text("Fan art")
             } footer: {

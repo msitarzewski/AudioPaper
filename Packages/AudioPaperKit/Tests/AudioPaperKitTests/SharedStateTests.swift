@@ -112,6 +112,30 @@ import Testing
         #expect(!pool.shouldSearch(song: "kim|heart to break"), "full")
     }
 
+    func art(_ name: String, from source: String) -> Artwork {
+        var artwork = art(name)
+        artwork.candidate.providerID = source
+        return artwork
+    }
+
+    @Test func switchedOffSourcesAreKeptButNotShown() {
+        var pool = ArtistPool()
+        pool.add([art("tadb1", from: "theaudiodb"), art("commons1", from: "wikimedia"), art("tadb2", from: "theaudiodb")])
+        let shown = pool.selection(count: 8, hiding: ["theaudiodb"]).map(\.candidate.providerID)
+        #expect(shown == ["wikimedia"])
+        #expect(pool.artworks.count == 3, "switching the source back on brings them back without a search")
+        #expect(pool.selection(count: 8).count == 3)
+    }
+
+    @Test func switchedOffSourcesDontUseUpTheCapacity() {
+        var pool = ArtistPool()
+        pool.add((0..<ArtistPool.capacity).map { art("tadb\($0)", from: "theaudiodb") })
+        #expect(!pool.shouldSearch(song: "chvrches|shame"), "full with the source on")
+        #expect(pool.shouldSearch(song: "chvrches|shame", hiding: ["theaudiodb"]), "room for the sources still on")
+        pool.add([art("commons1", from: "wikimedia")], hiding: ["theaudiodb"])
+        #expect(pool.selection(count: 8, hiding: ["theaudiodb"]).map(\.candidate.providerID) == ["wikimedia"])
+    }
+
     @Test func songsThatFoundNothingAreRetriedAfterAWeek() {
         var pool = ArtistPool()
         let then = Date(timeIntervalSince1970: 0)

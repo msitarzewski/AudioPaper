@@ -35,6 +35,7 @@
 - **v0.1.4** (2026-09-26): Spotify player (songs, podcasts, ads ignored), "During podcasts" setting, player icon and music/podcast glyph in the Mini Player and menu, Spotify cover fallback, players stored as disabled, install.sh icon-cache fix. 130 tests.
 - **v0.1.5** (2026-09-26): Settings → About has the update switches (check automatically; download and install automatically) plus last-checked and Check Now. The user's Mac had automatic checks off, with no way to turn them on before this.
 - **v0.1.6** (2026-09-26): compact Mini Player — artwork optional (Show Artwork, off by default); order song → strip → credit → controls. 131 tests.
+- **v0.1.7** (2026-09-26): Siri/Shortcuts/Spotlight App Intents ("What's on my desktop in AudioPaper?" answers with the credit), AppleScript dictionary (read what's showing, `show image n`, `next image`, `paused`), switched-off fan-art sources hidden from pools at once (kept, don't count toward 24). 134 tests.
 
 ## Next
 - Commons relevance: prefer files that name the artist (a NIN-cap photo of Gabriel Boric and a speaker stack came through).

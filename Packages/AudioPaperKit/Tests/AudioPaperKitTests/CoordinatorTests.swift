@@ -134,6 +134,29 @@ final class RecordingDisplay: WallpaperDisplay {
         #expect(coordinator.showing?.candidate.attribution.title == "The Downward Spiral")
     }
 
+    @Test func desktopDescriptionSaysWhatIsUpAndWhereItCameFrom() async {
+        #expect(coordinator.desktopDescription == "AudioPaper isn't showing anything right now.")
+        coordinator.start()
+        source.send(.playing(.sample()))
+        await waitUntil { coordinator.showing != nil }
+        #expect(coordinator.desktopDescription == "It's the album cover of “The Downward Spiral”, from test.")
+        coordinator.restoreOriginalWallpaper()
+        #expect(coordinator.desktopDescription == "Your own wallpaper is up while “Closer” plays.")
+
+        let file = Fixture.temporaryDirectory().appending(path: "photo.png")
+        try? Fixture.png(width: 1920, height: 1080).write(to: file)
+        let photo = Artwork(
+            candidate: ArtworkCandidate(
+                imageURL: URL(string: "https://upload.wikimedia.org/photo.jpg")!, kind: .fanArt, providerID: "wikimedia",
+                attribution: Attribution(creatorName: "David Lee", sourceName: "Wikimedia Commons", license: "CC BY 4.0")
+            ),
+            fileURL: file, pixelWidth: 1920, pixelHeight: 1080
+        )
+        coordinator.show(photo)
+        #expect(coordinator.desktopDescription
+            == "It's a photo by David Lee, CC BY 4.0, from Wikimedia Commons, for “Closer” by Nine Inch Nails.")
+    }
+
     @Test func rapidSkipsLoadOnlyTheTrackThatSettles() async {
         coordinator.start()
         source.send(.playing(.sample("A", album: "First")))

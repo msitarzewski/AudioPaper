@@ -62,6 +62,10 @@ swift run apctl render ./out/1-brave.jpg 3024 1964 fit      # preview a wallpape
 
 `fanart` spends real search quota (Brave's free tier is 1 request/second and 2,000/month), so prefer the unit tests and recorded fixtures when you're tuning filters.
 
+## Automation surfaces
+
+Siri, Shortcuts and Spotlight use the App Intents in `App/Intents.swift` (their spoken text comes from `NowPlayingCoordinator.desktopDescription`, which is tested); AppleScript uses `App/AudioPaper.sdef` with `App/Scripting.swift`. Keep the two in step when adding an action, and keep them read-and-choose only: nothing that controls playback or sends anything off the Mac.
+
 ## Adding a plugin
 
 Each extension point is a protocol in `AudioPaperKit`. Add one file, register it in one place, and add tests with a recorded fixture.

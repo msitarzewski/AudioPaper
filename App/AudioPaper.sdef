@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+<dictionary title="AudioPaper Terminology" xmlns:xi="http://www.w3.org/2003/XInclude">
+    <xi:include href="file:///System/Library/ScriptingDefinitions/CocoaStandard.sdef" xpointer="xpointer(/dictionary/suite)"/>
+
+    <suite name="AudioPaper Suite" code="AuPp" description="See and choose the wallpaper AudioPaper shows. Nothing here controls playback.">
+        <class-extension extends="application" description="AudioPaper.">
+            <property name="current song" code="ApSg" type="text" access="r" description="The song or episode playing, as “Title — Artist”, or empty when nothing is.">
+                <cocoa key="scriptCurrentSong"/>
+            </property>
+            <property name="image count" code="ApIc" type="integer" access="r" description="How many images are in the strip for this song: the cover, then the fan art and photos.">
+                <cocoa key="scriptImageCount"/>
+            </property>
+            <property name="current image" code="ApIx" type="integer" access="r" description="Which image in the strip is on the desktop, counting from 1; 0 when none is.">
+                <cocoa key="scriptCurrentImage"/>
+            </property>
+            <property name="current credit" code="ApCr" type="text" access="r" description="The credit of the image on the desktop, e.g. “Photo by David Lee · Photo · CC BY 4.0 · Wikimedia Commons”.">
+                <cocoa key="scriptCurrentCredit"/>
+            </property>
+            <property name="paused" code="ApPs" type="boolean" description="Whether wallpaper changes are paused (the same as Pause in the Mini Player).">
+                <cocoa key="scriptPaused"/>
+            </property>
+        </class-extension>
+
+        <command name="show image" code="AuPpShIm" description="Puts an image from the strip on the desktop now, and restarts the rotation clock.">
+            <cocoa class="ShowImageCommand"/>
+            <direct-parameter type="integer" description="The image's position in the strip, counting from 1."/>
+        </command>
+
+        <command name="next image" code="AuPpNxIm" description="Shows the next image in the rotation.">
+            <cocoa class="NextImageCommand"/>
+        </command>
+    </suite>
+</dictionary>

@@ -57,6 +57,7 @@ All of it stays inside AudioPaper's sandbox container (`~/Library/Containers/com
 ## Permissions
 
 - **Automation (Music, Spotify):** asked once per player, so AudioPaper can read what's already playing when it launches and, as a last resort, the artwork the player has (Music's own artwork; Spotify's cover link, which is also where podcast covers come from). It never controls playback. Track changes come from a notification each player broadcasts, which needs no permission.
+- **Being automated (optional, yours to grant):** Siri, Shortcuts and AppleScript can ask AudioPaper what's on the desktop and change the image. Siri and Shortcuts are Apple's; AppleScript from another app or script needs your permission in Privacy & Security → Automation. The answers stay on your Mac, apart from whatever Siri itself does with a spoken request.
 - **Network (outgoing only):** for the lookups above. AudioPaper accepts no incoming connections.
 - **Keychain:** for your API keys.
 

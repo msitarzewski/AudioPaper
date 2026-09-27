@@ -41,8 +41,12 @@
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>AudioPaper asks your music player what is playing when it starts, so your wallpaper matches right away, and asks Spotify for the cover of what it's playing.</string>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
+	<key>OSAScriptingDefinition</key>
+	<string>AudioPaper.sdef</string>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>

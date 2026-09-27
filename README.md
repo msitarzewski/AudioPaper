@@ -54,6 +54,23 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 - **Widgets:** *Now Playing* (small, medium, large), with working Pause and Next Image buttons on medium and large, and *Artwork* (every size), which shows the current wallpaper image with its credit. Clicking a widget opens the Mini Player. Like every macOS widget, they turn grayscale while the desktop isn't focused (with the *Automatic* widget style). Add them with **Edit Widgets** on the desktop (AudioPaper must be installed in `/Applications` for them to appear).
 - **Dock:** AudioPaper stays out of the Dock unless the Mini Player is open or the menu bar icon is hidden, so there's always a way back in. Clicking the Dock icon opens the Mini Player, and right-clicking it shows the wallpaper actions.
 
+## Siri, Shortcuts and AppleScript
+
+- **Siri:** "What's on my desktop in AudioPaper?" answers with the credit, for example *"It's a photo by David Lee, CC BY 4.0, from Wikimedia Commons, for "SPAGHETTI" by LE SSERAFIM."* Also: "Open the AudioPaper image source", "Next image in AudioPaper", "Pause AudioPaper", "Resume AudioPaper". Apple requires the app's name in each phrase.
+- **Shortcuts and Spotlight:** the same five actions (What's on My Desktop, Open Where This Image Came From, Next Image, Pause and Resume Wallpaper Changes), ready to use in your own shortcuts. What's on My Desktop also returns its answer as text.
+- **AppleScript:** a small dictionary (open AudioPaper in Script Editor's library) to read what's showing and pick an image:
+
+  ```applescript
+  tell application "AudioPaper"
+      get {current song, image count, current image, current credit}
+      show image 3        -- the third image in the strip, on the desktop now
+      next image
+      set paused to true  -- the same as Pause in the Mini Player
+  end tell
+  ```
+
+  macOS asks you before any other app or script can send these (Privacy & Security → Automation). None of them controls playback.
+
 ## Accessibility
 
 AudioPaper aims for WCAG 2.2 AA as W3C's [WCAG2ICT](https://www.w3.org/TR/wcag2ict-22/) applies it to desktop software (the basis of EN 301 549 and Section 508), and for Apple's accessibility guidelines for macOS. The website aims for WCAG 2.2 AA directly.
@@ -107,7 +124,7 @@ xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath bui
 | During podcasts | My wallpaper | Or the episode's cover art, from Spotify, on the desktop too (the Mini Player shows it either way). Shown when Spotify is installed |
 | Storage: keep up to | 500 MB | 250 MB – 2 GB of downloaded artwork; least-recently-used images go first. **Clear Cache…** empties it, keeping what's on screen |
 | Open at login | Off | Uses `SMAppService` |
-| Players / Fan art sources | All available | Turn each plugin on or off; new players and sources start on |
+| Players / Fan art sources | All available | Turn each plugin on or off; new players and sources start on. A source switched off also leaves the rotation at once; its images are kept, and return if you switch it back on |
 
 Settings reopens on the tab you used last.
 

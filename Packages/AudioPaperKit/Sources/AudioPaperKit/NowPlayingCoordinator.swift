@@ -96,6 +96,33 @@ public final class NowPlayingCoordinator {
 
     public var availableSources: [any NowPlayingSource] { registry.available }
 
+    /// What's on the desktop, as a sentence for Siri and Shortcuts: "It's a photo by David Lee, CC BY 4.0,
+    /// from Wikimedia Commons, for “SPAGHETTI” by LE SSERAFIM."
+    public var desktopDescription: String {
+        guard let showing = showing?.candidate else {
+            if let track, isPlaying { return "Your own wallpaper is up while “\(track.title)” plays." }
+            return "AudioPaper isn't showing anything right now."
+        }
+        let attribution = showing.attribution
+        let what: String
+        switch showing.kind {
+        case .albumCover:
+            what = "the album cover of “\(attribution.title ?? track?.album ?? "")”"
+        case .podcastCover:
+            what = "the cover of the podcast “\(attribution.title ?? track?.album ?? "")”"
+        case .fanArt:
+            let kind = showing.kindLabel == "Photo" ? "a photo" : "fan art"
+            what = attribution.creatorName.map { "\(kind) by \($0)" } ?? kind
+        }
+        var sentence = "It's \(what)"
+        if let license = attribution.license { sentence += ", \(license)" }
+        sentence += ", from \(attribution.sourceName)"
+        if let track, showing.kind == .fanArt {
+            sentence += track.isPodcast ? ", for “\(track.album)”" : ", for “\(track.title)” by \(track.artist)"
+        }
+        return sentence + "."
+    }
+
     /// The player a track came from, for its name and icon.
     public func player(for track: Track) -> (any NowPlayingSource)? {
         registry.sources.first { $0.id == track.sourceID }
@@ -316,10 +343,11 @@ public final class NowPlayingCoordinator {
         let key = Self.poolKey(for: track)
         poolKey = key
         let pool = await cache.pool(forKey: key)
-        fanArt = pool.selection(count: Self.imagesPerPlay)
+        let hidden = preferences.disabledFanArtSources
+        fanArt = pool.selection(count: Self.imagesPerPlay, hiding: hidden)
         // Fan art waits its turn after the cover; it goes up at once only when there's no cover to show.
         if albumArtwork == nil, let first = fanArt.first { present(first, animated: true) }
-        guard pool.shouldSearch(song: track.songKey) else { return }
+        guard pool.shouldSearch(song: track.songKey, hiding: hidden) else { return }
 
         // New-song searches are budgeted, so a flood of track changes (a process spoofing Music's
         // notification, say) can't spend a metered quota. Over budget, the song is simply searched on a
@@ -339,7 +367,7 @@ public final class NowPlayingCoordinator {
         let lookalikes = ([albumArtwork, showing].compactMap { $0 } + pool.artworks)
             .compactMap { ImageLoading.image(at: $0.fileURL, maxPixelSize: 512) }
         var pipeline = FanArtPipeline(sources: sources, cache: cache)
-        pipeline.maxAccepted = min(Self.imagesPerPlay, pool.room)
+        pipeline.maxAccepted = min(Self.imagesPerPlay, pool.room(hiding: hidden))
         var found: [Artwork] = []
         var complete = true
         for await event in pipeline.run(for: track, excluding: lookalikes, known: Set(pool.artworks.map(\.candidate.imageURL))) {
@@ -363,12 +391,33 @@ public final class NowPlayingCoordinator {
         let finds = found
         let searchedFully = complete
         _ = try? await cache.updatePool(forKey: key) { pool in
-            pool.add(finds)
+            pool.add(finds, hiding: hidden)
             // A source that was offline or rate limited may have art for this song: search it again next
             // play (images already pooled are skipped) rather than remembering it as found-nothing.
             if searchedFully { pool.recordSearch(song: track.songKey, found: finds.count) }
         }
         await pruneCache()
+    }
+
+    /// Applies switched fan-art sources to the song playing now: images from sources switched off leave the
+    /// rotation (and the desktop, if one is up); pooled images from sources switched back on return.
+    public func fanArtSourcesChanged() {
+        guard let key = poolKey, let track, !track.isPodcast else { return }
+        let hidden = preferences.disabledFanArtSources
+        Task { [weak self] in
+            guard let self else { return }
+            let pool = await self.cache.pool(forKey: key)
+            guard self.poolKey == key else { return }
+            let kept = self.fanArt.filter { !hidden.contains($0.candidate.providerID) }
+            let returning = pool.selection(count: Self.imagesPerPlay, hiding: hidden)
+                .filter { artwork in !kept.contains { $0.id == artwork.id } }
+            self.fanArt = kept + returning.prefix(max(0, Self.imagesPerPlay - kept.count))
+            if let showing = self.showing, showing.candidate.kind == .fanArt, hidden.contains(showing.candidate.providerID),
+               let replacement = self.fanArt.first ?? self.albumArtwork {
+                self.present(replacement, animated: true)
+                self.startRotation()
+            }
+        }
     }
 
     // MARK: Presentation

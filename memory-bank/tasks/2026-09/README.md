@@ -89,3 +89,8 @@
 
 ### 2026-09-26: Compact Mini Player (0.1.6)
 - User idea: the large artwork duplicated the desktop. Now optional (**Show Artwork** in the "…" menu, context menu and Window menu; off by default); both layouts read song → strip (image on the desktop outlined) → its credit → controls, and the song moves under the window buttons when the artwork is hidden. Verified with window-only captures; the user: "it's amazing". Noted for later: the credit row's ↗ link is faint on tinted glass.
+
+### 2026-09-26: Siri, Shortcuts, AppleScript, switched-off sources (0.1.7)
+- Switching a fan-art source off now hides its pooled images at once (kept; they don't count toward the 24; switching back on restores them), found while planning the video: TheAudioDB images kept rotating after the source was off.
+- AppleScript dictionary so the video can be driven exactly (user: "gee, I wonder who could fix that?"), then App Intents for Siri/Shortcuts/Spotlight: "What's on my desktop in AudioPaper?" answers with the credit. Verified live over osascript (read, `show image 3`, out-of-range error, `next image`) and the intents' extracted metadata; Siri itself needs the user's voice.
+- Launch video ("Credits"): real screen recording, not renders; covers + Commons photos only (David Lee's CC BY 4.0 LE SSERAFIM concert photos are strong); Apple Music's MiniPlayer stays in frame (proves it's real); music must be CC-licensed (e.g. NIN *Ghosts I–IV*); the staged-photographer beat becomes clicking the credit to the Commons page. Commons relevance example: a city-street photo in LE SSERAFIM's category.
