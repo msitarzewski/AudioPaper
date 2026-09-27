@@ -34,6 +34,15 @@ private struct GeneralSettings: View {
 
     var body: some View {
         Form {
+            Picker(selection: $preferences.wallpaperMode) {
+                ForEach(WallpaperMode.allCases) { Text($0.title).tag($0) }
+            } label: {
+                Text("Show art")
+                Text(preferences.wallpaperMode == .overlay
+                     ? "Your own wallpaper stays untouched underneath, including macOS's moving ones, and is back the moment the music stops."
+                     : "Replaces your wallpaper, so the art also shows in Mission Control. macOS's own dynamic wallpapers may not come back exactly.")
+            }
+            .onChange(of: preferences.wallpaperMode) { coordinator.wallpaperModeChanged() }
             Picker("Wallpaper", selection: $preferences.mode) {
                 ForEach(ArtworkMode.allCases) { Text($0.title).tag($0) }
             }
@@ -46,9 +55,12 @@ private struct GeneralSettings: View {
                 HStack {
                     Slider(value: $preferences.rotationInterval, in: 15...300, step: 15)
                         .accessibilityValue(Duration.seconds(preferences.rotationInterval).formatted(.units(allowed: [.minutes, .seconds], width: .wide)))
-                    Text(Duration.seconds(preferences.rotationInterval).formatted(.units(allowed: [.minutes, .seconds], width: .abbreviated)))
+                    // Narrow ("1m 15s") so it fits on one line; VoiceOver hears the wide form from the slider.
+                    Text(Duration.seconds(preferences.rotationInterval).formatted(.units(allowed: [.minutes, .seconds], width: .narrow)))
                         .monospacedDigit()
-                        .frame(width: 70, alignment: .trailing)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .frame(minWidth: 56, alignment: .trailing)
                 }
             }
             .disabled(preferences.mode == .albumOnly)
@@ -141,6 +153,9 @@ private struct SourceSettings: View {
     let coordinator: NowPlayingCoordinator
     @Bindable var preferences: Preferences
 
+    /// Sources with credentials. `isConfigured` reads the Keychain, which mustn't block the main thread.
+    @State private var configured: Set<String> = []
+
     var body: some View {
         Form {
             Section("Players") {
@@ -154,14 +169,14 @@ private struct SourceSettings: View {
                 ForEach(coordinator.allFanArtSources, id: \.id) { source in
                     Toggle(isOn: exclusion(source.id, from: $preferences.disabledFanArtSources)) {
                         Text(source.displayName)
-                        if !source.isConfigured {
+                        if !configured.contains(source.id) {
                             Text("Add credentials in Accounts to use this source.")
                         } else if source.isFallback {
                             // Makes "curated only" a clear choice: switch this off.
                             Text("Searches the open web, only when the sources above find too little.")
                         }
                     }
-                    .disabled(!source.isConfigured)
+                    .disabled(!configured.contains(source.id))
                 }
                 .onChange(of: preferences.disabledFanArtSources) { coordinator.fanArtSourcesChanged() }
             } header: {
@@ -179,6 +194,10 @@ private struct SourceSettings: View {
         // HIG: the settings window accommodates the size of the current pane, rather than scrolling.
         .scrollDisabled(true)
         .fixedSize(horizontal: false, vertical: true)
+        .task {
+            let sources = coordinator.allFanArtSources
+            configured = await Task.detached { Set(sources.filter(\.isConfigured).map(\.id)) }.value
+        }
     }
 
     /// On when `id` is *not* in the disabled set.
@@ -293,8 +312,10 @@ private struct CredentialField: View {
             }
         }
         .accessibilityLabel(spokenLabel)
-        .onAppear {
-            text = KeychainSecretStore().value(for: key) ?? ""
+        // The Keychain can block on an access prompt; keep it off the main thread.
+        .task {
+            let key = key
+            text = await Task.detached { KeychainSecretStore().value(for: key) }.value ?? ""
             loaded = true
         }
         // Save shortly after typing stops rather than on every keystroke.
@@ -302,7 +323,8 @@ private struct CredentialField: View {
             guard loaded else { return }
             try? await Task.sleep(for: .milliseconds(500))
             guard !Task.isCancelled else { return }
-            if KeychainSecretStore().set(text.trimmingCharacters(in: .whitespacesAndNewlines), for: key) {
+            let key = key, value = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if await Task.detached(operation: { KeychainSecretStore().set(value, for: key) }).value {
                 failed.remove(key)
             } else {
                 failed.insert(key)

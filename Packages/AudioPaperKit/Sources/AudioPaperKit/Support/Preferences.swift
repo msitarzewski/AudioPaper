@@ -75,6 +75,10 @@ public final class Preferences {
     public var restoreWhenStopped: Bool {
         didSet { defaults.set(restoreWhenStopped, forKey: "restoreWhenStopped") }
     }
+    /// How art reaches the desktop: over the wallpaper (default) or replacing it.
+    public var wallpaperMode: WallpaperMode {
+        didSet { defaults.set(wallpaperMode.rawValue, forKey: "wallpaperMode") }
+    }
     public var podcastWallpaper: PodcastWallpaper {
         didSet { defaults.set(podcastWallpaper.rawValue, forKey: "podcastWallpaper") }
     }
@@ -92,13 +96,15 @@ public final class Preferences {
         mode = defaults.string(forKey: "mode").flatMap(ArtworkMode.init(rawValue:)) ?? .albumThenFanArt
         rotationInterval = defaults.object(forKey: "rotationInterval") as? Double ?? 45
         fanArtFraming = defaults.string(forKey: "fanArtFraming").flatMap(FanArtFraming.init(rawValue:)) ?? .automatic
-        restoreWhenStopped = defaults.bool(forKey: "restoreWhenStopped")
+        // On unless turned off: people expect their own wallpaper back when the music stops.
+        restoreWhenStopped = defaults.object(forKey: "restoreWhenStopped") as? Bool ?? true
         showInMenuBar = defaults.object(forKey: "showInMenuBar") as? Bool ?? true
         cacheLimitBytes = defaults.object(forKey: "cacheLimitBytes") as? Int ?? 500_000_000
         miniPlayerFloatsOnTop = defaults.bool(forKey: "miniPlayerFloatsOnTop")
         miniPlayerOnAllDesktops = defaults.bool(forKey: "miniPlayerOnAllDesktops")
         miniPlayerOpen = defaults.bool(forKey: "miniPlayerOpen")
         miniPlayerShowsArtwork = defaults.bool(forKey: "miniPlayerShowsArtwork")
+        wallpaperMode = defaults.string(forKey: "wallpaperMode").flatMap(WallpaperMode.init(rawValue:)) ?? .overlay
         podcastWallpaper = defaults.string(forKey: "podcastWallpaper").flatMap(PodcastWallpaper.init(rawValue:)) ?? .myWallpaper
         disabledSources = Self.migratedDisabledSources(defaults)
         disabledFanArtSources = Set(defaults.stringArray(forKey: "disabledFanArtSources") ?? [])

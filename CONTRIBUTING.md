@@ -62,6 +62,10 @@ swift run apctl render ./out/1-brave.jpg 3024 1964 fit      # preview a wallpape
 
 `fanart` spends real search quota (Brave's free tier is 1 request/second and 2,000/month), so prefer the unit tests and recorded fixtures when you're tuning filters.
 
+## Wallpaper modes
+
+`WallpaperModeDisplay` routes to `DesktopOverlay` (the default: art in a click-through window above the desktop picture, which is never touched) or `WallpaperService` (replaces the desktop picture; records the person's own per display and Space and restores it). `Wallpaper/Spaces.swift` is AudioPaper's one use of a private API: the window server's current-Space lookup, resolved at run time with a fallback, because macOS has no public way to name Spaces. Keep it isolated there.
+
 ## Automation surfaces
 
 Siri, Shortcuts and Spotlight use the App Intents in `App/Intents.swift` (their spoken text comes from `NowPlayingCoordinator.desktopDescription`, which is tested); AppleScript uses `App/AudioPaper.sdef` with `App/Scripting.swift`. Keep the two in step when adding an action, and keep them read-and-choose only: nothing that controls playback or sends anything off the Mac.

@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 @testable import AudioPaperKit
@@ -289,6 +290,10 @@ import Testing
         #expect(big.width == 1920 && big.height == 1280)
     }
 
+    @Test func placeholderAuthorsKeepOnlyTheName() {
+        #expect(WikimediaCommonsSource.plainText("No machine-readable author provided. Juumik assumed (based on copyright claims).") == "Juumik")
+    }
+
     @Test func artistCreditHTMLBecomesPlainText() {
         #expect(WikimediaCommonsSource.plainText(#"<a href="//commons.wikimedia.org/wiki/User:Yan">Yan Mayen</a>"#) == "Yan Mayen")
     }
@@ -461,6 +466,13 @@ import Testing
         #expect(Preferences(defaults: defaults()).miniPlayerShowsArtwork == false)
     }
 
+    @Test func restoringTheWallpaperIsOnByDefault() {
+        #expect(Preferences(defaults: defaults()).restoreWhenStopped)
+        let store = defaults()
+        store.set(false, forKey: "restoreWhenStopped")
+        #expect(Preferences(defaults: store).restoreWhenStopped == false, "a choice already made is kept")
+    }
+
     @Test func podcastsDefaultToMyWallpaper() {
         #expect(Preferences(defaults: defaults()).podcastWallpaper == .myWallpaper)
     }
@@ -485,5 +497,48 @@ import Testing
         let poppy = WikimediaCommonsSource.relevantSubcategories(
             ["Category:Poppy (singer) logos", "Category:Poppy (singer) by year", "Category:Chris Greatti (songwriter)"], of: "Poppy (singer)")
         #expect(poppy == ["Poppy (singer) by year"], "other people filed under the artist aren't followed")
+    }
+}
+
+@Suite struct OriginalWallpaperTests {
+    let pictures = [URL(filePath: "/System/Library/Desktop Pictures"), URL(filePath: "/Library/Desktop Pictures")]
+
+    @Test func anOrdinaryPictureIsRestoredAsItself() {
+        let url = URL(filePath: "/Users/me/Pictures/beach.jpg")
+        #expect(WallpaperService.restorableWallpaper(for: url, fileExists: { $0 == url.path(percentEncoded: false) }, systemPictures: pictures) == url)
+    }
+
+    @Test func macOSWallpapersMapBackToTheirSystemDescriptor() {
+        // What macOS reports for Catalina: a file that doesn't exist.
+        let reported = URL(filePath: "/Users/me/Library/Application Support/com.apple.mobileAssetDesktop/Catalina.heic")
+        let descriptor = "/System/Library/Desktop Pictures/Catalina.madesktop"
+        let restorable = WallpaperService.restorableWallpaper(for: reported, fileExists: { $0 == descriptor }, systemPictures: pictures)
+        #expect(restorable?.path(percentEncoded: false) == descriptor)
+    }
+
+    @Test func aMissingFileWithNoDescriptorCantBeRestored() {
+        let url = URL(filePath: "/Volumes/Gone/wallpaper.png")
+        #expect(WallpaperService.restorableWallpaper(for: url, fileExists: { _ in false }, systemPictures: pictures) == nil)
+    }
+
+    @Test func scalingOptionsSurviveStorage() {
+        let options: [NSWorkspace.DesktopImageOptionKey: Any] = [.imageScaling: NSNumber(value: NSImageScaling.scaleProportionallyUpOrDown.rawValue), .allowClipping: NSNumber(value: false), .fillColor: NSColor.red]
+        let stored = WallpaperService.storableOptions(options)
+        #expect(stored.count == 2, "the fill colour isn't a plain value and is left out")
+        let back = WallpaperService.desktopOptions(from: stored)
+        #expect((back[.allowClipping] as? NSNumber)?.boolValue == false)
+        #expect((back[.imageScaling] as? NSNumber)?.uintValue == NSImageScaling.scaleProportionallyUpOrDown.rawValue)
+    }
+
+    @Test func eachSpaceGetsItsOwnWallpaperBackWithTheDisplayAsFallback() {
+        let saved = ["UUID-A|1": "/Library/Desktop Pictures/One.madesktop", "UUID-A|7": "/Pictures/seven.jpg", "UUID-A": "/Pictures/seven.jpg"]
+        #expect(WallpaperService.originalKey(in: saved, exact: "UUID-A|1", display: "UUID-A", legacy: "1") == "UUID-A|1")
+        #expect(WallpaperService.originalKey(in: saved, exact: "UUID-A|9", display: "UUID-A", legacy: "1") == "UUID-A",
+                "a Space never recorded gets the latest wallpaper seen on its display")
+        #expect(WallpaperService.originalKey(in: saved, exact: nil, display: "UUID-A", legacy: "1") == "UUID-A",
+                "without Space IDs, the display's latest")
+        #expect(WallpaperService.originalKey(in: ["1": "/old.jpg"], exact: "UUID-B|2", display: "UUID-B", legacy: "1") == "1",
+                "records from before 0.1.8 still work")
+        #expect(WallpaperService.originalKey(in: [:], exact: "UUID-B|2", display: "UUID-B", legacy: "2") == nil)
     }
 }

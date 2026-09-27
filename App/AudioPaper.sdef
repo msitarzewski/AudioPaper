@@ -11,11 +11,26 @@
             <property name="image count" code="ApIc" type="integer" access="r" description="How many images are in the strip for this song: the cover, then the fan art and photos.">
                 <cocoa key="scriptImageCount"/>
             </property>
+            <property name="image credits" code="ApIC" access="r" description="The credit of every image in the strip, in order.">
+                <type type="text" list="yes"/>
+                <cocoa key="scriptImageCredits"/>
+            </property>
+            <property name="image source pages" code="ApIP" access="r" description="The web address each image in the strip came from, in order (empty where there's none), so a script can find a particular image without showing it.">
+                <type type="text" list="yes"/>
+                <cocoa key="scriptImageSourcePages"/>
+            </property>
+            <property name="artist image source pages" code="ApAP" access="r" description="The web address of every image AudioPaper has found for this artist (the strip shows a selection of them each play). Any of them can be shown with “show image from page”.">
+                <type type="text" list="yes"/>
+                <cocoa key="scriptArtistImageSourcePages"/>
+            </property>
             <property name="current image" code="ApIx" type="integer" access="r" description="Which image in the strip is on the desktop, counting from 1; 0 when none is.">
                 <cocoa key="scriptCurrentImage"/>
             </property>
             <property name="current credit" code="ApCr" type="text" access="r" description="The credit of the image on the desktop, e.g. “Photo by David Lee · Photo · CC BY 4.0 · Wikimedia Commons”.">
                 <cocoa key="scriptCurrentCredit"/>
+            </property>
+            <property name="current source page" code="ApSp" type="text" access="r" description="The web address of the page the image on the desktop came from (the photo, the fan art, the album), or empty when there's none.">
+                <cocoa key="scriptCurrentSourcePage"/>
             </property>
             <property name="paused" code="ApPs" type="boolean" description="Whether wallpaper changes are paused (the same as Pause in the Mini Player).">
                 <cocoa key="scriptPaused"/>
@@ -25,6 +40,15 @@
         <command name="show image" code="AuPpShIm" description="Puts an image from the strip on the desktop now, and restarts the rotation clock.">
             <cocoa class="ShowImageCommand"/>
             <direct-parameter type="integer" description="The image's position in the strip, counting from 1."/>
+        </command>
+
+        <command name="show image from page" code="AuPpShPg" description="Puts the image that came from this web address on the desktop now: one in the strip, or any image found for this artist (it joins the strip).">
+            <cocoa class="ShowImageFromPageCommand"/>
+            <direct-parameter type="text" description="The image's source page, as in “image source pages” or “artist image source pages”."/>
+        </command>
+
+        <command name="restore original wallpaper" code="AuPpRsWp" description="Puts back the wallpaper you had before AudioPaper changed it (the same as Restore Original Wallpaper in the menu).">
+            <cocoa class="RestoreWallpaperCommand"/>
         </command>
 
         <command name="next image" code="AuPpNxIm" description="Shows the next image in the rotation.">

@@ -13,6 +13,17 @@ public struct AppleMusicSource: NowPlayingSource {
     public let displayName = "Apple Music"
     public var appBundleID: String? { Self.bundleID }
 
+    /// Reveals the playing track in Music (it's the one AudioPaper shows), then brings Music forward.
+    @MainActor
+    public func open(_ track: Track) -> Bool {
+        guard Self.isMusicRunning else { return false }
+        var error: NSDictionary?
+        NSAppleScript(source: "tell application id \"com.apple.Music\"\nreveal current track\nactivate\nend tell")?
+            .executeAndReturnError(&error)
+        if let error { log.info("Music reveal unavailable: \(error, privacy: .public)") }
+        return error == nil
+    }
+
     public init() {}
 
     public var isAvailable: Bool {
@@ -34,9 +45,16 @@ public struct AppleMusicSource: NowPlayingSource {
             let initial = Task { @MainActor in
                 if let event = Self.currentState() { continuation.yield(event) }
             }
+            // Quitting the player may not post a Stopped notification; treat it as one.
+            let workspace = NSWorkspace.shared.notificationCenter
+            let quit = ObserverToken(workspace.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: nil) { note in
+                let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+                if app?.bundleIdentifier == Self.bundleID { continuation.yield(.stopped) }
+            })
             continuation.onTermination = { _ in
                 initial.cancel()
                 center.removeObserver(observer.value)
+                workspace.removeObserver(quit.value)
             }
         }
     }

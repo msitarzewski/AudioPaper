@@ -12,11 +12,14 @@ public protocol NowPlayingSource: Sendable {
     var playsPodcasts: Bool { get }
     /// The player app's bundle ID, so the interface can show its icon; nil when there's no app to show.
     var appBundleID: String? { get }
+    /// Brings the player forward showing this track. False when it can't.
+    @MainActor func open(_ track: Track) -> Bool
 }
 
 extension NowPlayingSource {
     public var playsPodcasts: Bool { false }
     public var appBundleID: String? { nil }
+    @MainActor public func open(_ track: Track) -> Bool { false }
 }
 
 /// Reads fields from a player's change notification. Any process can post one, so values are length-capped.

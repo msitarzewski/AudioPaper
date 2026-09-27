@@ -52,7 +52,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
     <li>The Mini Player and the menu show which app is playing, with its icon, and a note or a microphone for music or a podcast.</li>
     <li><strong>Ads</strong> are ignored. Spotify doesn’t announce them, so the last song’s art simply stays up until the next song.</li>
   </ul>
-  <p>Your own wallpaper is remembered the first time AudioPaper changes it, so <strong>Restore Original Wallpaper</strong> can put it back later.</p>
+  <p>By default AudioPaper draws its art <em>over</em> your wallpaper rather than replacing it, so your own wallpaper, including macOS’s moving ones, is untouched and back the moment the music stops. <strong>Settings → General → Show art</strong> can switch to replacing the wallpaper instead.</p>
 
   <h2 id="more-art">Getting more art</h2>
   <p>Out of the box, AudioPaper finds covers for nearly everything, and fan art and photos from <strong>fanart.tv</strong>, <strong>TheAudioDB</strong> and <strong>Wikimedia Commons</strong>. Well-known artists usually have plenty; newer or smaller artists may have one image or none. These optional keys find more. Add them in <strong>Settings → Accounts</strong>; they’re saved in your Keychain as you type.</p>
@@ -80,7 +80,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
 
   <h2 id="mini-player">The Mini Player</h2>
   <figure class="shot"><img src="shots/mini-babymetal.webp" width="385" height="438" loading="lazy" alt="The Mini Player during BABYMETAL's Gimme Chocolate!!: the concert photo on the desktop with its credit, a strip of five photos, and the Pause, Next Image, Restore and More buttons."><figcaption>Photos: <a href="credits.html#babymetal">credits</a></figcaption></figure>
-  <p>A small window, like Music’s MiniPlayer: the song, a strip of every image in rotation (the one on the desktop is outlined), that image’s credit, and buttons for <strong>Next Image</strong>, <strong>Pause</strong> and <strong>Restore Original Wallpaper</strong>. Click an image in the strip to show it now.</p>
+  <p>A small window, like Music’s MiniPlayer: the song (click it to show the song in Music or Spotify), a strip of every image in rotation (the one on the desktop is outlined), that image’s credit, and buttons for <strong>Next Image</strong>, <strong>Pause</strong> and <strong>Restore Original Wallpaper</strong>. Click an image in the strip to show it now.</p>
   <ul>
     <li><strong>Open it</strong> from the menu (<kbd>⌥</kbd><kbd>⌘</kbd><kbd>M</kbd>), by clicking a widget, or by clicking AudioPaper’s Dock icon.</li>
     <li><strong>Move it</strong> by dragging anywhere on its background.</li>
@@ -106,7 +106,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
     <li><strong>Pause Wallpaper Changes</strong> keeps the current image until you resume, whatever you play.</li>
     <li><strong>Settings → General → Change fan art every</strong> sets the rotation, from 15 seconds to 5 minutes.</li>
     <li><strong>Settings → General → Wallpaper → Album cover</strong> shows only the cover: no fan art, and no fan-art lookups.</li>
-    <li><strong>Restore my wallpaper when music stops</strong> puts your own wallpaper back 30 seconds after playback stops.</li>
+    <li><strong>Restore my wallpaper when music stops</strong> (on unless you turn it off) brings your own wallpaper back 30 seconds after playback stops, or after the player quits.</li>
     <li><strong>Restore Original Wallpaper</strong> puts it back now.</li>
   </ul>
   <p>The wallpaper AudioPaper sets is a real wallpaper, so it stays if you quit, and shows on every desktop and display.</p>
@@ -115,7 +115,7 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
   <p>Downloaded art is kept so that replays cost nothing. <strong>Settings → General → Storage</strong> shows how much is in use, sets the limit (250 MB to 2 GB, 500 MB by default), and has <strong>Clear Cache…</strong>, which deletes it all except the images on screen. When the limit is reached, the images used least recently go first.</p>
 
   <h2 id="siri">Siri, Shortcuts and scripts</h2>
-  <p>Ask Siri <strong>“What’s on my desktop in AudioPaper?”</strong> and it answers with the credit: who made the image, its licence, where it came from, and the song it’s for. Siri also knows <strong>“Open the AudioPaper image source”</strong>, <strong>“Next image in AudioPaper”</strong>, <strong>“Pause AudioPaper”</strong> and <strong>“Resume AudioPaper”</strong>. Apple asks apps to include their name in each phrase, so “in AudioPaper” is part of it.</p>
+  <p>Say <strong>“AudioPaper credit”</strong> to Siri and it answers with the credit of what’s on your desktop: who made the image, its licence, where it came from, and the song it’s for. Siri also knows <strong>“Open the AudioPaper image source”</strong>, <strong>“Next image in AudioPaper”</strong>, <strong>“Pause AudioPaper”</strong> and <strong>“Resume AudioPaper”</strong>. Apple asks apps to include their name in each phrase. Siri tends to answer questions itself, so these are commands; if it still answers on its own, add <strong>What’s on My Desktop</strong> to a shortcut in the Shortcuts app and name it whatever you like to say.</p>
   <p>The same actions are in the <strong>Shortcuts</strong> app, under AudioPaper, and in Spotlight. Scripts can use AudioPaper too; the <a href="reference.html#automation">Reference</a> has the AppleScript commands. Whatever the app, macOS asks you before it may send AudioPaper commands, and none of them controls your music.</p>
 
   <h2 id="troubleshooting">When something doesn’t work</h2>
@@ -125,6 +125,12 @@ description: Installing AudioPaper, getting more art, the menu, the Mini Player,
     <li>AudioPaper follows the <strong>Music</strong> app and <strong>Spotify</strong>. Other players aren’t supported yet, and a player switched off in <strong>Settings → Sources</strong> is ignored.</li>
     <li>Check the menu bar icon: if it shows a pause mark, choose <strong>Resume Wallpaper Changes</strong>.</li>
     <li>The first song after launch needs the Automation permission (see <a href="#first-launch">The first launch</a>). The next song works without it.</li>
+  </ul>
+
+  <h3>My wallpaper didn’t come back</h3>
+  <ul>
+    <li>Check <strong>Settings → General → Restore my wallpaper when music stops</strong> is on, or choose <strong>Restore Original Wallpaper</strong> from the menu.</li>
+    <li>With <strong>Show art: As my wallpaper</strong>, macOS’s own dynamic wallpapers (Golden Gate, the Aerials) can’t be put back exactly by any app; choose yours again in System Settings → Wallpaper, and switch to <strong>Over my wallpaper</strong>, which never touches it.</li>
   </ul>
 
   <h3>Only the album cover, no fan art</h3>

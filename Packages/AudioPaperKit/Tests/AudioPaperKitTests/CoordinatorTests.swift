@@ -38,7 +38,8 @@ final class RecordingDisplay: WallpaperDisplay {
     var shown: [(files: [UInt32: URL], animated: Bool)] = []
     var restored = 0
     func show(_ files: [UInt32: URL], animated: Bool) async { shown.append((files, animated)) }
-    func restoreOriginals() { restored += 1 }
+    var canRestore = true
+    func restoreOriginals() -> Bool { restored += 1; return canRestore }
 }
 
 @MainActor
@@ -132,6 +133,12 @@ final class RecordingDisplay: WallpaperDisplay {
         source.send(.playing(.sample()))
         await waitUntil { display.shown.count == 1 }
         #expect(coordinator.showing?.candidate.attribution.title == "The Downward Spiral")
+    }
+
+    @Test func unrestorableWallpaperIsExplained() async {
+        display.canRestore = false
+        coordinator.restoreOriginalWallpaper()
+        #expect(coordinator.status.contains("System Settings → Wallpaper"))
     }
 
     @Test func desktopDescriptionSaysWhatIsUpAndWhereItCameFrom() async {
@@ -239,7 +246,7 @@ final class GatedDisplay: WallpaperDisplay {
         while !isOpen { try? await Task.sleep(for: .milliseconds(10)) }
         shown += 1
     }
-    func restoreOriginals() {}
+    func restoreOriginals() -> Bool { true }
 }
 
 /// Song changes: the app leads, the wallpaper follows, and the cover comes before the fan art.

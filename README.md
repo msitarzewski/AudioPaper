@@ -50,19 +50,19 @@ AudioPaper is a small app for macOS 26 that changes your wallpaper whenever the 
 <img src="site/static/shots/menu.webp" width="300" align="right" alt="AudioPaper's menu: the song and artist, View Image on TheAudioDB, Next Image, Pause Wallpaper Changes, Restore Original Wallpaper, Show Mini Player (Option-Command-M), Check for Updates, Settings (Command-comma) and Quit AudioPaper (Command-Q).">
 
 - **Menu bar:** a standard macOS menu, per Apple's guidelines. It shows the track, credits the art (with a link to the artist's profile and the page it came from), and has Next Image, Pause, Restore Original Wallpaper, Show Mini Player (⌥⌘M), Check for Updates…, Settings… and Quit. You can hide the menu bar icon in Settings.
-- **Mini Player:** a small window modelled on Music's MiniPlayer, with a Liquid Glass background that takes on the colours of your wallpaper. It shows the song (with the playing app's icon, and a note or a microphone for music or a podcast), a strip of every image in rotation (the one on the desktop stays highlighted and in view), that image's credit, and the controls. From its **…** button it can *Show Artwork* (a large copy of the image on the desktop, off by default since the desktop already shows it), *Float on Top* and *Show on All Desktops*. It reopens at launch if you left it open, in the same spot.
+- **Mini Player:** a small window modelled on Music's MiniPlayer, with a Liquid Glass background that takes on the colours of your wallpaper. It shows the song (with the playing app's icon, and a note or a microphone for music or a podcast; click it to show the song in Music or Spotify), a strip of every image in rotation (the one on the desktop stays highlighted and in view), that image's credit, and the controls. From its **…** button it can *Show Artwork* (a large copy of the image on the desktop, off by default since the desktop already shows it), *Float on Top* and *Show on All Desktops*. It reopens at launch if you left it open, in the same spot.
 - **Widgets:** *Now Playing* (small, medium, large), with working Pause and Next Image buttons on medium and large, and *Artwork* (every size), which shows the current wallpaper image with its credit. Clicking a widget opens the Mini Player. Like every macOS widget, they turn grayscale while the desktop isn't focused (with the *Automatic* widget style). Add them with **Edit Widgets** on the desktop (AudioPaper must be installed in `/Applications` for them to appear).
 - **Dock:** AudioPaper stays out of the Dock unless the Mini Player is open or the menu bar icon is hidden, so there's always a way back in. Clicking the Dock icon opens the Mini Player, and right-clicking it shows the wallpaper actions.
 
 ## Siri, Shortcuts and AppleScript
 
-- **Siri:** "What's on my desktop in AudioPaper?" answers with the credit, for example *"It's a photo by David Lee, CC BY 4.0, from Wikimedia Commons, for "SPAGHETTI" by LE SSERAFIM."* Also: "Open the AudioPaper image source", "Next image in AudioPaper", "Pause AudioPaper", "Resume AudioPaper". Apple requires the app's name in each phrase.
+- **Siri:** "AudioPaper credit" answers with the credit of what's on the desktop, for example *"It's a photo by David Lee, CC BY 4.0, from Wikimedia Commons, for "SPAGHETTI" by LE SSERAFIM."* Also: "Open the AudioPaper image source", "Next image in AudioPaper", "Pause AudioPaper", "Resume AudioPaper". Apple requires the app's name in each phrase. Siri answers questions ("what's on my desktop?") itself, so the phrases are commands; if Siri still answers on its own, add **What's on My Desktop** to a shortcut and give it a name to say.
 - **Shortcuts and Spotlight:** the same five actions (What's on My Desktop, Open Where This Image Came From, Next Image, Pause and Resume Wallpaper Changes), ready to use in your own shortcuts. What's on My Desktop also returns its answer as text.
 - **AppleScript:** a small dictionary (open AudioPaper in Script Editor's library) to read what's showing and pick an image:
 
   ```applescript
   tell application "AudioPaper"
-      get {current song, image count, current image, current credit}
+      get {current song, image count, current image, current credit, current source page}
       show image 3        -- the third image in the strip, on the desktop now
       next image
       set paused to true  -- the same as Pause in the Mini Player
@@ -116,11 +116,12 @@ xcodebuild -project AudioPaper.xcodeproj -scheme AudioPaper -derivedDataPath bui
 
 | Setting | Default | What it does |
 |---|---|---|
+| Show art | Over my wallpaper | *Over my wallpaper* draws the art in a click-through window just above your desktop picture, which is never touched (macOS's moving wallpapers keep moving underneath) and is back the moment the music stops. *As my wallpaper* replaces the desktop picture, so the art also shows in Mission Control; your own wallpaper is recorded per display and desktop and put back, but macOS's own dynamic wallpapers (Golden Gate, Aerials) can't always be restored exactly |
 | Wallpaper | Album cover, then fan art | Or album cover only |
 | Fan art framing | Automatic | Fill the screen, fit the whole image, or decide per image (fits when filling would crop more than 15%) |
 | Change fan art every | 45 s | 15 s – 5 min |
 | Show in menu bar | On | When off, AudioPaper appears in the Dock instead |
-| Restore my wallpaper when music stops | Off | Puts your own wallpaper back 30 s after playback stops |
+| Restore my wallpaper when music stops | On | Your own wallpaper is back 30 s after playback stops, or after the player quits |
 | During podcasts | My wallpaper | Or the episode's cover art, from Spotify, on the desktop too (the Mini Player shows it either way). Shown when Spotify is installed |
 | Storage: keep up to | 500 MB | 250 MB – 2 GB of downloaded artwork; least-recently-used images go first. **Clear Cache…** empties it, keeping what's on screen |
 | Open at login | Off | Uses `SMAppService` |
@@ -171,7 +172,7 @@ Packages/AudioPaperKit/       Everything else, as a Swift package
     Sources/                  NowPlayingSource plugins (Apple Music, Spotify)
     Artwork/                  AlbumArtworkProvider plugins + chain
     FanArt/                   FanArtSource plugins, Vision ArtworkFilters, FanArtPipeline
-    Wallpaper/                Core Image composer, NSWorkspace wallpaper service + cross-fade
+    Wallpaper/                Core Image composer; desktop overlay (default) or NSWorkspace wallpaper service, cross-fades, per-Space restore
     Cache/                    Downloaded artwork and remembered search results (LRU, size-limited)
     Support/                  MusicBrainz identity, preferences, Keychain, widget snapshot, HTTP
     NowPlayingCoordinator     Playback events → cover → fan art → rotation

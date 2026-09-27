@@ -37,7 +37,8 @@ description: Every AudioPaper setting, where its art comes from, how images are 
       <tr><td>Wallpaper</td><td>Album cover, then fan art</td><td>Or <em>Album cover</em> only, which also skips every fan-art lookup.</td></tr>
       <tr><td>Fan art framing</td><td>Automatic</td><td><em>Fill</em> the screen, <em>Fit</em> the whole image, or <em>Automatic</em>: fill, unless that would crop more than 15% of the image.</td></tr>
       <tr><td>Change fan art every</td><td>45 seconds</td><td>From 15 seconds to 5 minutes.</td></tr>
-      <tr><td>Restore my wallpaper when music stops</td><td>Off</td><td>Puts your own wallpaper back 30 seconds after playback stops.</td></tr>
+      <tr><td>Show art</td><td>Over my wallpaper</td><td><em>Over my wallpaper</em> leaves your desktop picture untouched; <em>As my wallpaper</em> replaces it (see <a href="#display">Putting it on screen</a>).</td></tr>
+      <tr><td>Restore my wallpaper when music stops</td><td>On</td><td>Your own wallpaper is back 30 seconds after playback stops, or after the player quits.</td></tr>
       <tr><td>During podcasts</td><td>My wallpaper</td><td>For Spotify podcasts: your own wallpaper until music returns, or <em>Podcast cover art</em>, the episode’s cover from Spotify. The Mini Player and widgets show the cover either way. Podcasts never get fan art. Shown when Spotify is installed.</td></tr>
       <tr><td>Show in menu bar</td><td>On</td><td>When off, AudioPaper appears in the Dock instead.</td></tr>
       <tr><td>Open at login</td><td>Off</td><td>Registers AudioPaper as a login item.</td></tr>
@@ -116,8 +117,8 @@ description: Every AudioPaper setting, where its art comes from, how images are 
     <li><strong>The cover</strong> is drawn centred over a blurred, colour-matched wash of itself, at the size of each display.</li>
     <li><strong>Fan art</strong> fills the screen edge to edge. When filling would crop more than 15% (<em>Automatic</em>), or you chose <em>Fit</em>, the whole image is shown and its edges are feathered into a blurred extension of itself.</li>
     <li><strong>Order and timing:</strong> on a new song, the cover goes up first: at once if AudioPaper has downloaded it before, otherwise after a short pause (1.5 seconds, so skipping through songs doesn’t look each one up) and the lookup. It holds the place for about 10 seconds while the artist’s images load; then the fan art takes over and rotates at the interval you set. The menu, Mini Player and widgets switch to each new image the moment it’s chosen; the wallpaper follows as soon as it’s drawn, a fraction of a second, plus the 1.6-second cross-fade.</li>
-    <li><strong>The change</strong> is a cross-fade, drawn in a click-through window just above the desktop; then the real wallpaper is set underneath it. So the picture stays after you quit, and appears on every Space, every display and in Mission Control. It’s re-applied when you switch Spaces.</li>
-    <li><strong>Your original wallpaper</strong> is saved, per display, the first time AudioPaper changes it, and put back by <strong>Restore Original Wallpaper</strong>.</li>
+    <li><strong>Over my wallpaper</strong> (the default): the art is drawn in a click-through window just above the desktop picture and below the icons, on every display and Space, and cross-fades from image to image. Your desktop picture is never changed, so macOS’s dynamic and Aerial wallpapers keep moving underneath, and when the music stops (or AudioPaper quits) the window simply goes away. Mission Control and Show Desktop show your own wallpaper.</li>
+    <li><strong>As my wallpaper</strong>: the cross-fade is drawn the same way, then the real desktop picture is set underneath it, so the art also appears in Mission Control and stays after quitting. Your own wallpaper is recorded per display <em>and</em> desktop (Space) just before AudioPaper first covers it, and put back when the music stops: the desktop you’re on at once, the others when you next visit them. Where nothing was recorded, macOS’s default wallpaper is used rather than leaving AudioPaper’s image up. macOS doesn’t let apps read or set its own dynamic wallpapers (Golden Gate, the Aerials) exactly, so those may come back as a different picture; choose <em>Over my wallpaper</em> to keep them.</li>
   </ul>
 
   <h2 id="credits">Credits</h2>
@@ -171,16 +172,16 @@ description: Every AudioPaper setting, where its art comes from, how images are 
   <div class="table-wrap"><table>
     <thead><tr><th>Action</th><th>Siri phrases</th><th>What it does</th></tr></thead>
     <tbody>
-      <tr><td>What’s on My Desktop</td><td>“What’s on my desktop in AudioPaper”, “Who made my AudioPaper wallpaper”, “AudioPaper credit”</td><td>Says what’s up, who made it, the licence, the source and the song, and returns it as text for shortcuts.</td></tr>
+      <tr><td>What’s on My Desktop</td><td>“AudioPaper credit”, “Show the AudioPaper credit”, “Read the AudioPaper credit”</td><td>Says what’s up, who made it, the licence, the source and the song, and returns it as text for shortcuts.</td></tr>
       <tr><td>Open Where This Image Came From</td><td>“Open the AudioPaper image source”</td><td>Opens the image’s page (the photo, the fan art, the album) in your browser.</td></tr>
       <tr><td>Next Image</td><td>“Next image in AudioPaper”</td><td>Shows the next image in the rotation.</td></tr>
       <tr><td>Pause Wallpaper Changes</td><td>“Pause AudioPaper”</td><td>Leaves the current wallpaper up. The music keeps playing.</td></tr>
       <tr><td>Resume Wallpaper Changes</td><td>“Resume AudioPaper”</td><td>Changes the wallpaper with the music again.</td></tr>
     </tbody>
   </table></div>
-  <p>AppleScript (the dictionary is in Script Editor’s library): the properties <code>current song</code>, <code>image count</code>, <code>current image</code> (its position in the strip, from 1), <code>current credit</code> and <code>paused</code> (settable), and the commands <code>show image</code> <em>n</em> and <code>next image</code>.</p>
+  <p>AppleScript (the dictionary is in Script Editor’s library): the properties <code>current song</code>, <code>image count</code>, <code>image credits</code> and <code>image source pages</code> (lists, in strip order), <code>artist image source pages</code> (every image found for this artist; the strip shows a selection each play), <code>current image</code> (its position in the strip, from 1), <code>current credit</code>, <code>current source page</code> (the web address the image came from) and <code>paused</code> (settable), and the commands <code>show image</code> <em>n</em>, <code>show image from page</code> <em>address</em> (an exact image, from the strip or anywhere in the artist’s pool), <code>next image</code> and <code>restore original wallpaper</code>.</p>
   <pre><code>tell application "AudioPaper"
-    get {current song, image count, current image, current credit}
+    get {current song, image count, current image, current credit, current source page}
     show image 3        -- the third image in the strip, on the desktop now
     next image
     set paused to true  -- the same as Pause in the Mini Player

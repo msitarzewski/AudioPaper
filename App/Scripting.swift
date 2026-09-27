@@ -7,7 +7,8 @@ import AudioPaperKit
 
 extension AppDelegate {
     static let scriptKeys: Set<String> = [
-        "scriptCurrentSong", "scriptImageCount", "scriptCurrentImage", "scriptCurrentCredit", "scriptPaused",
+        "scriptCurrentSong", "scriptImageCount", "scriptCurrentImage", "scriptCurrentCredit", "scriptCurrentSourcePage", "scriptImageCredits", "scriptImageSourcePages", "scriptArtistImageSourcePages",
+        "scriptPaused",
     ]
 
     func application(_ sender: NSApplication, delegateHandlesKey key: String) -> Bool {
@@ -29,8 +30,26 @@ extension AppDelegate {
     }
 
     @objc var scriptCurrentCredit: String {
-        guard let showing = coordinator.showing?.candidate else { return "" }
-        return [showing.creatorCredit, showing.creditLine].compactMap { $0 }.joined(separator: " · ")
+        coordinator.showing.map { Self.credit($0.candidate) } ?? ""
+    }
+
+    @objc var scriptImageCredits: [String] { coordinator.slides.map { Self.credit($0.candidate) } }
+
+    @objc var scriptImageSourcePages: [String] {
+        coordinator.slides.map { $0.candidate.attribution.pageURL?.absoluteString ?? "" }
+    }
+
+    @objc var scriptArtistImageSourcePages: [String] {
+        coordinator.pooled.compactMap { $0.candidate.attribution.pageURL?.absoluteString }
+    }
+
+    private static func credit(_ candidate: ArtworkCandidate) -> String {
+        [candidate.creatorCredit, candidate.creditLine].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    /// Only ever a web page (credit links are filtered to http and https when they're read).
+    @objc var scriptCurrentSourcePage: String {
+        coordinator.showing?.candidate.attribution.pageURL?.absoluteString ?? ""
     }
 
     @objc var scriptPaused: Bool {
@@ -56,6 +75,29 @@ final class ShowImageCommand: NSScriptCommand {
             scriptErrorNumber = errAENoSuchObject
             scriptErrorString = error
         }
+        return nil
+    }
+}
+
+/// `show image from page "https://commons.wikimedia.org/wiki/File:…"`: an exact image, found by where it came from.
+@objc(ShowImageFromPageCommand)
+final class ShowImageFromPageCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        let page = (directParameter as? String).flatMap(URL.init(string:))
+        let shown = MainActor.assumeIsolated { page.map { AppModel.shared.coordinator.show(page: $0) } ?? false }
+        if !shown {
+            scriptErrorNumber = errAENoSuchObject
+            scriptErrorString = "No image found for this artist came from that page."
+        }
+        return nil
+    }
+}
+
+/// `restore original wallpaper`: the same as Restore Original Wallpaper in the menu.
+@objc(RestoreWallpaperCommand)
+final class RestoreWallpaperCommand: NSScriptCommand {
+    override func performDefaultImplementation() -> Any? {
+        MainActor.assumeIsolated { AppModel.shared.coordinator.restoreOriginalWallpaper() }
         return nil
     }
 }

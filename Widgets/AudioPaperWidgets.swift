@@ -60,6 +60,8 @@ struct Provider: TimelineProvider {
 struct NextImageIntent: AppIntent {
     static let title: LocalizedStringResource = "Next Image"
     static let description = IntentDescription("Shows the next fan art image as your wallpaper.")
+    /// The widget's button; Shortcuts and Siri use the app's own Next Image.
+    static let isDiscoverable = false
 
     func perform() async throws -> some IntentResult {
         WidgetCommand.next.post()
@@ -70,6 +72,7 @@ struct NextImageIntent: AppIntent {
 struct TogglePauseIntent: AppIntent {
     static let title: LocalizedStringResource = "Pause or Resume Wallpaper Changes"
     static let description = IntentDescription("Pauses or resumes AudioPaper changing your wallpaper.")
+    static let isDiscoverable = false
 
     func perform() async throws -> some IntentResult {
         WidgetCommand.togglePause.post()

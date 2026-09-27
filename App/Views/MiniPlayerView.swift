@@ -55,7 +55,7 @@ struct MiniPlayerView: View {
         ArtworkImage(artwork: coordinator.showing ?? coordinator.albumArtwork)
             .frame(height: 230)
             .overlay(alignment: .bottomLeading) {
-                songInfo
+                songButton
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .glassEffect(.regular, in: .rect(cornerRadius: 12))
@@ -67,6 +67,20 @@ struct MiniPlayerView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(heroDescription)
             .accessibilityAddTraits(.isImage)
+            .modifier(OpenInPlayerAction(coordinator: coordinator))
+    }
+
+    /// The song info as a button that opens the track in its player, when there's a track.
+    @ViewBuilder
+    private var songButton: some View {
+        if let track = coordinator.track, let player = coordinator.player(for: track) {
+            Button { coordinator.openInPlayer() } label: { songInfo.contentShape(.rect) }
+                .buttonStyle(.plain)
+                .help("Show in \(player.displayName)")
+                .accessibilityHint("Shows the song in \(player.displayName)")
+        } else {
+            songInfo
+        }
     }
 
     /// The title, and the player, kind and artist — album (or show) under it.
@@ -90,14 +104,16 @@ struct MiniPlayerView: View {
         }
     }
 
-    /// Without the artwork: the song sits just under the window buttons, in the glass title bar.
+    /// Without the artwork: the song sits just under the window buttons, in the glass title bar. Clicking it
+    /// shows the song in its player.
     private var songHeader: some View {
-        songInfo
+        songButton
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 14)
             .padding(.top, titleBarHeight + 2)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(songDescription)
+            .modifier(OpenInPlayerAction(coordinator: coordinator))
     }
 
     /// "Concrete, Poppy — I Disagree, in Spotify."
@@ -359,6 +375,19 @@ extension Artwork {
         case .fanArt:
             // "Photo by …" for Commons photos, "Art by …" for fan art, as the on-screen credit says.
             return "\(candidate.creatorCredit ?? candidate.kindLabel), from \(attribution.sourceName)"
+        }
+    }
+}
+
+/// VoiceOver's "Show in Music/Spotify" action, for places that read as one element.
+private struct OpenInPlayerAction: ViewModifier {
+    let coordinator: NowPlayingCoordinator
+
+    func body(content: Content) -> some View {
+        if let track = coordinator.track, let player = coordinator.player(for: track) {
+            content.accessibilityAction(named: "Show in \(player.displayName)") { coordinator.openInPlayer() }
+        } else {
+            content
         }
     }
 }

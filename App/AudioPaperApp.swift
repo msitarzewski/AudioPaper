@@ -92,8 +92,10 @@ enum SettingsWindow {
         NSApp.activate(ignoringOtherApps: true)
         openSettings()
         DispatchQueue.main.async {
+            // Exactly SwiftUI's Settings window: a looser match once picked a Liquid Glass helper window,
+            // leaving Settings not key (and, it seemed, not draggable).
             NSApp.windows
-                .first { $0.identifier?.rawValue.localizedCaseInsensitiveContains("settings") == true }?
+                .first { $0.identifier?.rawValue == "com_apple_SwiftUI_Settings_window" && $0.canBecomeKey }?
                 .makeKeyAndOrderFront(nil)
         }
     }

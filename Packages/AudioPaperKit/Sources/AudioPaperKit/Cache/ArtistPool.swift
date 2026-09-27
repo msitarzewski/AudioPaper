@@ -35,6 +35,9 @@ public struct ArtistPool: Codable, Sendable, Equatable {
         hidden.isEmpty ? entries : entries.filter { !hidden.contains($0.artwork.candidate.providerID) }
     }
 
+    /// Every image from sources that are switched on, in pool order.
+    public func artworks(hiding hidden: Set<String>) -> [Artwork] { visibleEntries(hiding: hidden).map(\.artwork) }
+
     public func isFull(hiding hidden: Set<String> = []) -> Bool { room(hiding: hidden) == 0 }
     public func room(hiding hidden: Set<String> = []) -> Int {
         max(0, Self.capacity - visibleEntries(hiding: hidden).count)

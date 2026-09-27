@@ -11,6 +11,9 @@ public final class NowPlayingCoordinator {
     public private(set) var isPlaying = false { didSet { stateChanged() } }
     public private(set) var albumArtwork: Artwork? { didSet { stateChanged() } }
     public private(set) var fanArt: [Artwork] = [] { didSet { stateChanged() } }
+    /// Every image in the current artist's pool from sources that are on: this play's `fanArt` is a selection
+    /// of it. For scripts that pick an exact image (`show(page:)`).
+    public private(set) var pooled: [Artwork] = []
     /// The image AudioPaper is showing: the app (Mini Player, menu, widgets) switches to it at once, and the
     /// wallpaper follows as soon as it's rendered and cross-faded (`onDesktop`).
     public private(set) var showing: Artwork? { didSet { stateChanged() } }
@@ -123,6 +126,13 @@ public final class NowPlayingCoordinator {
         return sentence + "."
     }
 
+    /// Shows the playing track in its own player (Music reveals it; Spotify opens it).
+    @discardableResult
+    public func openInPlayer() -> Bool {
+        guard let track, let player = player(for: track) else { return false }
+        return player.open(track)
+    }
+
     /// The player a track came from, for its name and icon.
     public func player(for track: Track) -> (any NowPlayingSource)? {
         registry.sources.first { $0.id == track.sourceID }
@@ -160,10 +170,26 @@ public final class NowPlayingCoordinator {
 
     // MARK: User actions
 
+    /// Shows the image that came from `page` — from this play's strip, or anywhere in the artist's pool, in
+    /// which case it joins the strip. False when no image came from that page.
+    @discardableResult
+    public func show(page: URL) -> Bool {
+        if let artwork = slides.first(where: { $0.candidate.attribution.pageURL == page }) {
+            show(artwork)
+            return true
+        }
+        guard let artwork = pooled.first(where: { $0.candidate.attribution.pageURL == page }) else { return false }
+        fanArt.append(artwork)
+        show(artwork)
+        return true
+    }
+
     /// Shows a specific image now (from the menu's filmstrip) and restarts the rotation clock.
     public func show(_ artwork: Artwork) {
         present(artwork, animated: true)
         startRotation()
+        // Chosen while nothing plays (from the strip, a script, Siri): the person's wallpaper still comes back.
+        if !isPlaying { scheduleRestoreIfNeeded() }
     }
 
     /// Re-renders what's on screen, e.g. after the framing setting changes.
@@ -198,10 +224,12 @@ public final class NowPlayingCoordinator {
         presentation?.cancel()
         presentationGeneration += 1
         isPresenting = false
-        display.restoreOriginals()
+        let restored = display.restoreOriginals()
         showing = nil
         onDesktop = nil
-        status = "Original wallpaper restored"
+        status = restored
+            ? "Original wallpaper restored"
+            : "Couldn't put your wallpaper back. Choose it again in System Settings → Wallpaper."
     }
 
     // MARK: Playback
@@ -288,6 +316,14 @@ public final class NowPlayingCoordinator {
         track?.isPodcast == true && preferences.podcastWallpaper == .myWallpaper
     }
 
+    /// Applies a changed "Show art" setting: the old way hands the desktop back, and the art on screen is
+    /// shown again the new way.
+    public func wallpaperModeChanged() {
+        (display as? WallpaperModeSwitching)?.modeChanged()
+        onDesktop = nil
+        refresh()
+    }
+
     /// Applies a changed podcast setting to the episode playing now.
     public func podcastSettingChanged() {
         guard let track, track.isPodcast, isPlaying else { return }
@@ -344,6 +380,7 @@ public final class NowPlayingCoordinator {
         poolKey = key
         let pool = await cache.pool(forKey: key)
         let hidden = preferences.disabledFanArtSources
+        pooled = pool.artworks(hiding: hidden)
         fanArt = pool.selection(count: Self.imagesPerPlay, hiding: hidden)
         // Fan art waits its turn after the cover; it goes up at once only when there's no cover to show.
         if albumArtwork == nil, let first = fanArt.first { present(first, animated: true) }
@@ -390,12 +427,13 @@ public final class NowPlayingCoordinator {
         fanArt = Array(fanArt.prefix(selected)) + fanArt.dropFirst(selected).sorted { ($0.qualityScore ?? -.infinity) > ($1.qualityScore ?? -.infinity) }
         let finds = found
         let searchedFully = complete
-        _ = try? await cache.updatePool(forKey: key) { pool in
+        let updated = try? await cache.updatePool(forKey: key) { pool in
             pool.add(finds, hiding: hidden)
             // A source that was offline or rate limited may have art for this song: search it again next
             // play (images already pooled are skipped) rather than remembering it as found-nothing.
             if searchedFully { pool.recordSearch(song: track.songKey, found: finds.count) }
         }
+        if let updated, poolKey == key { pooled = updated.artworks(hiding: hidden) }
         await pruneCache()
     }
 
@@ -408,6 +446,7 @@ public final class NowPlayingCoordinator {
             guard let self else { return }
             let pool = await self.cache.pool(forKey: key)
             guard self.poolKey == key else { return }
+            self.pooled = pool.artworks(hiding: hidden)
             let kept = self.fanArt.filter { !hidden.contains($0.candidate.providerID) }
             let returning = pool.selection(count: Self.imagesPerPlay, hiding: hidden)
                 .filter { artwork in !kept.contains { $0.id == artwork.id } }

@@ -25,6 +25,7 @@ final class AppModel {
 
     private init() {
         let secrets = Self.secrets
+        let preferences = Preferences()
         coordinator = NowPlayingCoordinator(
             albumChain: AlbumArtworkChain(providers: [ITunesSearchProvider(), CoverArtArchiveProvider(), AppleMusicArtworkProvider(), SpotifyArtworkProvider()]),
             fanArtSources: [
@@ -34,8 +35,8 @@ final class AppModel {
                 DeviantArtSource(secrets: secrets),
                 BraveImageSource(secrets: secrets),
             ],
-            display: WallpaperService(),
-            preferences: Preferences()
+            display: WallpaperModeDisplay(mode: { preferences.wallpaperMode }),
+            preferences: preferences
         )
         coordinator.onStateChange = { [weak self] in self?.publishWidgetSnapshot() }
         widgetCommands = WidgetCommand.observe { [weak self] command in
@@ -105,6 +106,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         updateDockPresence()
         Updates.shared.start()
+        // Tell Siri and Shortcuts about AudioPaper's phrases (App/Intents.swift); without this a fresh or
+        // locally built install may not be matched until the system gets round to it.
+        AudioPaperShortcuts.updateAppShortcutParameters()
     }
 
     /// A menu bar utility keeps running with no windows open; closing the Mini Player must not quit it.

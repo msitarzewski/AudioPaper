@@ -32,7 +32,12 @@ struct MenuBarMenu: View {
     @ViewBuilder
     private var nowPlaying: some View {
         if let track = coordinator.track {
-            Text(track.title)
+            if let player = coordinator.player(for: track), player.appBundleID != nil {
+                Button(track.title) { coordinator.openInPlayer() }
+                    .help("Show in \(player.displayName)")
+            } else {
+                Text(track.title)
+            }
             if let player = coordinator.player(for: track), let bundleID = player.appBundleID,
                let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
                 // The player's own icon, as Control Center's Now Playing shows it.

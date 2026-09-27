@@ -3,7 +3,8 @@
 Updated 2026-09-26 (Spotify / podcasts session).
 
 ## Where things stand
-- **v0.1.7 is live** (2026-09-26): Siri, Shortcuts and AppleScript (see `systemPatterns.md#Automation`); switched-off fan-art sources leave the rotation at once. **Next up: the launch video** (story "Credits" in the 2026-09-26 task log; real screen recording, Commons + covers only, CC-licensed soundtrack such as NIN *Ghosts I–IV*, driven over AppleScript; the user must grant full-display capture of a dedicated desktop first).
+- **v0.1.8** (2026-09-27): art over the wallpaper by default (see `systemPatterns.md#Wallpaper`), click-to-open in the player, command-style Siri phrases. Siri still unverified: if "AudioPaper credit" doesn't route, the workaround is a named user shortcut.
+- v0.1.7 (2026-09-26): Siri, Shortcuts and AppleScript (see `systemPatterns.md#Automation`); switched-off fan-art sources leave the rotation at once.
 - v0.1.6 (2026-09-26): compact Mini Player (Show Artwork optional, off by default; song → strip → credit → controls). The Help page's Mini Player screenshots still show the old layout; retake with covers/Commons-only sources before the user-growth push.
 - v0.1.5 (2026-09-26): Settings → About gained the update switches (check automatically, install automatically, last checked, Check Now).
 - v0.1.4 (2026-09-26): Spotify support, "During podcasts" setting, player icon and music/podcast glyph. The first release delivered through Sparkle (0.1.3 users get it from the feed). Tag `v0.1.4` = `6fd20fd`; the feed commit follows it.

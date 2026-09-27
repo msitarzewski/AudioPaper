@@ -49,7 +49,7 @@ All of it stays inside AudioPaper's sandbox container (`~/Library/Containers/com
 | Downloaded artwork, each artist's image pool (with when each image was last shown) and which songs were searched | Caches | Up to the limit you set (500 MB by default), least recently used first; **Settings → General → Clear Cache…** removes it |
 | Remembered artist identities | Caches (with the search results) | Until you clear the cache; unresolved names expire after a week |
 | Rendered wallpapers | Application Support | Only the current ones are kept |
-| Your original wallpaper's location | Preferences | Until you restore it |
+| Your own wallpaper's location, per display and desktop (only with **Show art: As my wallpaper**) | Preferences | Replaced whenever AudioPaper records it again |
 | Settings, and the Mini Player's position | Preferences | Until you change them |
 | API keys | Keychain | Until you remove them in Settings → Accounts |
 | Widget snapshot (track, credits, small thumbnails) | App Group, shared only with AudioPaper's own widgets | Replaced on every change |

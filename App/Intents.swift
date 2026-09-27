@@ -6,7 +6,7 @@ import AudioPaperKit
 // from, answered out loud; plus Next Image, Pause and Resume. The widget's buttons have their own intents in
 // the widget extension, which signal the app instead.
 
-/// "What's on my desktop in AudioPaper?" — the credit of the image on the desktop, as a sentence.
+/// "AudioPaper credit" — the credit of the image on the desktop, as a sentence.
 struct DesktopImageIntent: AppIntent {
     static let title: LocalizedStringResource = "What's on My Desktop"
     static let description = IntentDescription("Says what AudioPaper has put on the desktop, who made it, and where it came from.")
@@ -71,11 +71,13 @@ struct AudioPaperShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: DesktopImageIntent(),
+            // Commands, not questions: Siri answers questions like "what's on my desktop" itself (searching
+            // the Desktop folder, or the web) instead of asking the app.
             phrases: [
-                "What's on my desktop in \(.applicationName)",
-                "Who made my \(.applicationName) wallpaper",
-                "Where's my \(.applicationName) wallpaper from",
                 "\(.applicationName) credit",
+                "Show \(.applicationName) credit",
+                "Show the \(.applicationName) credit",
+                "Read the \(.applicationName) credit",
             ],
             shortTitle: "What's on My Desktop",
             systemImageName: "info.circle"

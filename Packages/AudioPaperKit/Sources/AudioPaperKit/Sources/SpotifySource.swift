@@ -17,6 +17,16 @@ public struct SpotifySource: NowPlayingSource {
     public var playsPodcasts: Bool { true }
     public var appBundleID: String? { Self.bundleID }
 
+    /// Opens the song or episode in the Spotify app, by its `spotify:` link.
+    @MainActor
+    public func open(_ track: Track) -> Bool {
+        guard let id = track.persistentID, Self.kind(of: id) != nil, let url = URL(string: id),
+              let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: Self.bundleID)
+        else { return false }
+        NSWorkspace.shared.open([url], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
+        return true
+    }
+
     public init() {}
 
     public var isAvailable: Bool {
@@ -36,9 +46,16 @@ public struct SpotifySource: NowPlayingSource {
             let initial = Task { @MainActor in
                 if let event = Self.currentState() { continuation.yield(event) }
             }
+            // Quitting the player may not post a Stopped notification; treat it as one.
+            let workspace = NSWorkspace.shared.notificationCenter
+            let quit = ObserverToken(workspace.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: nil) { note in
+                let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+                if app?.bundleIdentifier == Self.bundleID { continuation.yield(.stopped) }
+            })
             continuation.onTermination = { _ in
                 initial.cancel()
                 center.removeObserver(observer.value)
+                workspace.removeObserver(quit.value)
             }
         }
     }

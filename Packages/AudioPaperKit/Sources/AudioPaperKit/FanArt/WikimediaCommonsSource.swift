@@ -222,10 +222,14 @@ public struct WikimediaCommonsSource: FanArtSource {
 
     /// Commons' "Artist" field is HTML (links, lists); the credit needs plain text.
     static func plainText(_ html: String) -> String? {
-        let text = html
+        var text = html
             .replacing(/<[^>]+>/, with: " ")
             .decodingHTMLEntities()
             .split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        // A bot's placeholder: "No machine-readable author provided. Juumik assumed (based on copyright claims)."
+        if let match = text.firstMatch(of: /(?i)^No machine-readable author provided\.\s*(.+?)\s+assumed\b.*$/) {
+            text = String(match.output.1)
+        }
         return text.isEmpty ? nil : String(text.prefix(80))
     }
 }
