@@ -6,6 +6,19 @@
     <description>AudioPaper updates</description>
     <language>en</language>
     <item>
+      <title>AudioPaper 0.1.9</title>
+      <pubDate>Mon, 05 Oct 2026 02:35:14 GMT</pubDate>
+      <sparkle:version>10</sparkle:version>
+      <sparkle:shortVersionString>0.1.9</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/msitarzewski/AudioPaper/releases/tag/v0.1.9</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<h2>AudioPaper 0.1.9</h2>
+<ul>
+<li><b>Songs with no album get their cover.</b> If a song has a blank Album in Music, AudioPaper looks it up as a song instead, and the cover now comes first, before the fan art and photos.</li>
+</ul>]]></description>
+      <enclosure url="https://github.com/msitarzewski/AudioPaper/releases/download/v0.1.9/AudioPaper-0.1.9.zip" length="5215114" type="application/octet-stream" sparkle:edSignature="fsrlRRVE6cL1fR6QdcBD1YmXaBGQggw2iDYX05lTdrl2oMpbsxTDnMuLSqsKT+a6znJhfcasVGKV40IoH/N2CA=="/>
+    </item>
+    <item>
       <title>AudioPaper 0.1.8</title>
       <pubDate>Sun, 27 Sep 2026 13:47:42 GMT</pubDate>
       <sparkle:version>9</sparkle:version>
