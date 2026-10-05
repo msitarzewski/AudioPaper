@@ -31,6 +31,7 @@ public struct CoverArtArchiveProvider: AlbumArtworkProvider {
     }
 
     public func albumArtwork(for track: Track) async throws -> ArtworkCandidate? {
+        guard !track.album.isEmpty else { return nil }
         let album = MusicBrainz.phrase(track.album)
         let artist = MusicBrainz.phrase(track.primaryArtist)
         let url = URL.api("https://musicbrainz.org/ws/2/release-group", [

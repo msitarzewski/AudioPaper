@@ -37,6 +37,7 @@
 - **v0.1.6** (2026-09-26): compact Mini Player — artwork optional (Show Artwork, off by default); order song → strip → credit → controls. 131 tests.
 - **v0.1.7** (2026-09-26): Siri/Shortcuts/Spotlight App Intents ("What's on my desktop in AudioPaper?" answers with the credit), AppleScript dictionary (read what's showing, `show image n`, `next image`, `paused`), switched-off fan-art sources hidden from pools at once (kept, don't count toward 24). 134 tests.
 - **v0.1.8** (2026-09-27): art drawn over the wallpaper by default ("Show art: Over my wallpaper"; the desktop picture is never touched), replace mode with per-display-and-Space restore, restore on by default, player quit counts as stopped, click the song to open it in Music/Spotify, command-style Siri phrases ("AudioPaper credit") + phrase registration at launch, widget intents hidden from Shortcuts, exact Settings-window match, Keychain off the main thread, Commons placeholder authors tidied, narrow slider label, more AppleScript (source pages, choose by page, restore). 142 tests.
+- **v0.1.9** (2026-10-04): songs with no album in the library (blank Album in Music) now get a cover: looked up as a song in the Apple Music catalog (title + artist), Music's embedded artwork as fallback, and each such song has its own cover key. Before, they skipped straight to fan art. 143 tests.
 
 ## Next
 - Commons relevance: prefer files that name the artist (a NIN-cap photo of Gabriel Boric and a speaker stack came through).
@@ -44,3 +45,11 @@
 - Idea: for artists with no fan art (e.g. Chemlab), fanart.tv's scans of their other album covers.
 - **Backlog: narrower Apple Events permission.** Replace `temporary-exception.apple-events` (Music, Spotify) with `com.apple.security.scripting-targets` for the groups the apps publish: Music `com.apple.Music.playback` (+ `com.apple.Music.library.read` if artwork needs it), Spotify `com.spotify.playback`. Same Automation prompt for users; macOS then enforces read-only. Verify every AppleScript term live (terms outside the groups fail silently), then say so in PRIVACY.md.
 - DeviantArt: issue #1181, decide by ~2026-10-09 (PKCE or drop). Verify with real credentials; tune filters with more genres; decide on shipping the fanart.tv project key for release builds.
+
+## Hopes
+Features we'd like but can't build well today, each waiting on something outside AudioPaper. Revisit when macOS or the services change.
+- **Apple Podcasts as a player** (2026-09-27): the Podcasts app posts no change notification (verified with a listener while playing, skipping and pausing) and has no AppleScript dictionary. The system now-playing service (MediaRemote) is private and, since macOS 15.4, limited to Apple-entitled processes; the Perl-loading workaround isn't fit for a sandboxed app. Needs a public now-playing API (worth filing feedback).
+- **Podcast chapter art** (2026-09-27): Podcasting 2.0 `<podcast:chapters>` JSON can give each chapter its own image, perfect for the rotation (Callisto.fm did this). Only useful once AudioPaper can follow a player that exposes the episode's feed. Apple's in-app chapters ("Automatically created") have titles only and aren't reachable. Checked: Tech Policy Press (300 episodes, one image, no chapters).
+- **Restoring macOS's own dynamic wallpapers exactly** in "As my wallpaper" mode: no public API reads or sets provider wallpapers (FB13683971). The overlay default sidesteps it.
+- **Siri's built-in phrases**: actions work in Shortcuts, but Siri hasn't routed "AudioPaper credit" to the app on the user's Mac. Re-test with a released build after indexing; the named-shortcut workaround is documented.
+

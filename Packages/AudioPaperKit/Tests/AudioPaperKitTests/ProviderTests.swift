@@ -15,6 +15,17 @@ import Testing
         #expect(candidate.matchScore == 1)
     }
 
+    @Test func iTunesFindsTheCoverOfASongWithNoAlbum() throws {
+        let json = #"{"results":[{"collectionName":"TUNE & PLAY - EP","trackName":"GRLS","artistName":"TUIDE","artworkUrl100":"https://is1-ssl.mzstatic.com/x/100x100bb.jpg","trackViewUrl":"https://music.apple.com/us/album/grls/1?i=2"},{"collectionName":"Other","trackName":"Something Else","artistName":"Someone Else","artworkUrl100":"https://is1-ssl.mzstatic.com/y/100x100bb.jpg"}]}"#
+        let response = try JSONDecoder().decode(ITunesSearchProvider.Response.self, from: Data(json.utf8))
+        let track = Track.sample("GRLS", artist: "TUIDE", album: "")
+        let candidate = try #require(ITunesSearchProvider.bestMatch(in: response, for: track))
+        #expect(candidate.attribution.title == "TUNE & PLAY - EP")
+        #expect(candidate.matchScore == 1)
+        // Two album-less songs by one artist don't share a cover.
+        #expect(track.albumKey != Track.sample("Other", artist: "TUIDE", album: "").albumKey)
+    }
+
     @Test func musicBrainzPicksExactReleaseGroup() throws {
         let response = try Fixture.decode(CoverArtArchiveProvider.Response.self, "musicbrainz-downward-spiral")
         let candidate = try #require(CoverArtArchiveProvider.bestMatch(in: response, for: .sample()))

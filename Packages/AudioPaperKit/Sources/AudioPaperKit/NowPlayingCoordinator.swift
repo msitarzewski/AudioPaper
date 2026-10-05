@@ -338,7 +338,7 @@ public final class NowPlayingCoordinator {
             if showing != albumArtwork { present(albumArtwork, animated: true) }
             return
         }
-        guard !track.album.isEmpty, let cached = await cache.artworks(forKey: "album:" + track.albumKey)?.first else {
+        guard let cached = await cache.artworks(forKey: "album:" + track.albumKey)?.first else {
             showing = nil
             return
         }
@@ -349,7 +349,7 @@ public final class NowPlayingCoordinator {
     }
 
     private func resolveAlbum(for track: Track) async -> Artwork? {
-        guard !track.album.isEmpty else { return nil }
+        guard !track.album.isEmpty || !track.title.isEmpty else { return nil }
         let key = "album:" + track.albumKey
         if let cached = await cache.artworks(forKey: key)?.first { return cached }
         guard let candidate = await albumChain.artwork(for: track) else { return nil }

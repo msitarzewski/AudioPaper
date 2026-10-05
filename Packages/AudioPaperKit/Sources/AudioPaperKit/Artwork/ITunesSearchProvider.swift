@@ -16,17 +16,21 @@ public struct ITunesSearchProvider: AlbumArtworkProvider {
     struct Response: Decodable {
         struct Result: Decodable {
             var collectionName: String?
+            var trackName: String?
             var artistName: String?
             var artworkUrl100: String?
             var collectionViewUrl: String?
+            var trackViewUrl: String?
         }
         var results: [Result]
     }
 
     public func albumArtwork(for track: Track) async throws -> ArtworkCandidate? {
-        let term = "\(Normalizer.searchTerm(track.primaryArtist)) \(Normalizer.searchTerm(track.album))"
+        // A song with no album in the library is looked up as a song; its release supplies the cover.
+        let single = track.album.isEmpty
+        let term = "\(Normalizer.searchTerm(track.primaryArtist)) \(Normalizer.searchTerm(single ? track.title : track.album))"
         let url = URL.api("https://itunes.apple.com/search", [
-            "term": term, "entity": "album", "limit": "10", "country": country,
+            "term": term, "entity": single ? "song" : "album", "limit": "10", "country": country,
         ])
         let response = try await http.json(Response.self, from: URLRequest(url: url))
         return Self.bestMatch(in: response, for: track)
@@ -35,10 +39,12 @@ public struct ITunesSearchProvider: AlbumArtworkProvider {
     static func bestMatch(in response: Response, for track: Track) -> ArtworkCandidate? {
         let scored = response.results.compactMap { result -> (Double, Response.Result)? in
             guard let name = result.collectionName, let artist = result.artistName, result.artworkUrl100 != nil else { return nil }
-            let score = MatchScorer.albumScore(
-                artist: track.primaryArtist, album: track.album,
-                candidateArtist: artist, candidateAlbum: name
-            )
+            let score = track.album.isEmpty
+                ? Self.songScore(track: track, candidateArtist: artist, candidateTitle: result.trackName ?? "")
+                : MatchScorer.albumScore(
+                    artist: track.primaryArtist, album: track.album,
+                    candidateArtist: artist, candidateAlbum: name
+                )
             return (score, result)
         }
         guard let (score, best) = scored.max(by: { $0.0 < $1.0 }),
@@ -53,10 +59,17 @@ public struct ITunesSearchProvider: AlbumArtworkProvider {
             attribution: Attribution(
                 title: best.collectionName,
                 creatorName: best.artistName,
-                pageURL: best.collectionViewUrl.flatMap(URL.init(string:)),
+                pageURL: (best.collectionViewUrl ?? best.trackViewUrl).flatMap(URL.init(string:)),
                 sourceName: "Apple Music"
             ),
             matchScore: score
         )
+    }
+
+    /// How well a song result matches an album-less track: the artist and the title, as for an album.
+    static func songScore(track: Track, candidateArtist: String, candidateTitle: String) -> Double {
+        let artistScore = MatchScorer.similarity(track.primaryArtist, candidateArtist)
+        guard artistScore >= 0.5 else { return 0 }
+        return 0.4 * artistScore + 0.6 * MatchScorer.similarity(track.title, candidateTitle)
     }
 }

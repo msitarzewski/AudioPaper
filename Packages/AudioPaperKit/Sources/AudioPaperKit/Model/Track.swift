@@ -70,7 +70,10 @@ public struct Track: Hashable, Sendable, Codable {
     /// Identity of the album, used to skip redundant cover lookups. The artist part keeps accents,
     /// because they can distinguish artists ("ROSÉ" vs "Rose").
     public var albumKey: String {
-        "\(MusicBrainz.identityKey(primaryArtist))|\(Normalizer.key(album))"
+        // A song with no album in the library is its own "album", so its cover isn't shared with the
+        // artist's other album-less songs.
+        let name = album.isEmpty ? "single:" + Normalizer.key(title) : Normalizer.key(album)
+        return "\(MusicBrainz.identityKey(primaryArtist))|\(name)"
     }
 
     /// Identity of the song, used to key fan-art lookups.
