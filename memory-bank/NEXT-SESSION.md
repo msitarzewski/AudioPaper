@@ -1,6 +1,6 @@
 # Next session — start here
 
-Updated 2026-10-04 (v0.1.9 shipped).
+Updated 2026-10-07 (v0.1.9 shipped; DeviantArt verified).
 
 ## Where things stand
 - **v0.1.9** (2026-10-04): a song with a blank Album in Music now shows its cover first (catalog song search by title + artist, then Music's embedded art), instead of jumping to fan art. Cause found via the AppleScript `image credits` property (first image was a photo).
@@ -19,11 +19,11 @@ Updated 2026-10-04 (v0.1.9 shipped).
 2. **Commons relevance**: categories include photos merely related to an artist (Gabriel Boric in a NIN cap; speaker stacks). Proposal: trust top-category files only when the file name or caption names the artist. Verify against real categories (NIN, aespa, Poppy, Kim Petras, Laufey) before changing.
 3. **Site screenshots** (done): BABYMETAL and BLACKPINK Mini Players captured by the user with only covers + Commons sources on; every image credited on `site/pages/credits.html` (identified by matching against Commons categories); screenshots offered under CC BY-SA 4.0. A Springsteen capture was skipped (2026-09-26, user's decision): its single cover shows protest signs, and the current set already shows the range.
 4. A hands-on VoiceOver + Full Keyboard Access session.
-5. **DeviantArt auth model** (raised by a Codex review, confirmed in DeviantArt's docs 2026-09-25): native apps are *public* OAuth clients (client ID only, Authorization Code + PKCE, OAuth 2.1 for new apps); Client Credentials needs a secret and is for confidential clients. AudioPaper uses Client Credentials with a per-user app ID + secret in the user's Keychain, public browse endpoints only. Asked on DeviantArt's official tracker, 2026-09-25: https://github.com/wix-incubator/DeviantArt-API/issues/1181 (no developer email exists; the issue tracker is their documented channel); if not, move to PKCE (user signs in) or drop the source. The tracker rarely gets staff replies (none on the last 8 issues, incl. #388's licence question since May), so if there's no answer by ~2026-10-09, decide without one. Still untested live.
+5. **DeviantArt: settled (2026-10-07).** AudioPaper uses Client Credentials with a per-user app ID + secret in the Keychain (public browse endpoints only). The maintainer approved that on #1181 (2026-09-27: "Per-user credentials are fine to use!"), so no PKCE and no dropping the source. Verified live end to end: token, browse, 11–17 candidates per artist, 1 of 53 accepted by the filters (art is mostly small or square). Nothing left to do unless the size floor is revisited.
 
-## Pause point (2026-10-04)
-- v0.1.9 live; the Hopes list in `progress.md` is committed with it.
-- Open: Siri built-in phrases (re-test after a released update), DeviantArt #1181 (decide ~2026-10-09), Commons relevance (Shibuya-billboard and j-hope/BTS collaboration strays are good test cases), the narrower Apple Events permission (backlog), a VoiceOver session, retaking the Help page's Mini Player screenshots in the compact layout.
+## Pause point (2026-10-07)
+- v0.1.9 live (commits `ed3faa3`, feed `94181f0`); the Hopes list is committed. Repo quiet: no issues or PRs; 3 downloads of 0.1.9.
+- Open: Siri built-in phrases (re-test after a released update), Commons relevance (Shibuya-billboard and j-hope/BTS collaboration strays are good test cases), the narrower Apple Events permission (backlog), a VoiceOver session, retaking the Help page's Mini Player screenshots in the compact layout.
 
 ## Loose ends
-- DeviantArt unverified live (needs credentials). Stylized logos can pass OCR. Letterboxed stills. Idea: fanart.tv album-cover scans for artists with no fan art (Chemlab). Verify 0.1.3 → 0.1.4 Sparkle update on a real install.
+- Stylized logos can pass OCR. Letterboxed stills. Idea: fanart.tv album-cover scans for artists with no fan art (Chemlab). Verify 0.1.3 → 0.1.4 Sparkle update on a real install.

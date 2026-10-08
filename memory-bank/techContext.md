@@ -13,7 +13,7 @@
   - Brave Search image API — `X-Subscription-Token`. Current key is **free tier: 1 req/s, 2,000/month**. `BraveImageSource.limiter` enforces spacing.
   - fanart.tv — `webservice.fanart.tv/v3/music/{mbid}?api_key=…&client_key=…`; `artist4kbackground` + `artistbackground`, sorted by likes. Project key in Keychain `FAN_ART_API_KEY`, optional personal `FAN_ART_CLIENT_KEY`. Site is behind Cloudflare (curl gets 403); the API is fine.
   - TheAudioDB — artist fan art (1280×720). Free public key `123`, 30 req/min (`TheAudioDBSource.limiter`), optional personal key. Terms: credit + link TheAudioDB; free key not allowed for App Store apps.
-  - DeviantArt API — OAuth2 client credentials (`/oauth2/token`, `/browse/popular`, `/browse/tags`). **Not yet verified live**: no credentials yet.
+  - DeviantArt API — OAuth2 client credentials (`/oauth2/token`, `/browse/popular`, `/browse/tags`). **Verified live 2026-10-07** with per-user credentials (token, `/browse/tags`, candidates through the pipeline); the maintainer approved per-user credentials on issue #1181. Most DeviantArt art fails the size floor, so it adds little.
   - Wikimedia — `www.wikidata.org` (entity JSON), `commons.wikimedia.org` (API), `upload.wikimedia.org`/`thumb.wikimedia.org` (images). No key; requires a contact User-Agent (`URLSessionHTTPClient.userAgent` includes the repo URL). Standard rendition widths only (1920 works; 2560 returns the original).
   - DuckDuckGo: no official image API (the user asked twice); scraping its internal endpoint is off the table.
   - MusicBrainz is also the identity service: recording search (title + artist) → artist MBID, used by fanart.tv and TheAudioDB (`artist-mb.php`).

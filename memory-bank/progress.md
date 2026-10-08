@@ -44,7 +44,7 @@
 - A hands-on VoiceOver + Full Keyboard Access session.
 - Idea: for artists with no fan art (e.g. Chemlab), fanart.tv's scans of their other album covers.
 - **Backlog: narrower Apple Events permission.** Replace `temporary-exception.apple-events` (Music, Spotify) with `com.apple.security.scripting-targets` for the groups the apps publish: Music `com.apple.Music.playback` (+ `com.apple.Music.library.read` if artwork needs it), Spotify `com.spotify.playback`. Same Automation prompt for users; macOS then enforces read-only. Verify every AppleScript term live (terms outside the groups fail silently), then say so in PRIVACY.md.
-- DeviantArt: issue #1181, decide by ~2026-10-09 (PKCE or drop). Verify with real credentials; tune filters with more genres; decide on shipping the fanart.tv project key for release builds.
+- **DeviantArt: verified, no further work.** DeviantArt is verified live (2026-10-07): the maintainer answered issue #1181 on 2026-09-27 ("Per-user credentials are fine to use!", closed as completed), and a run with the user's own app ID + secret (Keychain `com.audiopaper.credentials`) got a token (3600 s), browsed `/browse/tags`, and returned 11–17 candidates per artist (BLACKPINK, NIN, Poppy, Taylor Swift). Almost all fail the quality floor (mostly ≤1024 px or square, some text/utility): 1 of 53 accepted. Fanart.tv and TheAudioDB fill the 8-image cap first, so DeviantArt stays a minor source. Filters were left alone; loosening the size floor would admit low-resolution art. The fanart.tv project key ships in release builds (decided 2026-09-25).
 
 ## Hopes
 Features we'd like but can't build well today, each waiting on something outside AudioPaper. Revisit when macOS or the services change.
